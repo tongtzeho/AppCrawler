@@ -14,7 +14,7 @@ def unzip_apk(apkfile):
 				os.makedirs(path)			
 			file_zip = zipfile.ZipFile(apkfile, 'r')
 			for file in file_zip.namelist():
-				if re.match("(META-INF\/.+)|(AndroidManifest\.xml)|(resources\.arsc)|(classes[0-9]*\.dex)|(res\/drawable.*?\/icon.png)", file, re.I):
+				if re.match("(META-INF\/.+)|(AndroidManifest\.xml)|(resources\.arsc)|(classes[0-9]*\.dex)", file, re.I):
 					file_zip.extract(file, path)
 			file_zip.close()
 			return path

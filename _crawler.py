@@ -187,6 +187,7 @@ def main_loop(threadidstr):
 					url_set.add(extend_url)
 				lock_set.release()
 				hold_lock_set = False
+				print (market+threadidstr+"：准备下载APK（"+response[4]+"）")
 				if not download_apk(market, response[4], "~"+market+"tmp"+threadidstr+".apk"):
 					print (market+threadidstr+"：下载APK失败（"+url+"）")
 					lock_pool.acquire()
