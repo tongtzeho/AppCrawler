@@ -4,7 +4,7 @@
 
 from urllib import request
 from selenium import webdriver
-import threading, random, urllib, time, os, codecs, shutil, sys
+import multiprocessing, threading, random, urllib, time, os, codecs, shutil, sys
 
 from _downloader import *
 from _decoder import *
@@ -73,20 +73,20 @@ def check_response(market, result):
 	return True
 	
 def open_url(market, url):
-	for i in range(10):
-		if market == 'baidu':
-			try:
-				web = request.urlopen(url)
+	for i in range(15):
+		try:
+			if market == 'baidu':
+				web = request.urlopen(url, timeout=20)
 				charset = str(web.headers.get_content_charset())
 				if charset == "None": charset = "utf-8"
 				data = web.read().decode(charset)
-			except:
-				data = ""
-		else:
-			driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-			driver.get(url)
-			data = driver.page_source
-			driver.quit()
+			else:
+				driver = webdriver.PhantomJS(executable_path=phantomjs_path, desired_capabilities={'phantomjs.page.settings.resourceTimeout': '20000'})
+				driver.get(url)
+				data = driver.page_source
+				driver.quit()
+		except:
+			data = ""
 		if page_invalid(market, data): return ()
 		dict = get_app_basic_info(market, data)				
 		permission_list = get_app_permission(market, data)
@@ -117,7 +117,7 @@ def read_url(market):
 	fin.close()
 	return result
 			
-def main_loop(threadidstr):
+def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
@@ -154,7 +154,7 @@ def main_loop(threadidstr):
 					lock_set.release()
 					hold_lock_set = False
 					update += 1
-					if (update % (thread_num*2) == 0):
+					if (update % (thread_num*5) == 0):
 						update = 0
 						lock_set.acquire()
 						hold_lock_set = True
@@ -255,7 +255,7 @@ def main_loop(threadidstr):
 							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
 							fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 							fout.close()
-							if (update % (thread_num*2) == 0):
+							if (update % (thread_num*5) == 0):
 								update = 0
 								lock_set.acquire()
 								hold_lock_set = True
@@ -284,19 +284,36 @@ def main_loop(threadidstr):
 				if hold_lock_pool: lock_pool.release()
 				if hold_lock_set: lock_set.release()
 
-if __name__ == '__main__':
-	if len(sys.argv) < 4: exit()
-	market = sys.argv[1]
-	thread_num = int(sys.argv[2])
-	if thread_num < 1: exit()
-	rate_per_iteration = float(sys.argv[3])
-	if rate_per_iteration <= 0 or rate_per_iteration > 1: exit()
+def initialization(param):
+	market = param[0]
+	thread_num = param[1]
+	rate_per_iteration = param[2]
+	print ("初始化进程：("+market+", "+str(thread_num)+", "+str(rate_per_iteration)+")")
 	lock_pool = threading.Lock()
 	url_pool = set()
 	lock_set = threading.Lock()
 	url_set = read_url(market)
 	if not len(url_set): exit()
 	for i in range(1, thread_num):
-		t = threading.Thread(target=main_loop, args=(str(i)))
+		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set))
 		t.start()
-	main_loop('0')
+	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set)
+
+if __name__ == '__main__':
+	if not os.path.isfile("settings.txt"): exit()
+	fin_settings = open("settings.txt", "r")
+	param_list = []
+	market_set = set()
+	for line in fin_settings:
+		market = line.split(" ")[0]
+		thread_num = int(line.split(" ")[1])
+		rate_per_iteration = float(line.split(" ")[2])
+		if market in market_set: exit()
+		if thread_num <= 0 or thread_num > 50: exit()
+		if rate_per_iteration <= 0 or rate_per_iteration > 1: exit()
+		param_list.append((market, thread_num, rate_per_iteration))
+		market_set.add(market)
+	for param in param_list:
+		if param == param_list[0]: continue
+		multiprocessing.Process(target = initialization, args = (param,)).start()
+	initialization(param_list[0])

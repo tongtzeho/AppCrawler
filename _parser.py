@@ -38,6 +38,8 @@ def get_app_basic_info(market, data):
 		if len(matcher):
 			matcher = re.findall('[0-9]*年[0-9]*月[0-9]*日', matcher[0])
 			if len(matcher): dict['Update_Time'] = matcher[0]
+		if 'adv-btn_has">有广告' in data: dict['Has_Ads'] = 'True'
+		elif 'adv-btn">无广告' in data: dict['Has_Ads'] = 'False'
 			
 	elif market == 'baidu':
 		matcher = re.findall('<span class="gray">.*?</span>', data)
@@ -54,7 +56,7 @@ def get_app_basic_info(market, data):
 			type1 = re.subn('<a target="_self" href="/.*?/">', "", replace_html(matcher[1].replace('</a>', "")))[0]
 			dict['Category'] = type0+"-"+type1
 		matcher = re.findall('class="version">版本: .*?</span>', data)
-		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('class="version">版本: ', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('class="version">版本: ', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))		
 		
 	elif market == '360':
 		matcher = re.findall('<span title=".*?">', data)
