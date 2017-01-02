@@ -7,7 +7,7 @@ def download_apk(market, url, apkfile):
 	if not len(url): return False
 	for i in range(15):
 		try:
-			web = requests.get(url, stream=True, timeout=20)
+			web = requests.get(url, stream=True, timeout=30)
 			with open(apkfile, 'wb') as fout:
 				for chunk in web.iter_content(chunk_size=204800):
 					if chunk:
@@ -23,7 +23,7 @@ def download_icon(market, url, pngfile):
 	if not len(url): return False
 	for i in range(15):
 		try:
-			web = request.urlopen(url, timeout=20)
+			web = request.urlopen(url, timeout=30)
 			data = web.read()
 			File = open(pngfile, "wb")
 			File.write(data)

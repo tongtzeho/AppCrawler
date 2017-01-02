@@ -109,6 +109,37 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<strong>语言：</strong>.*?<', data)
 		if len(matcher): dict['Language'] = replace_html(matcher[0].replace('<strong>语言：</strong>', "").replace('<', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		
+	elif market == 'googleplay':
+		matcher = re.findall('<div class="id-app-title" tabindex="0">.*?</div>', data)
+		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('<div class="id-app-title" tabindex="0">', "").replace('</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="content" itemprop="numDownloads">.*?</div>', data)
+		if len(matcher): dict['Download'] = replace_html(matcher[0].replace('<div class="content" itemprop="numDownloads">', "").replace('</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " ")).replace(' ', "")
+		matcher = re.findall('<div class="score" aria-label=".*?">[0-9\.]+</div>', data)
+		if len(matcher): dict['Rating'] = re.subn('<.*?>', "", matcher[0])[0]
+		matcher = re.findall('<span class="reviews-num" aria-label=".*?">[0-9,]+</span>', data)
+		if len(matcher): dict['Rating_Num'] = re.subn('<.*?>', "", matcher[0])[0].replace(",", "")
+		matcher = re.findall('<span class="bar-number" aria-label=".*?">[0-9,]+</span>', data)
+		if len(matcher) >= 5:
+			dict['5-Star_Rating_Num'] = re.subn('<.*?>', "", matcher[0])[0].replace(",", "")
+			dict['4-Star_Rating_Num'] = re.subn('<.*?>', "", matcher[1])[0].replace(",", "")
+			dict['3-Star_Rating_Num'] = re.subn('<.*?>', "", matcher[2])[0].replace(",", "")
+			dict['2-Star_Rating_Num'] = re.subn('<.*?>', "", matcher[3])[0].replace(",", "")
+			dict['1-Star_Rating_Num'] = re.subn('<.*?>', "", matcher[4])[0].replace(",", "")
+		matcher = re.findall('<span itemprop="genre">.*?</span>', data)
+		if len(matcher):
+			categoryall = ""
+			for category in matcher:
+				categoryall += replace_html(category.replace('<span itemprop="genre">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))+";"
+			dict['Category'] = categoryall[:-1]
+		matcher = re.findall('<div class="content" itemprop="softwareVersion">.*?</div>', data)
+		if len(matcher): dict['Edition'] = re.subn(' *<.*?> *', "", matcher[0])[0]
+		matcher = re.findall('<span itemprop="name">.*?</span>', data)
+		if len(matcher): dict['Developer'] = replace_html(matcher[0].replace('<span itemprop="name">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="content" itemprop="operatingSystems">.*?</div>', data)
+		if len(matcher): dict['System'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0])
+		matcher = re.findall('<div class="content" itemprop="datePublished">.*?</div>', data)
+		if len(matcher): dict['Update_Time'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0])
+		
 	return dict
 
 def get_app_permission(market, data):
@@ -119,7 +150,7 @@ def get_app_permission(market, data):
 			matcher = re.findall('<div class="r">.*?</div></li>', matcher[0])
 			for permission in matcher:
 				list.append(replace_html(permission.replace('<div class="r">', "").replace('</div></li>', "")))
-	return tuple(list)
+	return tuple(set(list))
 	
 def get_app_description(market, data):
 	if market == 'yingyongbao':

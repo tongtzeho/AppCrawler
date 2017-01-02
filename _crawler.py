@@ -16,7 +16,8 @@ root = 'E:/Android/'
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
 'baidu': 'http://shouji.baidu.com/software/',
-'360': 'http://zhushou.360.cn/detail/index/soft_id/'
+'360': 'http://zhushou.360.cn/detail/index/soft_id/',
+'googleplay': 'https://play.google.com/store/apps/details?id='
 }
 
 def page_invalid(market, data):
@@ -26,6 +27,8 @@ def page_invalid(market, data):
 		return "<p>请检查您所输入的URL地址是否有误。</p>" in data
 	elif market == '360':
 		return '<span class="t">获取应用内容失败，请尝试ctrl+f5刷新</span>' in data
+	elif market == 'googleplay':
+		return '<div id="error-section" class="rounded">We\'re sorry, the requested URL was not found on this server.</div>' in data or '<div id="error-section" class="rounded">抱歉，在此服务器中找不到请求的网址。</div>' in data
 	return False	
 
 def check_response(market, result):
@@ -74,19 +77,32 @@ def check_response(market, result):
 	
 def open_url(market, url):
 	for i in range(15):
-		try:
-			if market == 'baidu':
-				web = request.urlopen(url, timeout=20)
+		if market == 'baidu':
+			try:
+				web = request.urlopen(url, timeout=30)
 				charset = str(web.headers.get_content_charset())
 				if charset == "None": charset = "utf-8"
 				data = web.read().decode(charset)
-			else:
-				driver = webdriver.PhantomJS(executable_path=phantomjs_path, desired_capabilities={'phantomjs.page.settings.resourceTimeout': '20000'})
-				driver.get(url)
+			except:
+				data = ""
+		else:
+			try:
+				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+				driver.set_page_load_timeout(30)
+				if market == 'googleplay':
+					driver.get(url+"&hl=zh")
+					try:
+						driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
+						time.sleep(2)
+					except:
+						pass
+				else:
+					driver.get(url)
 				data = driver.page_source
 				driver.quit()
-		except:
-			data = ""
+			except:
+				data = ""
+				driver.quit()
 		if page_invalid(market, data): return ()
 		dict = get_app_basic_info(market, data)				
 		permission_list = get_app_permission(market, data)
@@ -299,13 +315,18 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set)
 
+#response = open_url('googleplay', 'https://play.google.com/store/apps/details?id=com.supercell.clashroyale')
+#for key, val in response[0].items():
+#	print (key+": "+val)
+#exit()
+	
 if __name__ == '__main__':
 	if not os.path.isfile("settings.txt"): exit()
 	fin_settings = open("settings.txt", "r")
 	param_list = []
 	market_set = set()
 	for line in fin_settings:
-		market = line.split(" ")[0]
+		market = line.split(" ")[0].lower()
 		thread_num = int(line.split(" ")[1])
 		rate_per_iteration = float(line.split(" ")[2])
 		if market in market_set: exit()
