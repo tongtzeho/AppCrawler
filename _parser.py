@@ -114,6 +114,8 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('<div class="id-app-title" tabindex="0">', "").replace('</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<div class="content" itemprop="numDownloads">.*?</div>', data)
 		if len(matcher): dict['Download'] = replace_html(matcher[0].replace('<div class="content" itemprop="numDownloads">', "").replace('</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " ")).replace(' ', "")
+		matcher = re.findall('<div class="content" itemprop="fileSize">.*?</div>', data)
+		if len(matcher): dict['Size'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0])
 		matcher = re.findall('<div class="score" aria-label=".*?">[0-9\.]+</div>', data)
 		if len(matcher): dict['Rating'] = re.subn('<.*?>', "", matcher[0])[0]
 		matcher = re.findall('<span class="reviews-num" aria-label=".*?">[0-9,]+</span>', data)
@@ -139,6 +141,10 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['System'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0])
 		matcher = re.findall('<div class="content" itemprop="datePublished">.*?</div>', data)
 		if len(matcher): dict['Update_Time'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0])
+		matcher = re.findall('<div class="content" itemprop="contentRating">.*?</div>', data)
+		if len(matcher): dict['Age'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0])
+		matcher = re.findall('</jsl> *</jsl> *<span>.*?</span> *</button>', data)
+		if len(matcher): dict['Price'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0]).replace("安装", "免费").replace("Install", "Free")
 		
 	return dict
 
@@ -150,6 +156,13 @@ def get_app_permission(market, data):
 			matcher = re.findall('<div class="r">.*?</div></li>', matcher[0])
 			for permission in matcher:
 				list.append(replace_html(permission.replace('<div class="r">', "").replace('</div></li>', "")))
+				
+	elif market == 'googleplay':
+		matcher = re.findall('<li jstcache="[0-9]+" jsinstance="[\*0-9]+">.*?</li>', data)
+		if len(matcher):
+			for permission in matcher:
+				list.append(replace_html(re.subn('<.*?>', "", permission)[0]))
+	
 	return tuple(set(list))
 	
 def get_app_description(market, data):
@@ -242,26 +255,4 @@ def get_icon_download_link(market, data):
 		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
-	
-#def get_app_special_info(market, url):
-#	dict = {}
-#	if market == 'yingyongbao':
-#		for i in range(10):
-#			try:
-#				web = request.urlopen(url)
-#				data = web.read().decode(web.headers.get_content_charset())
-#				if ',"success":true,' in data:
-#					matcher = re.findall('"total":[0-9]*,', data)
-#					dict['Rating_Num'] = matcher[0].replace('"total":', "").replace(",", "")
-#					return dict
-#				continue
-#			except urllib.error.URLError:
-#				print("Internet Error")
-#				time.sleep(1)
-#				continue
-#			except ConnectionResetError:
-#				print("Internet Error")
-#				time.sleep(1)
-#				continue
-#	return dict
 				

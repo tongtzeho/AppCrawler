@@ -5,7 +5,7 @@ import urllib, time, requests
 
 def download_apk(market, url, apkfile):
 	if not len(url): return False
-	for i in range(15):
+	for i in range(10):
 		try:
 			web = requests.get(url, stream=True, timeout=30)
 			with open(apkfile, 'wb') as fout:
@@ -21,7 +21,7 @@ def download_apk(market, url, apkfile):
 	
 def download_icon(market, url, pngfile):
 	if not len(url): return False
-	for i in range(15):
+	for i in range(10):
 		try:
 			web = request.urlopen(url, timeout=30)
 			data = web.read()

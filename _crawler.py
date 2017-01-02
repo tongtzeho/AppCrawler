@@ -4,6 +4,7 @@
 
 from urllib import request
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import multiprocessing, threading, random, urllib, time, os, codecs, shutil, sys
 
 from _downloader import *
@@ -76,7 +77,7 @@ def check_response(market, result):
 	return True
 	
 def open_url(market, url):
-	for i in range(15):
+	for i in range(10):
 		if market == 'baidu':
 			try:
 				web = request.urlopen(url, timeout=30)
@@ -88,12 +89,12 @@ def open_url(market, url):
 		else:
 			try:
 				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-				driver.set_page_load_timeout(30)
+				driver.set_page_load_timeout(60)
 				if market == 'googleplay':
 					driver.get(url+"&hl=zh")
 					try:
 						driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
-						time.sleep(2)
+						time.sleep(3)
 					except:
 						pass
 				else:
@@ -104,7 +105,7 @@ def open_url(market, url):
 				data = ""
 				driver.quit()
 		if page_invalid(market, data): return ()
-		dict = get_app_basic_info(market, data)				
+		info_dict = get_app_basic_info(market, data)				
 		permission_list = get_app_permission(market, data)
 		description = get_app_description(market, data)
 		release_note = get_app_release_note(market, data)
@@ -112,7 +113,7 @@ def open_url(market, url):
 		extend_urls = get_extend_urls(market, data, url_prefix[market])
 		similar_apps = get_similar_apps(market, data, url_prefix[market])
 		icon_link = get_icon_download_link(market, data)
-		result = (dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
+		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
 		if not check_response(market, result):
 			continue
 		else:
@@ -315,9 +316,12 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set)
 
-#response = open_url('googleplay', 'https://play.google.com/store/apps/details?id=com.supercell.clashroyale')
+#response = open_url('googleplay', 'https://play.google.com/store/apps/details?id=com.estoty.game2048')
 #for key, val in response[0].items():
 #	print (key+": "+val)
+#print ("-----------")
+#for permission in response[1]:
+#	print (permission)
 #exit()
 	
 if __name__ == '__main__':
