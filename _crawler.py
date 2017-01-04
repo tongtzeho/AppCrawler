@@ -247,7 +247,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 		hold_lock_set = False
 		random.shuffle(url_list)
 		for short_url in url_list:
-			#try:
+			try:
 				url = url_prefix[market]+short_url
 				lock_pool.acquire()
 				hold_lock_pool = True
@@ -349,7 +349,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 								# 数据库添加
 							if not os.path.exists(root+market+"/"+apk_key[1]+"/["+cur_time+"]"):
 								os.makedirs(root+market+"/"+apk_key[1]+"/["+cur_time+"]")
-							write_text_information('root+market+"/"+apk_key[1]+"/["+cur_time+"]/', response)
+							write_text_information(root+market+"/"+apk_key[1]+"/["+cur_time+"]/", response)
 							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
 							fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 							fout.close()
@@ -377,10 +377,10 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 				url_pool.remove(short_url)
 				lock_pool.release()
 				hold_lock_pool = False
-			#except:
-			#	print (market+threadidstr+"：未知错误（"+url+"）")
-			#	if hold_lock_pool: lock_pool.release()
-			#	if hold_lock_set: lock_set.release()
+			except:
+				print (market+threadidstr+"：未知错误（"+url+"）")
+				if hold_lock_pool: lock_pool.release()
+				if hold_lock_set: lock_set.release()
 
 def initialization(param):
 	market = param[0]
