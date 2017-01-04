@@ -328,7 +328,9 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 									fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 									fout.close()
 									shutil.move("~"+market+"tmp"+threadidstr+".apk", extract_dir+"/"+apk_key[1]+".apk")
-									if os.path.isfile("~"+market+"tmp"+threadidstr+".png"): shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
+									if os.path.isfile("~"+market+"tmp"+threadidstr+".png"):
+										if market != 'googleplay': shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
+										else: shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.webp")
 									shutil.copytree(extract_dir, root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", symlinks=True)
 									print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"版本和信息")
 									# 数据库添加
@@ -337,13 +339,14 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 									# 数据库更新
 							else:
 								os.makedirs(root+market+"/"+apk_key[1])
-								if market != 'googleplay': download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
-								else: download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".webp")
+								market != 'googleplay': download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
 								fout = codecs.open(extract_dir+"/Index.txt", "w", "utf-8")
 								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 								fout.close()
 								shutil.move("~"+market+"tmp"+threadidstr+".apk", extract_dir+"/"+apk_key[1]+".apk")
-								if os.path.isfile("~"+market+"tmp"+threadidstr+".png"): shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
+								if os.path.isfile("~"+market+"tmp"+threadidstr+".png"):
+									if market != 'googleplay': shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
+									else: shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.webp")
 								shutil.copytree(extract_dir, root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", symlinks=True)
 								print (apk_key[0]+threadidstr+"：新增"+apk_key[1])
 								# 数据库添加
