@@ -1,3 +1,4 @@
+googleplay 10 0.4
 yingyongbao 10 0.4
 baidu 10 0.4
 360 10 0.4

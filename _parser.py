@@ -171,14 +171,14 @@ def get_app_description(market, data):
 		if len(matcher):
 			matcher1 = re.findall('.*?<div class="det-app-data-tit">更新内容：</div>', matcher[0], re.S)
 			if len(matcher1):
-				tmp0 = re.subn('<.*?>', '', replace_html(matcher1[0].replace('<div class="det-intro-tit">应用信息</div>', "").replace('<div class="det-app-data-tit">更新内容：</div>', "").replace('<br>', "\n").replace('</div>', "\n")))[0]
-				tmp1 = re.subn('( |\t)+', ' ', tmp0)[0]
+				tmp0 = re.subn('<.*?>', '', matcher1[0].replace('<div class="det-intro-tit">应用信息</div>', "").replace('<div class="det-app-data-tit">更新内容：</div>', "").replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+				tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 				tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 				if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 				else: return tmp2
 			else:
-				tmp0 = re.subn('<.*?>', '', replace_html(matcher[0].replace('<div class="det-intro-tit">应用信息</div>', "").replace('<br>', "\n").replace('</div>', "\n")))[0]
-				tmp1 = re.subn('( |\t)+', ' ', tmp0)[0]
+				tmp0 = re.subn('<.*?>', '', matcher[0].replace('<div class="det-intro-tit">应用信息</div>', "").replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+				tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 				tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 				if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 				else: return tmp2
@@ -186,8 +186,8 @@ def get_app_description(market, data):
 	elif market == 'baidu':
 		matcher = re.findall('<div class="brief-long".*?</div>', data, re.S)
 		if len(matcher):
-			tmp0 = re.subn('<.*?>', '', replace_html(matcher[0].replace('<a href="javascript:;" target="_self" class="fold">收起</a>', "").replace('<br>', "\n").replace('</div>', "\n")))[0]
-			tmp1 = re.subn('( |\t)+', ' ', tmp0)[0]
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<a href="javascript:;" target="_self" class="fold">收起</a>', "").replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
@@ -195,8 +195,17 @@ def get_app_description(market, data):
 	elif market == '360':
 		matcher = re.findall('<div class="breif">.*?<div', data, re.S)
 		if len(matcher):
-			tmp0 = re.subn('<.*?>', '', replace_html(matcher[0].replace('<div class="breif">', "").replace('<div', "").replace('<br>', "\n").replace('</div>', "\n")))[0]
-			tmp1 = re.subn('( |\t)+', ' ', tmp0)[0]
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<div class="breif">', "").replace('<div', "").replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
+	elif market == 'googleplay':
+		matcher = re.findall('<h1 aria-label=".*?"></h1>.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
@@ -209,50 +218,27 @@ def get_app_release_note(market, data):
 		if len(matcher):
 			matcher1 = re.findall('<div class="det-app-data-tit">更新内容：</div>.*?<div.*?[ |\n|\r|\t]*</div>', matcher[0], re.S)
 			if len(matcher1):
-				tmp0 = re.subn('<.*?>', '', replace_html(matcher1[0].replace('<div class="det-app-data-tit">更新内容：</div>', "").replace('<br>', "\n").replace('</div>', "\n")))[0]
-				tmp1 = re.subn('( |\t)+', ' ', tmp0)[0]
+				tmp0 = re.subn('<.*?>', '', matcher1[0].replace('<div class="det-app-data-tit">更新内容：</div>', "").replace('<br>', "\n").replace('</div>', "\n"))[0]
+				tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 				tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 				if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 				else: return tmp2
 				
-	if market == '360':
+	elif market == '360':
 		matcher = re.findall('<br><b>【更新内容】</b><br>.*?</div>', data, re.S)
 		if len(matcher):
-			tmp0 = re.subn('<.*?>', '', replace_html(matcher[0].replace('<br><b>【更新内容】</b><br>', "").replace('<br>', "\n").replace('</div>', "\n")))[0]
-			tmp1 = re.subn('( |\t)+', ' ', tmp0)[0]
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br><b>【更新内容】</b><br>', "").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
+			
+	elif market == 'googleplay':
+		matcher = re.findall('<div class="recent-change">.*?</div>', data, re.S)
+		if len(matcher):
+			result = ""
+			for note in matcher:
+				result += replace_html(re.subn('<.*?>', "", note)[0].replace('<br>', "\n").replace('</div>', "\n"))+"\n"
+			return result
 
 	return ""
-	
-def get_app_download_link(market, data):
-	if market == 'yingyongbao':
-		matcher = re.findall('data-apkurl=".*?"', data)
-		if len(matcher): return matcher[0].replace('data-apkurl="', "").replace('"', "")
-		
-	elif market == 'baidu':
-		matcher = re.findall('<span class="one-setup-btn".*?data_url=".*?"', data, re.S)
-		if len(matcher): return re.subn('<span class="one-setup-btn".*?data_url="', "", matcher[0].replace("\r", "").replace("\n", ""))[0].replace('"', "")
-		
-	elif market == '360':
-		matcher = re.findall('url=.*?.apk" data-sid=', data)
-		if len(matcher): return matcher[0].replace('url=', "").replace('" data-sid=', "")
-		
-	return ""
-	
-def get_icon_download_link(market, data):
-	if market == 'yingyongbao':
-		matcher = re.findall('<div class="det-icon">.*?src=".*?"', data, re.S)
-		if len(matcher): return matcher[0].split('"')[-2]
-	
-	if market == 'baidu':
-		matcher = re.findall('<div class="app-pic">.*?=".*?"', data, re.S)
-		if len(matcher): return matcher[0].split('"')[-2]
-		
-	if market == '360':
-		matcher = re.findall('<dt>.*?<img src=".*?"', data, re.S)
-		if len(matcher): return matcher[0].split('"')[-2]
-		
-	return ""
-				

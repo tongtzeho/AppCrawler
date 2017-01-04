@@ -4,7 +4,6 @@
 
 from urllib import request
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import multiprocessing, threading, random, urllib, time, os, codecs, shutil, sys
 
 from _downloader import *
@@ -13,13 +12,14 @@ from _parser import *
 from _extender import *
 
 phantomjs_path = 'phantomjs/bin/phantomjs'
-root = 'E:/Android/'
+root = 'G:/'
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
 'baidu': 'http://shouji.baidu.com/software/',
 '360': 'http://zhushou.360.cn/detail/index/soft_id/',
 'googleplay': 'https://play.google.com/store/apps/details?id='
 }
+need_extend = False
 
 def page_invalid(market, data):
 	if market == 'yingyongbao':
@@ -72,7 +72,23 @@ def check_response(market, result):
 		if not 'Best_Comment_Num' in result[0]: return False
 		if not 'Good_Comment_Num' in result[0]: return False
 		if not 'Bad_Comment_Num' in result[0]: return False
-		if not 'System' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'googleplay':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not '5-Star_Rating_Num' in result[0]: return False
+		if not '4-Star_Rating_Num' in result[0]: return False
+		if not '3-Star_Rating_Num' in result[0]: return False
+		if not '2-Star_Rating_Num' in result[0]: return False
+		if not '1-Star_Rating_Num' in result[0]: return False
+		if not 'Age' in result[0]: return False
+		if not 'Price' in result[0]: return False
+		if not len(result[1]): return False
 		if not len(result[2]): return False
 	return True
 	
@@ -105,19 +121,49 @@ def open_url(market, url):
 				data = ""
 				driver.quit()
 		if page_invalid(market, data): return ()
-		info_dict = get_app_basic_info(market, data)				
+		info_dict = get_app_basic_info(market, data)
 		permission_list = get_app_permission(market, data)
 		description = get_app_description(market, data)
 		release_note = get_app_release_note(market, data)
-		download_link = get_app_download_link(market, data)
-		extend_urls = get_extend_urls(market, data, url_prefix[market])
+		download_link = get_apk_download_link(market, data, url)
+		if need_extend: extend_urls = get_extend_urls(market, data, url_prefix[market])
+		else: extend_urls = set()
 		similar_apps = get_similar_apps(market, data, url_prefix[market])
 		icon_link = get_icon_download_link(market, data)
 		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
 		if not check_response(market, result):
+			print ("中文版有问题")
 			continue
 		else:
 			break
+	if market == 'googleplay':
+		for i in range(10):
+			try:
+				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+				driver.set_page_load_timeout(60)
+				driver.get(url+"&hl=en")
+				try:
+					driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
+					time.sleep(3)
+				except:
+					pass
+				data = driver.page_source
+				driver.quit()
+			except:
+				data = ""
+				driver.quit()
+			if page_invalid(market, data): return ()
+			info_dict_en = get_app_basic_info(market, data)
+			permission_list_en = get_app_permission(market, data)
+			description_en = get_app_description(market, data)
+			release_note_en = get_app_release_note(market, data)
+			resulten = (info_dict_en, permission_list_en, description_en, release_note_en)
+			if not check_response(market, resulten):
+				print ("英文版有问题")
+				continue
+			else:
+				break
+	result += resulten
 	return result
 
 def read_url(market):
@@ -133,8 +179,63 @@ def read_url(market):
 		result.add(line.replace('\r', "").replace('\n', ""))
 	fin.close()
 	return result
-			
-def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set):
+
+def read_config():
+	result = {}
+	if os.path.isfile("config.txt"):
+		fin = open("config.txt", "r")
+		data = fin.read().replace("\r", "").split("\n")
+		result['ANDROID_ID'] = data[0]
+		result['GOOGLE_LOGIN'] = data[1]
+		result['GOOGLE_PASSWORD'] = data[2]
+	return result
+	
+def write_text_information(dir, response):
+	fout = codecs.open(dir+"Information.txt", "w", "utf-8")
+	for key, value in response[0].items():
+		if len(value): fout.write(key+"\n\t"+value+"\n")
+	if len(response[6]):
+		fout.write("Similar_Apps\n")
+		for urls in response[6]:
+			fout.write("\t"+urls+"\n")
+	fout.close()
+	if len(response[1]):
+		fout = codecs.open(dir+"Permission.txt", "w", "utf-8")
+		for permission in response[1]:
+			fout.write(permission+"\n")
+		fout.close()
+	if len(response[2]):
+		fout = codecs.open(dir+"Description.txt", "w", "utf-8")
+		fout.write(response[2])
+		fout.close()
+	if len(response[3]):
+		fout = codecs.open(dir+"Release_Note.txt", "w", "utf-8")
+		fout.write(response[3])
+		fout.close()
+	if len(response) == 12:
+		fout = codecs.open(dir+"Information(eng).txt", "w", "utf-8")
+		for key, value in response[8].items():
+			if len(value): fout.write(key+"\n\t"+value+"\n")
+		if len(response[6]):
+			fout.write("Similar_Apps\n")
+			for urls in response[6]:
+				fout.write("\t"+urls+"\n")
+		fout.close()
+		if len(response[9]):
+			fout = codecs.open(dir+"Permission(eng).txt", "w", "utf-8")
+			for permission in response[9]:
+				fout.write(permission+"\n")
+			fout.close()
+		if len(response[10]):
+			fout = codecs.open(dir+"Description(eng).txt", "w", "utf-8")
+			fout.write(response[10])
+			fout.close()
+		if len(response[11]):
+			fout = codecs.open(dir+"Release_Note(eng).txt", "w", "utf-8")
+			fout.write(response[11])
+			fout.close()
+	
+def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config = {}):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
@@ -199,13 +300,14 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					hold_lock_pool = False
 					continue
 				lock_set.acquire()
-				hold_lock_set = True
-				for extend_url in response[5]:					
-					url_set.add(extend_url)
-				lock_set.release()
-				hold_lock_set = False
+				if need_extend:
+					hold_lock_set = True
+					for extend_url in response[5]:					
+						url_set.add(extend_url)
+					lock_set.release()
+					hold_lock_set = False
 				print (market+threadidstr+"：准备下载APK（"+response[4]+"）")
-				if not download_apk(market, response[4], "~"+market+"tmp"+threadidstr+".apk"):
+				if not download_apk(market, response[4], "~"+market+"tmp"+threadidstr+".apk", config):
 					print (market+threadidstr+"：下载APK失败（"+url+"）")
 					lock_pool.acquire()
 					hold_lock_pool = True
@@ -237,7 +339,8 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 									# 数据库更新
 							else:
 								os.makedirs(root+market+"/"+apk_key[1])
-								download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
+								if market != 'googleplay': download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
+								else: download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".webp")
 								fout = codecs.open(extract_dir+"/Index.txt", "w", "utf-8")
 								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 								fout.close()
@@ -248,27 +351,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 								# 数据库添加
 							if not os.path.exists(root+market+"/"+apk_key[1]+"/["+cur_time+"]"):
 								os.makedirs(root+market+"/"+apk_key[1]+"/["+cur_time+"]")
-							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Information.txt", "w", "utf-8")
-							for key, value in response[0].items():
-								if len(value): fout.write(key+"\n\t"+value+"\n")
-							if len(response[6]):
-								fout.write("Similar_Apps\n")
-								for urls in response[6]:
-									fout.write("\t"+urls+"\n")
-							fout.close()
-							if len(response[1]):
-								fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Permission.txt", "w", "utf-8")
-								for permission in response[1]:
-									fout.write(permission+"\n")
-								fout.close()
-							if len(response[2]):
-								fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Description.txt", "w", "utf-8")
-								fout.write(response[2])
-								fout.close()
-							if len(response[3]):
-								fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Release_Note.txt", "w", "utf-8")
-								fout.write(response[3])
-								fout.close()
+							write_text_information('root+market+"/"+apk_key[1]+"/["+cur_time+"]/', response)
 							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
 							fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 							fout.close()
@@ -310,19 +393,51 @@ def initialization(param):
 	url_pool = set()
 	lock_set = threading.Lock()
 	url_set = read_url(market)
+	if market == 'googleplay': config = read_config()
+	else: config = {}
 	if not len(url_set): exit()
 	for i in range(1, thread_num):
 		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set))
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set)
 
-#response = open_url('googleplay', 'https://play.google.com/store/apps/details?id=com.estoty.game2048')
-#for key, val in response[0].items():
-#	print (key+": "+val)
-#print ("-----------")
-#for permission in response[1]:
-#	print (permission)
-#exit()
+if False:
+	myurl = 'https://play.google.com/store/apps/details?id=me.msqrd.android'
+	config = read_config()
+	download_apk('googleplay', myurl, '~googleplaytmp0.apk', config)
+	exit()
+
+	response = open_url('googleplay', myurl)
+	for key, val in response[0].items():
+		print (key+": "+val)
+	print ("-----------")
+	for permission in response[1]:
+		print (permission)
+	print ("-----------")
+	print (response[2])
+	print ("-----------")
+	print (response[3])
+	print ("-----------")
+	print (response[4])
+	print ("-----------")
+	for newurl in response[5]:
+		print (newurl)
+	print ("-----------")
+	for newurl in response[6]:
+		print (newurl)
+	print ("-----------")
+	print (response[7])
+	for key, val in response[8].items():
+		print (key+": "+val)
+	print ("-----------")
+	for permission in response[9]:
+		print (permission)
+	print ("-----------")
+	print (response[10])
+	print ("-----------")
+	print (response[11])
+	print ("-----------")
+	exit()
 	
 if __name__ == '__main__':
 	if not os.path.isfile("settings.txt"): exit()
@@ -338,6 +453,7 @@ if __name__ == '__main__':
 		if rate_per_iteration <= 0 or rate_per_iteration > 1: exit()
 		param_list.append((market, thread_num, rate_per_iteration))
 		market_set.add(market)
+	fin_settings.close()
 	for param in param_list:
 		if param == param_list[0]: continue
 		multiprocessing.Process(target = initialization, args = (param,)).start()
