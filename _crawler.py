@@ -339,7 +339,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 									# 数据库更新
 							else:
 								os.makedirs(root+market+"/"+apk_key[1])
-								market != 'googleplay': download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
+								download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
 								fout = codecs.open(extract_dir+"/Index.txt", "w", "utf-8")
 								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 								fout.close()
