@@ -132,7 +132,6 @@ def open_url(market, url):
 		icon_link = get_icon_download_link(market, data)
 		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
 		if not check_response(market, result):
-			print ("中文版有问题")
 			continue
 		else:
 			break
@@ -159,11 +158,10 @@ def open_url(market, url):
 			release_note_en = get_app_release_note(market, data)
 			resulten = (info_dict_en, permission_list_en, description_en, release_note_en)
 			if not check_response(market, resulten):
-				print ("英文版有问题")
 				continue
 			else:
 				break
-	result += resulten
+		result += resulten
 	return result
 
 def read_url(market):
@@ -249,7 +247,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 		hold_lock_set = False
 		random.shuffle(url_list)
 		for short_url in url_list:
-			try:
+			#try:
 				url = url_prefix[market]+short_url
 				lock_pool.acquire()
 				hold_lock_pool = True
@@ -379,10 +377,10 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 				url_pool.remove(short_url)
 				lock_pool.release()
 				hold_lock_pool = False
-			except:
-				print (market+threadidstr+"：未知错误（"+url+"）")
-				if hold_lock_pool: lock_pool.release()
-				if hold_lock_set: lock_set.release()
+			#except:
+			#	print (market+threadidstr+"：未知错误（"+url+"）")
+			#	if hold_lock_pool: lock_pool.release()
+			#	if hold_lock_set: lock_set.release()
 
 def initialization(param):
 	market = param[0]
