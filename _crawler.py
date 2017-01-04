@@ -297,8 +297,8 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					lock_pool.release()
 					hold_lock_pool = False
 					continue
-				lock_set.acquire()
-				if need_extend:
+				if need_extend:	
+					lock_set.acquire()
 					hold_lock_set = True
 					for extend_url in response[5]:					
 						url_set.add(extend_url)
@@ -395,9 +395,9 @@ def initialization(param):
 	else: config = {}
 	if not len(url_set): exit()
 	for i in range(1, thread_num):
-		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set))
+		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config))
 		t.start()
-	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set)
+	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config)
 
 if False:
 	myurl = 'https://play.google.com/store/apps/details?id=me.msqrd.android'
