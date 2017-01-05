@@ -23,7 +23,8 @@ url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
 'baidu': 'http://shouji.baidu.com/software/',
 '360': 'http://zhushou.360.cn/detail/index/soft_id/',
-'googleplay': 'https://play.google.com/store/apps/details?id='
+'googleplay': 'https://play.google.com/store/apps/details?id=',
+'huawei': 'http://appstore.huawei.com/app/'
 }
 need_extend = True
 set_maxsize = 12000
@@ -37,6 +38,8 @@ def page_invalid(market, data):
 		return '<span class="t">获取应用内容失败，请尝试ctrl+f5刷新</span>' in data
 	elif market == 'googleplay':
 		return '<div id="error-section" class="rounded">We\'re sorry, the requested URL was not found on this server.</div>' in data or '<div id="error-section" class="rounded">抱歉，在此服务器中找不到请求的网址。</div>' in data
+	elif market == 'huawei':
+		return '<p>欢迎来到火星做客，可惜我们这儿找不到你需要的应用。</p>' in data
 	return False	
 
 def check_response(market, result):
@@ -101,7 +104,7 @@ def check_response(market, result):
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu':
+		if market == 'baidu' or market == 'huawei':
 			try:
 				web = request.urlopen(url, timeout=30)
 				charset = str(web.headers.get_content_charset())
@@ -410,13 +413,9 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config)
 
-if False:
-	myurl = 'https://play.google.com/store/apps/details?id=me.msqrd.android'
-	config = read_config()
-	download_apk('googleplay', myurl, '~googleplaytmp0.apk', config)
-	exit()
-
-	response = open_url('googleplay', myurl)
+if True:
+	myurl = 'http://appstore.huawei.com/app/C10419631'
+	response = open_url('huawei', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -436,16 +435,6 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	for key, val in response[8].items():
-		print (key+": "+val)
-	print ("-----------")
-	for permission in response[9]:
-		print (permission)
-	print ("-----------")
-	print (response[10])
-	print ("-----------")
-	print (response[11])
-	print ("-----------")
 	exit()
 	
 if __name__ == '__main__':

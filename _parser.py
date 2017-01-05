@@ -146,6 +146,30 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('</jsl> *</jsl> *<span>.*?</span> *</button>', data)
 		if len(matcher): dict['Price'] = replace_html(re.subn(' *<.*?> *', "", matcher[0])[0]).replace("安装", "免费").replace("Install", "Free")
 		
+	elif market == 'huawei':
+		matcher = re.findall('<p><span class="title">.*?</span>', data)
+		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('<p><span class="title">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="grey sub">.*?</span>', data)
+		if len(matcher):
+			matcher = re.findall('[0-9]+', matcher[0])
+			if len(matcher): dict['Download'] = matcher[0]
+		matcher = re.findall('<li class="ul-li-detail">大小：<span>.*?</span>', data)
+		if len(matcher): dict['Size'] = replace_html(matcher[0].replace('<li class="ul-li-detail">大小：<span>', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="score_[0-9]*">', data)
+		if len(matcher):
+			matcher = re.findall('[0-9]+', matcher[0])
+			if len(matcher): dict['Rating'] = matcher[0]
+		matcher = re.findall('（[0-9]+条）:</span>', data)
+		if len(matcher):
+			matcher = re.findall('[0-9]+', matcher[0])
+			if len(matcher): dict['Rating_Num'] = matcher[0]
+		matcher = re.findall('<li class="ul-li-detail">版本：<span>.*?</span>', data)
+		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('<li class="ul-li-detail">版本：<span>', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="ul-li-detail">开发者：<span title=\'.*?\'>', data)
+		if len(matcher): dict['Developer'] = replace_html(matcher[0].replace('<li class="ul-li-detail">开发者：<span title=\'', "").replace('\'>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="ul-li-detail">日期：<span>.*?</span>', data)
+		if len(matcher): dict['Update_Time'] = replace_html(matcher[0].replace('<li class="ul-li-detail">日期：<span>', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		
 	return dict
 
 def get_app_permission(market, data):
@@ -205,6 +229,15 @@ def get_app_description(market, data):
 		matcher = re.findall('<h1 aria-label=".*?"></h1>.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
+	elif market == 'huawei':
+		matcher = re.findall('<div class="content">.*?<!-- introduce end -->', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('>展开<', "").replace('>收起<', "").replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
