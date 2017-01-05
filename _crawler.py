@@ -11,15 +11,22 @@ from _decoder import *
 from _parser import *
 from _extender import *
 
+#Windows
 phantomjs_path = 'phantomjs/bin/phantomjs'
 root = 'G:/'
+
+#Linux
+#phantomjs_path = '/usr/bin/phantomjs'
+#root = '../Android/'
+
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
 'baidu': 'http://shouji.baidu.com/software/',
 '360': 'http://zhushou.360.cn/detail/index/soft_id/',
 'googleplay': 'https://play.google.com/store/apps/details?id='
 }
-need_extend = False
+need_extend = True
+set_maxsize = 12000
 
 def page_invalid(market, data):
 	if market == 'yingyongbao':
@@ -300,7 +307,8 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 				if need_extend:	
 					lock_set.acquire()
 					hold_lock_set = True
-					for extend_url in response[5]:					
+					for extend_url in response[5]:
+						if len(url_set) >= set_maxsize: break
 						url_set.add(extend_url)
 					lock_set.release()
 					hold_lock_set = False

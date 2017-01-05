@@ -419,6 +419,7 @@ if __name__ == '__main__':
 	
 	for key, val in dict.items():
 		url_set = set()
+		if key == 'googleplay': continue
 		for root_url in val:
 			web = request.urlopen(root_url, timeout=20)
 			charset = str(web.headers.get_content_charset())
