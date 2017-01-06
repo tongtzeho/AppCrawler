@@ -34,6 +34,12 @@ def get_extend_urls(market, data, prefix):
 			if '&' in full_url: full_url = full_url[:full_url.index('&')]
 			if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
 			
+	elif market == 'huawei':
+		matcher = re.findall('<a href=".*?">', data)
+		for url in matcher:
+			full_url = url.replace('<a href="', "").replace('">', "").replace(':80', "")
+			if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
+			
 	return urls
 	
 def get_similar_apps(market, data, prefix):
@@ -61,7 +67,22 @@ def get_similar_apps(market, data, prefix):
 			for url in matcher:
 				full_url = 'https://play.google.com'+url.replace('href="', "").replace('"', "")
 				if '&' in full_url: full_url = full_url[:full_url.index('&')]
-				if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))		
+				if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))	
+
+	elif market == 'huawei':
+		matcher = re.findall('<span class="title flt ft-yh">相关推荐</span>.+<span class="title flt ft-yh">.*?排行<', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href=".*?"><', matcher[0])
+			for url in matcher:
+				full_url = url.replace('<a href="', "").replace('"><', "").replace(':80', "")
+				if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
+		else:
+			matcher = re.findall('<span class="title flt ft-yh">相关推荐</span>.+', data, re.S)
+			if len(matcher):
+				matcher = re.findall('<a href=".*?"><', matcher[0])
+				for url in matcher:
+					full_url = url.replace('<a href="', "").replace('"><', "").replace(':80', "")
+					if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
 	
 	return urls
 	

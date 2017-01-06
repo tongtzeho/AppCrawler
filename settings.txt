@@ -1,4 +1,4 @@
-googleplay 10 0.4
-yingyongbao 10 0.4
-baidu 10 0.4
-360 10 0.4
+googleplay 7 0.65
+yingyongbao 8 0.6
+baidu 5 0.7
+360 8 0.6

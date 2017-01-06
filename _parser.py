@@ -163,6 +163,8 @@ def get_app_basic_info(market, data):
 		if len(matcher):
 			matcher = re.findall('[0-9]+', matcher[0])
 			if len(matcher): dict['Rating_Num'] = matcher[0]
+		matcher = re.findall('<span class="title flt ft-yh">.*?排行<', data)
+		if len(matcher): dict['Category'] = replace_html(matcher[0].replace('<span class="title flt ft-yh">', "").replace('排行<', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<li class="ul-li-detail">版本：<span>.*?</span>', data)
 		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('<li class="ul-li-detail">版本：<span>', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<li class="ul-li-detail">开发者：<span title=\'.*?\'>', data)

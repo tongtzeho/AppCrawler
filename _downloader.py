@@ -20,6 +20,10 @@ def get_apk_download_link(market, data, url):
 		
 	elif market == 'googleplay':
 		return url
+		
+	elif market == 'huawei':
+		matcher = re.findall('dlurl=".*?"', data)
+		if len(matcher): return matcher[0].replace('dlurl="', "").replace('"', "")
 
 	return ""
 	
@@ -39,6 +43,10 @@ def get_icon_download_link(market, data):
 	elif market == 'googleplay':
 		matcher = re.findall('<img class="cover-image" src=".*?"', data)
 		if len(matcher): return 'https:'+matcher[0].split('"')[-2]
+		
+	elif market == 'huawei':
+		matcher = re.findall('img class="app-ico" lazyload=".*?"', data)
+		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 

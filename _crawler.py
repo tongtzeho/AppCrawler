@@ -176,13 +176,13 @@ def open_url(market, url):
 
 def read_url(market):
 	result = set()
-	if os.path.isfile(root+market+"/~url_list.txt"):
-		shutil.move(root+market+"/~url_list.txt", root+market+"/url_list.txt")
-	elif os.path.isfile(root+market+"/url_list.txt"):
+	if os.path.isfile(root+market+"_~url_list.txt"):
+		shutil.move(root+market+"_~url_list.txt", root+market+"_url_list.txt")
+	elif os.path.isfile(root+market+"_url_list.txt"):
 		pass
 	else:
 		return result
-	fin = open(root+market+"/url_list.txt", "r")
+	fin = open(root+market+"_url_list.txt", "r")
 	for line in fin:
 		result.add(line.replace('\r', "").replace('\n', ""))
 	fin.close()
@@ -284,12 +284,12 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 						update = 0
 						lock_set.acquire()
 						hold_lock_set = True
-						shutil.move(root+market+"/url_list.txt", root+market+"/~url_list.txt")
-						fout = codecs.open(root+market+"/url_list.txt", "w", "utf-8")
+						shutil.move(root+market+"_url_list.txt", root+market+"_~url_list.txt")
+						fout = codecs.open(root+market+"_url_list.txt", "w", "utf-8")
 						for temp_url in url_set:
 							fout.write(temp_url+"\n")
 						fout.close()
-						os.remove(root+market+"/~url_list.txt")
+						os.remove(root+market+"_~url_list.txt")
 						lock_set.release()
 						hold_lock_set = False
 						print (market+threadidstr+"：更新链接列表")
@@ -371,12 +371,12 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 								update = 0
 								lock_set.acquire()
 								hold_lock_set = True
-								shutil.move(root+market+"/url_list.txt", root+market+"/~url_list.txt")
-								fout = codecs.open(root+market+"/url_list.txt", "w", "utf-8")
+								shutil.move(root+market+"_url_list.txt", root+market+"_~url_list.txt")
+								fout = codecs.open(root+market+"_url_list.txt", "w", "utf-8")
 								for temp_url in url_set:
 									fout.write(temp_url+"\n")
 								fout.close()
-								os.remove(root+market+"/~url_list.txt")
+								os.remove(root+market+"_~url_list.txt")
 								lock_set.release()
 								hold_lock_set = False
 								print (market+threadidstr+"：更新链接列表")
