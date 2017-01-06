@@ -237,9 +237,9 @@ def get_app_description(market, data):
 			else: return tmp2
 			
 	elif market == 'huawei':
-		matcher = re.findall('<div class="content">.*?<!-- introduce end -->', data, re.S)
+		matcher = re.findall('<div id="app_desc" style="display:none;">.*?</div>', data, re.S)
 		if len(matcher):
-			tmp0 = re.subn('<.*?>', '', matcher[0].replace('>展开<', "").replace('>收起<', "").replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

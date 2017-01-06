@@ -27,7 +27,7 @@ url_prefix = {
 'huawei': 'http://appstore.huawei.com/app/'
 }
 need_extend = True
-set_maxsize = 12000
+set_maxsize = 15000
 
 def page_invalid(market, data):
 	if market == 'yingyongbao':
@@ -100,6 +100,15 @@ def check_response(market, result):
 		if not 'Price' in result[0]: return False
 		if not len(result[1]): return False
 		if not len(result[2]): return False
+	elif market == 'huawei':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False		
+		if not 'Rating' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False		
 	return True
 	
 def open_url(market, url):
@@ -142,6 +151,7 @@ def open_url(market, url):
 		icon_link = get_icon_download_link(market, data)
 		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
 		if not check_response(market, result):
+			print ("1234567")
 			continue
 		else:
 			break
@@ -408,13 +418,14 @@ def initialization(param):
 	if market == 'googleplay': config = read_config()
 	else: config = {}
 	if not len(url_set): exit()
+	if not os.path.exists(root+market): os.makedirs(root+market)
 	for i in range(1, thread_num):
 		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config))
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config)
 
-if True:
-	myurl = 'http://appstore.huawei.com/app/C10419631'
+if False:
+	myurl = 'http://appstore.huawei.com/app/C10271928'
 	response = open_url('huawei', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
@@ -435,6 +446,9 @@ if True:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
+	exit()
+	download_apk('huawei', response[4], '~huaweitmp0.apk', {})
+	download_icon('huawei', response[7], '~huaweitmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
