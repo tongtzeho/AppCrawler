@@ -151,7 +151,6 @@ def open_url(market, url):
 		icon_link = get_icon_download_link(market, data)
 		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
 		if not check_response(market, result):
-			print ("1234567")
 			continue
 		else:
 			break
