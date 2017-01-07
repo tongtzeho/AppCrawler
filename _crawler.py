@@ -12,7 +12,7 @@ from _parser import *
 from _extender import *
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs'
+phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 root = 'G:/'
 
 #Linux
@@ -26,8 +26,6 @@ url_prefix = {
 'googleplay': 'https://play.google.com/store/apps/details?id=',
 'huawei': 'http://appstore.huawei.com/app/'
 }
-need_extend = True
-set_maxsize = 15000
 
 def page_invalid(market, data):
 	if market == 'yingyongbao':
@@ -252,11 +250,13 @@ def write_text_information(dir, response):
 			fout.write(response[11])
 			fout.close()
 	
-def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config = {}):
+def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
 	hold_lock_set = False
+	print (need_extend)
+	print (set_maxsize)
 	while len(url_set):
 		iteration += 1
 		lock_set.acquire()
@@ -409,6 +409,8 @@ def initialization(param):
 	market = param[0]
 	thread_num = param[1]
 	rate_per_iteration = param[2]
+	need_extend = param[3]
+	set_maxsize = param[4]
 	print ("初始化进程：("+market+", "+str(thread_num)+", "+str(rate_per_iteration)+")")
 	lock_pool = threading.Lock()
 	url_pool = set()
@@ -416,12 +418,11 @@ def initialization(param):
 	url_set = read_url(market)
 	if market == 'googleplay': config = read_config()
 	else: config = {}
-	if not len(url_set): exit()
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	for i in range(1, thread_num):
-		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config))
+		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config))
 		t.start()
-	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, config)
+	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config)
 
 if False:
 	myurl = 'http://appstore.huawei.com/app/C10271928'
@@ -451,18 +452,25 @@ if False:
 	exit()
 	
 if __name__ == '__main__':
-	if not os.path.isfile("settings.txt"): exit()
+	if not os.path.isfile(phantomjs_path) or (not os.path.exists(root) and len(root) > 0) or not os.path.isfile("settings.txt"): exit()
 	fin_settings = open("settings.txt", "r")
 	param_list = []
 	market_set = set()
 	for line in fin_settings:
+		if line.startswith('#'): continue
 		market = line.split(" ")[0].lower()
 		thread_num = int(line.split(" ")[1])
 		rate_per_iteration = float(line.split(" ")[2])
+		if len(line.split(" ")) <= 3 or int(line.split(" ")[3]) <= 0:
+			need_extend = False
+			set_maxsize = 0
+		else:
+			need_extend = True
+			set_maxsize = int(line.split(" ")[3])
 		if market in market_set: exit()
 		if thread_num <= 0 or thread_num > 50: exit()
 		if rate_per_iteration <= 0 or rate_per_iteration > 1: exit()
-		param_list.append((market, thread_num, rate_per_iteration))
+		param_list.append((market, thread_num, rate_per_iteration, need_extend, set_maxsize))
 		market_set.add(market)
 	fin_settings.close()
 	for param in param_list:

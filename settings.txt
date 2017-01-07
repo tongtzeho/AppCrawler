@@ -1,5 +1,5 @@
-googleplay 8 0.6
-yingyongbao 8 0.6
-baidu 3 0.8
-360 8 0.6
-huawei 8 0.6
+googleplay 8 0.6 15000
+yingyongbao 8 0.6 15000
+baidu 3 0.8 15000
+360 8 0.6 15000
+huawei 8 0.6 15000
