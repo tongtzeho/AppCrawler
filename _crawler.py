@@ -255,8 +255,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 	update = 0
 	hold_lock_pool = False
 	hold_lock_set = False
-	print (need_extend)
-	print (set_maxsize)
 	while len(url_set):
 		iteration += 1
 		lock_set.acquire()
