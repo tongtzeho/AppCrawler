@@ -24,6 +24,10 @@ def get_apk_download_link(market, data, url):
 	elif market == 'huawei':
 		matcher = re.findall('dlurl=".*?"', data)
 		if len(matcher): return matcher[0].replace('dlurl="', "").replace('"', "")
+		
+	elif market == 'xiaomi':
+		matcher = re.findall('<div class="app-info-down"><a href=".*?"', data)
+		if len(matcher): return 'http://app.mi.com'+matcher[0].replace('<div class="app-info-down"><a href="', "").replace('"', "")
 
 	return ""
 	
@@ -46,6 +50,10 @@ def get_icon_download_link(market, data):
 		
 	elif market == 'huawei':
 		matcher = re.findall('img class="app-ico" lazyload=".*?"', data)
+		if len(matcher): return matcher[0].split('"')[-2]
+		
+	elif market == 'xiaomi':
+		matcher = re.findall('<img class="yellow-flower" src=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""

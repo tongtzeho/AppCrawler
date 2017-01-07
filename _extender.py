@@ -40,6 +40,12 @@ def get_extend_urls(market, data, prefix):
 			full_url = url.replace('<a href="', "").replace('">', "").replace(':80', "")
 			if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
 			
+	elif market == 'xiaomi':
+		matcher = re.findall('<a href="/details\?id=.*?">', data)
+		for url in matcher:
+			full_url = 'http://app.mi.com'+url.replace('<a href="', "").replace('">', "")
+			if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
+			
 	return urls
 	
 def get_similar_apps(market, data, prefix):
@@ -83,6 +89,14 @@ def get_similar_apps(market, data, prefix):
 				for url in matcher:
 					full_url = url.replace('<a href="', "").replace('"><', "").replace(':80', "")
 					if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
+					
+	elif market == 'xiaomi':
+		matcher = re.findall('<h3 class="special-h3">相关应用</h3>.+', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href="/details\?id=.*?">', matcher[0])
+			for url in matcher:
+				full_url = 'http://app.mi.com'+url.replace('<a href="', "").replace('">', "")
+				if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
 	
 	return urls
 	

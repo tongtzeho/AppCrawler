@@ -9,6 +9,8 @@ def replace_html(s):
 	s = s.replace('&lt;','<')
 	s = s.replace('&gt;','>')
 	s = s.replace('&nbsp;',' ')
+	s = s.replace('&ldquo;', '“')
+	s = s.replace('&rdquo;', '”')
 	return s
 
 def get_app_basic_info(market, data):
@@ -172,6 +174,26 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<li class="ul-li-detail">日期：<span>.*?</span>', data)
 		if len(matcher): dict['Update_Time'] = replace_html(matcher[0].replace('<li class="ul-li-detail">日期：<span>', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		
+	elif market == 'xiaomi':
+		matcher = re.findall('</p><h3>.*?</h3><p', data)
+		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('</p><h3>', "").replace('</h3><p', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('软件大小:</li><li>.*?</li>', data)
+		if len(matcher): dict['Size'] = replace_html(matcher[0].replace('软件大小:</li><li>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="star1-hover star1-[0-9]+', data)
+		if len(matcher): dict['Rating'] = replace_html(matcher[0].replace('<div class="star1-hover star1-', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('[0-9]+次评分 \)<\/span>', data)
+		if len(matcher): dict['Rating_Num'] = replace_html(matcher[0].replace('次评分 )</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<b>分类：</b>.*?<span', data)
+		if len(matcher): dict['Category'] = replace_html(matcher[0].replace('<b>分类：</b>', "").replace('<span', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('版本号：</li><li>.*?</li>', data)
+		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('版本号：</li><li>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('"intro-titles"><p>.*?</p><h3>', data)
+		if len(matcher): dict['Developer'] = replace_html(matcher[0].replace('"intro-titles"><p>', "").replace('</p><h3>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('更新时间：</li><li>.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = replace_html(matcher[0].replace('更新时间：</li><li>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<b>支持：</b>.*?</p>', data)
+		if len(matcher): dict['Device'] = replace_html(matcher[0].replace('<b>支持：</b>', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		
 	return dict
 
 def get_app_permission(market, data):
@@ -188,6 +210,12 @@ def get_app_permission(market, data):
 		if len(matcher):
 			for permission in matcher:
 				list.append(replace_html(re.subn('<.*?>', "", permission)[0]))
+				
+	elif market == 'xiaomi':
+		matcher = re.findall('<li>▪ .*?</li>', data)
+		if len(matcher):
+			for permission in matcher:
+				list.append(replace_html(permission.replace('<li>▪ ', "").replace('</li>', "")))
 	
 	return tuple(set(list))
 	
@@ -244,6 +272,15 @@ def get_app_description(market, data):
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
+	
+	elif market == 'xiaomi':
+		matcher = re.findall('<h3>应用介绍</h3><p class="pslide">.*?</p>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3>应用介绍</h3><p class="pslide">', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
 			
 	return ""
 	
@@ -275,5 +312,14 @@ def get_app_release_note(market, data):
 			for note in matcher:
 				result += replace_html(re.subn('<.*?>', "", note)[0].replace('<br>', "\n").replace('</div>', "\n"))+"\n"
 			return result
-
+			
+	elif market == 'xiaomi':
+		matcher = re.findall('<h3 class="special-h3">新版特性</h3><p class="pslide">.*?</p>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3 class="special-h3">新版特性</h3><p class="pslide">', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+		
 	return ""

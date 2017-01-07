@@ -24,7 +24,8 @@ url_prefix = {
 'baidu': 'http://shouji.baidu.com/software/',
 '360': 'http://zhushou.360.cn/detail/index/soft_id/',
 'googleplay': 'https://play.google.com/store/apps/details?id=',
-'huawei': 'http://appstore.huawei.com/app/'
+'huawei': 'http://appstore.huawei.com/app/',
+'xiaomi': 'http://app.mi.com/details?id='
 }
 
 def page_invalid(market, data):
@@ -38,6 +39,8 @@ def page_invalid(market, data):
 		return '<div id="error-section" class="rounded">We\'re sorry, the requested URL was not found on this server.</div>' in data or '<div id="error-section" class="rounded">抱歉，在此服务器中找不到请求的网址。</div>' in data
 	elif market == 'huawei':
 		return '<p>欢迎来到火星做客，可惜我们这儿找不到你需要的应用。</p>' in data
+	elif market == 'xiaomi':
+		return False
 	return False	
 
 def check_response(market, result):
@@ -106,14 +109,25 @@ def check_response(market, result):
 		if not 'Edition' in result[0]: return False
 		if not 'Developer' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
-		if not len(result[2]): return False		
+		if not len(result[2]): return False	
+	elif market == 'xiaomi':
+		if not 'Name' in result[0]: return False
+		if not 'Size' in result[0]: return False		
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False	
 	return True
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi':
 			try:
-				web = request.urlopen(url, timeout=30)
+				if market == 'xiaomi' and i % 3 == 2: web = request.urlopen(url+"&type=pad", timeout=30)
+				else: web = request.urlopen(url, timeout=30)
 				charset = str(web.headers.get_content_charset())
 				if charset == "None": charset = "utf-8"
 				data = web.read().decode(charset)
@@ -143,8 +157,7 @@ def open_url(market, url):
 		description = get_app_description(market, data)
 		release_note = get_app_release_note(market, data)
 		download_link = get_apk_download_link(market, data, url)
-		if need_extend: extend_urls = get_extend_urls(market, data, url_prefix[market])
-		else: extend_urls = set()
+		extend_urls = get_extend_urls(market, data, url_prefix[market])
 		similar_apps = get_similar_apps(market, data, url_prefix[market])
 		icon_link = get_icon_download_link(market, data)
 		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
@@ -422,9 +435,9 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config)
 
-if False:
-	myurl = 'http://appstore.huawei.com/app/C10271928'
-	response = open_url('huawei', myurl)
+if True:
+	myurl = 'http://app.mi.com/details?id=com.cronlygames.gomoku'
+	response = open_url('xiaomi', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
