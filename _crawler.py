@@ -435,7 +435,7 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config)
 
-if True:
+if False:
 	myurl = 'http://app.mi.com/details?id=com.cronlygames.gomoku'
 	response = open_url('xiaomi', myurl)
 	for key, val in response[0].items():

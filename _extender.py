@@ -608,6 +608,38 @@ if __name__ == '__main__':
 	"http://appstore.huawei.com/game/list_20_2_7",
 	"http://appstore.huawei.com/game/list_20_2_8",
 	"http://appstore.huawei.com/game/list_20_2_9"
+	),
+	
+	'xiaomi':
+	(
+	"http://app.mi.com/category/15",
+	"http://app.mi.com/category/5",
+	"http://app.mi.com/category/27",
+	"http://app.mi.com/category/2",
+	"http://app.mi.com/category/7",
+	"http://app.mi.com/category/12",
+	"http://app.mi.com/category/10",
+	"http://app.mi.com/category/9",
+	"http://app.mi.com/category/4",
+	"http://app.mi.com/category/3",
+	"http://app.mi.com/category/6",
+	"http://app.mi.com/category/14",
+	"http://app.mi.com/category/8",
+	"http://app.mi.com/category/11",
+	"http://app.mi.com/category/13",
+	"http://app.mi.com/category/1",
+	"http://app.mi.com/category/16",
+	"http://app.mi.com/category/17",
+	"http://app.mi.com/category/18",
+	"http://app.mi.com/category/19",
+	"http://app.mi.com/category/20",
+	"http://app.mi.com/category/21",
+	"http://app.mi.com/category/22",
+	"http://app.mi.com/category/23",
+	"http://app.mi.com/category/25",
+	"http://app.mi.com/category/26",
+	"http://app.mi.com/category/28",
+	"http://app.mi.com/category/29"
 	)
 	}
 	
@@ -616,12 +648,13 @@ if __name__ == '__main__':
 	'baidu': 'http://shouji.baidu.com/software/',
 	'360': 'http://zhushou.360.cn/detail/index/soft_id/',
 	'googleplay': 'https://play.google.com/store/apps/details?id=',
-	'huawei': 'http://appstore.huawei.com/app/'
+	'huawei': 'http://appstore.huawei.com/app/',
+	'xiaomi': 'http://app.mi.com/details?id='
 	}
 	
 	for key, val in dict.items():
 		url_set = set()
-		if key != 'huawei': continue
+		if key != 'xiaomi': continue
 		for root_url in val:
 			while True:
 				try:

@@ -11,6 +11,8 @@ def replace_html(s):
 	s = s.replace('&nbsp;',' ')
 	s = s.replace('&ldquo;', '“')
 	s = s.replace('&rdquo;', '”')
+	s = s.replace('&hellip;', '…')
+	a = s.replace('&middot;', '·')
 	return s
 
 def get_app_basic_info(market, data):
