@@ -654,7 +654,6 @@ if __name__ == '__main__':
 	
 	for key, val in dict.items():
 		url_set = set()
-		if key != 'xiaomi': continue
 		for root_url in val:
 			while True:
 				try:

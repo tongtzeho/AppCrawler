@@ -1,6 +1,6 @@
 googleplay 7 0.6 20000
 yingyongbao 7 0.6 20000
-baidu 2 0.9 20000
+baidu 7 0.6 20000
 360 7 0.6 20000
 huawei 7 0.6 20000
 xiaomi 7 0.6 20000

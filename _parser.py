@@ -196,6 +196,44 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<b>支持：</b>.*?</p>', data)
 		if len(matcher): dict['Device'] = replace_html(matcher[0].replace('<b>支持：</b>', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		
+	elif market == 'wandoujia':
+		matcher = re.findall('<span class="title" itemprop="name">.*?</span>', data)
+		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('<span class="title" itemprop="name">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('data-install=".*?"', data)
+		if len(matcher): dict['Download'] = replace_html(matcher[0].replace('data-install="', "").replace('"', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<meta itemprop="fileSize" content="[0-9]+"/>', data)
+		if len(matcher): dict['Size'] = replace_html(matcher[0].replace('<meta itemprop="fileSize" content="', "").replace('"/>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('data-like=".*?"', data)
+		if len(matcher): dict['Like_Num'] = replace_html(matcher[0].replace('data-like="', "").replace('"', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<i>[0-9]+</i>[ \n\r\t]*<b>人评论</b>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<i>[0-9]+</i>', matcher[0])
+			if len(matcher): dict['Comment_Num'] = replace_html(matcher[0].replace('<i>', "").replace('</i>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('itemprop="SoftwareApplicationCategory" data-track="detail-click-appTag">.*?</a>', data)
+		if len(matcher):
+			categoryall = ""
+			for category in matcher:
+				categoryall += replace_html(category.replace('itemprop="SoftwareApplicationCategory" data-track="detail-click-appTag">', "").replace('</a>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))+";"
+			dict['Category'] = categoryall[:-1]
+		matcher = re.findall('<div class="tag-box">[ \n\r\t]*<a href="http://www.wandoujia.com/tag/.*?">[ \n\r\t]*.*?[ \n\r\t]*</a>[ \n\r\t]*</div>', data, re.S)
+		if len(matcher):
+			tagall = ""
+			for tag in matcher:
+				tagall += replace_html(re.subn('<.*?>', "", tag)[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))+";"
+			dict['Tag'] = tagall[:-1]
+		matcher = re.findall('<dt>版本</dt>[ \n\r\t]*<dd>.*?</dd>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<dd>.*?</dd>', matcher[0])
+			if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('<dd>', "").replace('</dd>', "").replace('\t', " ").replace('\r', " ").replace('\n', " "))
+		matcher = re.findall('<dt>来自</dt>.*?<dd>.*?</dd>', data, re.S)
+		if len(matcher): dict['Developer'] = replace_html(re.subn('<.*?>', "", matcher[0].replace("<dt>来自</dt>", ""))[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('datetime=".*?">', data)
+		if len(matcher): dict['Update_Time'] = replace_html(matcher[0].replace('datetime="', "").replace('">', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<dt>要求</dt>.*?<dd.*?<', data, re.S)
+		if len(matcher): dict['System'] = replace_html(re.subn(' *<.*?> *', "", matcher[0].replace('<dt>要求</dt>', "").replace('\t', "").replace('\r', "").replace(" ", "").replace('\n', " "))[0].replace('<', ""))
+		if '<s class="tag adv-embed"></s>' in data: dict['Has_Ads'] = 'True'
+		elif '<s class="tag no-ad"></s>' in data: dict['Has_Ads'] = 'False'
+
 	return dict
 
 def get_app_permission(market, data):
@@ -218,6 +256,12 @@ def get_app_permission(market, data):
 		if len(matcher):
 			for permission in matcher:
 				list.append(replace_html(permission.replace('<li>▪ ', "").replace('</li>', "")))
+
+	elif market == 'wandoujia':
+		matcher = re.findall('<li><span class="perms" itemprop="permissions">.*?</span></li>', data)
+		if len(matcher):
+			for permission in matcher:
+				list.append(replace_html(permission.replace('<li><span class="perms" itemprop="permissions">', "").replace('</span></li>', "")))		
 	
 	return tuple(set(list))
 	
@@ -279,6 +323,15 @@ def get_app_description(market, data):
 		matcher = re.findall('<h3>应用介绍</h3><p class="pslide">.*?</p>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3>应用介绍</h3><p class="pslide">', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'wandoujia':
+		matcher = re.findall('<div.*?class="con" itemprop="description">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

@@ -12,12 +12,12 @@ from _parser import *
 from _extender import *
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-root = 'G:/'
+#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+#root = 'G:/'
 
 #Linux
-#phantomjs_path = '/usr/bin/phantomjs'
-#root = '../Android/'
+phantomjs_path = '/usr/bin/phantomjs'
+root = '../Android/'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -25,7 +25,8 @@ url_prefix = {
 '360': 'http://zhushou.360.cn/detail/index/soft_id/',
 'googleplay': 'https://play.google.com/store/apps/details?id=',
 'huawei': 'http://appstore.huawei.com/app/',
-'xiaomi': 'http://app.mi.com/details?id='
+'xiaomi': 'http://app.mi.com/details?id=',
+'wandoujia': 'http://www.wandoujia.com/apps/'
 }
 
 def page_invalid(market, data):
@@ -40,6 +41,8 @@ def page_invalid(market, data):
 	elif market == 'huawei':
 		return '<p>欢迎来到火星做客，可惜我们这儿找不到你需要的应用。</p>' in data
 	elif market == 'xiaomi':
+		return False
+	elif market == 'wandoujia':
 		return False
 	return False	
 
@@ -124,7 +127,7 @@ def check_response(market, result):
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: web = request.urlopen(url+"&type=pad", timeout=30)
 				else: web = request.urlopen(url, timeout=30)
@@ -435,9 +438,9 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config)
 
-if False:
-	myurl = 'http://app.mi.com/details?id=com.cronlygames.gomoku'
-	response = open_url('xiaomi', myurl)
+if True:
+	myurl = 'http://www.wandoujia.com/apps/com.yyk.knowchat'
+	response = open_url('wandoujia', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
