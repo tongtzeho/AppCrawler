@@ -28,6 +28,9 @@ def get_apk_download_link(market, data, url):
 	elif market == 'xiaomi':
 		matcher = re.findall('<div class="app-info-down"><a href=".*?"', data)
 		if len(matcher): return 'http://app.mi.com'+matcher[0].replace('<div class="app-info-down"><a href="', "").replace('"', "")
+		
+	elif market == 'wandoujia':
+		return url+"/download"
 
 	return ""
 	
@@ -55,6 +58,10 @@ def get_icon_download_link(market, data):
 	elif market == 'xiaomi':
 		matcher = re.findall('<img class="yellow-flower" src=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+		
+	elif market == 'wandoujia':
+		matcher = re.findall('<img src=".*?" itemprop="image" width="110" height="110"', data)
+		if len(matcher): return matcher[0].split('"')[-8]
 		
 	return ""
 

@@ -12,12 +12,12 @@ from _parser import *
 from _extender import *
 
 #Windows
-#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-#root = 'G:/'
+phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+root = 'G:/'
 
 #Linux
-phantomjs_path = '/usr/bin/phantomjs'
-root = '../Android/'
+#phantomjs_path = '/usr/bin/phantomjs'
+#root = '../Android/'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -122,7 +122,16 @@ def check_response(market, result):
 		if not 'Edition' in result[0]: return False
 		if not 'Developer' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
-		if not len(result[2]): return False	
+		if not len(result[2]): return False
+	elif market == 'wandoujia':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False
 	return True
 	
 def open_url(market, url):
@@ -154,7 +163,7 @@ def open_url(market, url):
 			except:
 				data = ""
 				driver.quit()
-		if page_invalid(market, data): return ()
+		if page_invalid(market, data) and i >= 3: return ()
 		info_dict = get_app_basic_info(market, data)
 		permission_list = get_app_permission(market, data)
 		description = get_app_description(market, data)
@@ -438,8 +447,8 @@ def initialization(param):
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config)
 
-if True:
-	myurl = 'http://www.wandoujia.com/apps/com.yyk.knowchat'
+if False:
+	myurl = 'http://www.wandoujia.com/apps/com.zhihu.daily.android'
 	response = open_url('wandoujia', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)

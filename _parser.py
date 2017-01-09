@@ -329,7 +329,7 @@ def get_app_description(market, data):
 			else: return tmp2
 
 	elif market == 'wandoujia':
-		matcher = re.findall('<div.*?class="con" itemprop="description">.*?</div>', data, re.S)
+		matcher = re.findall('<div data-originheight="100" class="con" itemprop="description">.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
@@ -372,6 +372,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('<h3 class="special-h3">新版特性</h3><p class="pslide">.*?</p>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3 class="special-h3">新版特性</h3><p class="pslide">', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
+	elif market == 'wandoujia':
+		matcher = re.findall('<div data-originheight="100" class="con">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
