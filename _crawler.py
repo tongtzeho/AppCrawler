@@ -189,6 +189,9 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 		random.shuffle(url_list)
 		for short_url in url_list:
 			try:
+				if os.path.isfile('.exit'):
+					print (market+threadidstr+"：结束")
+					return
 				url = url_prefix[market]+short_url
 				lock_pool.acquire()
 				hold_lock_pool = True
@@ -358,10 +361,15 @@ def initialization(param):
 	if market == 'googleplay': config = read_config()
 	else: config = {}
 	if not os.path.exists(root+market): os.makedirs(root+market)
+	threads = []
 	for i in range(1, thread_num):
-		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config))
+		threads.append(threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)))
+	for t in threads:
 		t.start()
 	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
+	for t in threads:
+		t.join()
+	print ("进程"+market+"退出")
 
 if False:
 	myurl = 'http://www.wandoujia.com/apps/com.netease.railwayticke12313t'
@@ -393,6 +401,7 @@ if False:
 if __name__ == '__main__':
 	if not os.path.isfile(phantomjs_path) or (not os.path.exists(root) and len(root) > 0) or not os.path.isfile("settings.txt"): exit()
 	if not os.path.exists(root+"__log__"): os.makedirs(root+"__log__")
+	if os.path.isfile('.exit'): os.remove('.exit')
 	fin_settings = open("settings.txt", "r")
 	param_list = []
 	market_set = set()
@@ -413,7 +422,13 @@ if __name__ == '__main__':
 		param_list.append((market, thread_num, rate_per_iteration, need_extend, set_maxsize))
 		market_set.add(market)
 	fin_settings.close()
+	processes = []
 	for param in param_list:
 		if param == param_list[0]: continue
-		multiprocessing.Process(target = initialization, args = (param,)).start()
+		processes.append(multiprocessing.Process(target = initialization, args = (param,)))
+	for p in processes:
+		p.start()
 	initialization(param_list[0])
+	for p in processes:
+		p.join()
+	print ("正常退出")
