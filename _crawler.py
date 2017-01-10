@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-# 需要安装chardet, selenium，下载phantomjs并复制到当前目录下
+# 需要安装chardet, selenium, google, protobuf，安装phantomjs并设置路径，下载AXMLPrinter2.jar放在当前目录中
 
 from urllib import request
 from selenium import webdriver
@@ -10,6 +10,7 @@ from _downloader import *
 from _decoder import *
 from _parser import *
 from _extender import *
+from _checker import *
 
 #Windows
 phantomjs_path = 'phantomjs/bin/phantomjs.exe'
@@ -28,111 +29,6 @@ url_prefix = {
 'xiaomi': 'http://app.mi.com/details?id=',
 'wandoujia': 'http://www.wandoujia.com/apps/'
 }
-
-def page_invalid(market, data):
-	if market == 'yingyongbao':
-		return False
-	elif market == 'baidu':
-		return "<p>请检查您所输入的URL地址是否有误。</p>" in data
-	elif market == '360':
-		return '<span class="t">获取应用内容失败，请尝试ctrl+f5刷新</span>' in data
-	elif market == 'googleplay':
-		return '<div id="error-section" class="rounded">We\'re sorry, the requested URL was not found on this server.</div>' in data or '<div id="error-section" class="rounded">抱歉，在此服务器中找不到请求的网址。</div>' in data
-	elif market == 'huawei':
-		return '<p>欢迎来到火星做客，可惜我们这儿找不到你需要的应用。</p>' in data
-	elif market == 'xiaomi':
-		return False
-	elif market == 'wandoujia':
-		return False
-	return False	
-
-def check_response(market, result):
-	if not len(result): return False
-	if market == 'yingyongbao':
-		if not 'Name' in result[0]: return False
-		if not 'Download' in result[0]: return False
-		if not 'Size' in result[0]: return False
-		if not 'Rating' in result[0]: return False
-		if not 'Rating_Num' in result[0]: return False
-		if not 'Category' in result[0]: return False
-		if not 'Edition' in result[0]: return False
-		if not 'Developer' in result[0]: return False
-		if not 'Update_Time' in result[0]: return False
-		if not len(result[1]): return False
-		if not len(result[2]): return False
-	elif market == 'baidu':
-		if not 'Name' in result[0]: return False
-		if not 'Download' in result[0]: return False
-		if not 'Size' in result[0]: return False
-		if not 'Rating' in result[0]: return False
-		if not 'Category' in result[0]: return False
-		if not 'Edition' in result[0]: return False
-		if not len(result[2]): return False
-	elif market == '360':
-		if not 'Name' in result[0]: return False
-		if not 'Download' in result[0]: return False
-		if not 'Size' in result[0]: return False
-		if not 'Rating' in result[0]: return False
-		if not 'Rating_Num' in result[0]: return False
-		if not 'Edition' in result[0]: return False
-		if not 'Developer' in result[0]: return False
-		if not 'Update_Time' in result[0]: return False
-		if not '5-Star_Rating_Num' in result[0]: return False
-		if not '4-Star_Rating_Num' in result[0]: return False
-		if not '3-Star_Rating_Num' in result[0]: return False
-		if not '2-Star_Rating_Num' in result[0]: return False
-		if not '1-Star_Rating_Num' in result[0]: return False
-		if not 'Comment_Num' in result[0]: return False
-		if not 'Best_Comment_Num' in result[0]: return False
-		if not 'Good_Comment_Num' in result[0]: return False
-		if not 'Bad_Comment_Num' in result[0]: return False
-		if not len(result[2]): return False
-	elif market == 'googleplay':
-		if not 'Name' in result[0]: return False
-		if not 'Download' in result[0]: return False
-		if not 'Rating' in result[0]: return False
-		if not 'Rating_Num' in result[0]: return False
-		if not 'Category' in result[0]: return False
-		if not 'Developer' in result[0]: return False
-		if not 'Update_Time' in result[0]: return False
-		if not '5-Star_Rating_Num' in result[0]: return False
-		if not '4-Star_Rating_Num' in result[0]: return False
-		if not '3-Star_Rating_Num' in result[0]: return False
-		if not '2-Star_Rating_Num' in result[0]: return False
-		if not '1-Star_Rating_Num' in result[0]: return False
-		if not 'Age' in result[0]: return False
-		if not 'Price' in result[0]: return False
-		if not len(result[1]): return False
-		if not len(result[2]): return False
-	elif market == 'huawei':
-		if not 'Name' in result[0]: return False
-		if not 'Download' in result[0]: return False
-		if not 'Size' in result[0]: return False		
-		if not 'Rating' in result[0]: return False
-		if not 'Edition' in result[0]: return False
-		if not 'Developer' in result[0]: return False
-		if not 'Update_Time' in result[0]: return False
-		if not len(result[2]): return False	
-	elif market == 'xiaomi':
-		if not 'Name' in result[0]: return False
-		if not 'Size' in result[0]: return False		
-		if not 'Rating' in result[0]: return False
-		if not 'Rating_Num' in result[0]: return False
-		if not 'Category' in result[0]: return False
-		if not 'Edition' in result[0]: return False
-		if not 'Developer' in result[0]: return False
-		if not 'Update_Time' in result[0]: return False
-		if not len(result[2]): return False
-	elif market == 'wandoujia':
-		if not 'Name' in result[0]: return False
-		if not 'Download' in result[0]: return False
-		if not 'Size' in result[0]: return False
-		if not 'Category' in result[0]: return False
-		if not 'Edition' in result[0]: return False
-		if not 'Developer' in result[0]: return False
-		if not 'Update_Time' in result[0]: return False
-		if not len(result[2]): return False
-	return True
 	
 def open_url(market, url):
 	for i in range(10):
@@ -163,7 +59,6 @@ def open_url(market, url):
 			except:
 				data = ""
 				driver.quit()
-		if page_invalid(market, data) and i >= 3: return ()
 		info_dict = get_app_basic_info(market, data)
 		permission_list = get_app_permission(market, data)
 		description = get_app_description(market, data)
@@ -173,10 +68,12 @@ def open_url(market, url):
 		similar_apps = get_similar_apps(market, data, url_prefix[market])
 		icon_link = get_icon_download_link(market, data)
 		result = (info_dict, permission_list, description, release_note, download_link, extend_urls, similar_apps, icon_link)
-		if not check_response(market, result):
-			continue
-		else:
+		if check_response(market, result):
 			break
+		elif page_invalid(market, data) and i >= 3:
+			return ()
+		else:
+			continue
 	if market == 'googleplay':
 		for i in range(10):
 			try:
@@ -193,16 +90,17 @@ def open_url(market, url):
 			except:
 				data = ""
 				driver.quit()
-			if page_invalid(market, data): return ()
 			info_dict_en = get_app_basic_info(market, data)
 			permission_list_en = get_app_permission(market, data)
 			description_en = get_app_description(market, data)
 			release_note_en = get_app_release_note(market, data)
 			resulten = (info_dict_en, permission_list_en, description_en, release_note_en)
-			if not check_response(market, resulten):
-				continue
-			else:
+			if check_response(market, resulten):
 				break
+			elif page_invalid(market, data) and i >= 3:
+				return ()
+			else:
+				continue
 		result += resulten
 	return result
 
@@ -275,11 +173,12 @@ def write_text_information(dir, response):
 			fout.write(response[11])
 			fout.close()
 	
-def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config):
+def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
 	hold_lock_set = False
+	hold_lock_log = False
 	while len(url_set):
 		iteration += 1
 		lock_set.acquire()
@@ -325,6 +224,14 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 						lock_set.release()
 						hold_lock_set = False
 						print (market+threadidstr+"：更新链接列表")
+					lock_log.acquire()
+					hold_lock_log = True
+					cur_time = str(int(time.time()))
+					flog = open(root+'__log__/'+market+'.log', 'a')
+					flog.write(cur_time+' invalid '+short_url+'\n')
+					flog.close()
+					lock_log.release()
+					hold_lock_log = False
 					lock_pool.acquire()
 					hold_lock_pool = True
 					url_pool.remove(short_url)
@@ -412,6 +319,13 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 								lock_set.release()
 								hold_lock_set = False
 								print (market+threadidstr+"：更新链接列表")
+							lock_log.acquire()
+							hold_lock_log = True
+							flog = open(root+'__log__/'+market+'.log', 'a')
+							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+'\n')
+							flog.close()
+							lock_log.release()
+							hold_lock_log = False
 						else:
 							print (market+threadidstr+"：解析XML失败（"+url+"）")
 					else:
@@ -427,6 +341,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 				print (market+threadidstr+"：未知错误（"+url+"）")
 				if hold_lock_pool: lock_pool.release()
 				if hold_lock_set: lock_set.release()
+				if hold_lock_log: lock_log.release()
 
 def initialization(param):
 	market = param[0]
@@ -439,16 +354,17 @@ def initialization(param):
 	url_pool = set()
 	lock_set = threading.Lock()
 	url_set = read_url(market)
+	lock_log = threading.Lock()
 	if market == 'googleplay': config = read_config()
 	else: config = {}
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	for i in range(1, thread_num):
-		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config))
+		t = threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config))
 		t.start()
-	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, need_extend, set_maxsize, config)
+	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
 
 if False:
-	myurl = 'http://www.wandoujia.com/apps/com.zhihu.daily.android'
+	myurl = 'http://www.wandoujia.com/apps/com.netease.railwayticke12313t'
 	response = open_url('wandoujia', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
@@ -476,6 +392,7 @@ if False:
 	
 if __name__ == '__main__':
 	if not os.path.isfile(phantomjs_path) or (not os.path.exists(root) and len(root) > 0) or not os.path.isfile("settings.txt"): exit()
+	if not os.path.exists(root+"__log__"): os.makedirs(root+"__log__")
 	fin_settings = open("settings.txt", "r")
 	param_list = []
 	market_set = set()
