@@ -249,14 +249,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					lock_pool.release()
 					hold_lock_pool = False
 					continue
-				if need_extend:	
-					lock_set.acquire()
-					hold_lock_set = True
-					for extend_url in response[5]:
-						if len(url_set) >= set_maxsize: break
-						url_set.add(extend_url)
-					lock_set.release()
-					hold_lock_set = False
 				print (market+threadidstr+"：准备下载APK（"+response[4]+"）")
 				if os.path.isfile('.exit'):
 					print (market+threadidstr+"：结束")
@@ -275,7 +267,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					if len(manifest_file):
 						apk_key = get_apk_key(market, "~"+market+"tmp"+threadidstr+".apk", manifest_file)
 						if len(apk_key) == 3:
-							update += 1
 							cur_time = str(int(time.time()))
 							if os.path.exists(root+market+"/"+apk_key[1]):
 								if not os.path.exists(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}"):
@@ -312,6 +303,15 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
 							fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 							fout.close()
+							if need_extend:	
+								lock_set.acquire()
+								hold_lock_set = True
+								for extend_url in response[5]:
+									if len(url_set) >= set_maxsize: break
+									url_set.add(extend_url)
+								lock_set.release()
+								hold_lock_set = False
+							update += 1
 							if (update % (thread_num*5) == 0):
 								update = 0
 								lock_set.acquire()
