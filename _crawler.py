@@ -189,7 +189,20 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 		random.shuffle(url_list)
 		for short_url in url_list:
 			try:
-				if os.path.exists("~"+market+"tmp"+threadidstr): shutil.rmtree("~"+market+"tmp"+threadidstr, ignore_errors=True)
+				if update >= thread_num*5:
+					update = 0
+					lock_set.acquire()
+					hold_lock_set = True
+					os.rename(root+market+"_url_list.txt", root+market+"_~url_list.txt")
+					fout = codecs.open(root+market+"_url_list.txt", "w", "utf-8")
+					for temp_url in url_set:
+						fout.write(temp_url+"\n")
+					fout.close()
+					os.remove(root+market+"_~url_list.txt")
+					lock_set.release()
+					hold_lock_set = False
+					print (market+threadidstr+"：更新链接列表")
+				if os.path.exists("~"+market+"tmp"+threadidstr): shutil.rmtree("~"+market+"tmp"+threadidstr, ignore_errors=True)				
 				if os.path.isfile('exit'):
 					print (market+threadidstr+"：结束")
 					return
@@ -204,19 +217,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 					lock_set.release()
 					hold_lock_set = False
 					update += 1
-					if (update % (thread_num*5) == 0):
-						update = 0
-						lock_set.acquire()
-						hold_lock_set = True
-						shutil.move(root+market+"_url_list.txt", root+market+"_~url_list.txt")
-						fout = codecs.open(root+market+"_url_list.txt", "w", "utf-8")
-						for temp_url in url_set:
-							fout.write(temp_url+"\n")
-						fout.close()
-						os.remove(root+market+"_~url_list.txt")
-						lock_set.release()
-						hold_lock_set = False
-						print (market+threadidstr+"：更新链接列表")
 					lock_log.acquire()
 					hold_lock_log = True
 					cur_time = str(int(time.time()))
@@ -242,38 +242,30 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 					if len(manifest_file):
 						apk_key = get_apk_key(market, "~"+market+"tmp"+threadidstr+".apk", manifest_file)
 						if len(apk_key) == 3:					
-							while True:
-								lock_pool.acquire()
-								hold_lock_pool = True
-								if apk_key[1] in name_pool:
-									lock_pool.release()
-									hold_lock_pool = False
-									os.sleep(1)
-								else:
-									name_pool.add(apk_key[1])
-									lock_pool.release()
-									hold_lock_pool = False
-									break
-							cur_time = str(int(time.time()))
-							if os.path.exists(root+market+"/"+apk_key[1]):
-								if not os.path.exists(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}"):
-									download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
-									fout = codecs.open(extract_dir+"/Index.txt", "w", "utf-8")
-									fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
-									fout.close()
-									shutil.move("~"+market+"tmp"+threadidstr+".apk", extract_dir+"/"+apk_key[1]+".apk")
-									if os.path.isfile("~"+market+"tmp"+threadidstr+".png"):
-										if market != 'googleplay': shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
-										else: shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.webp")
-									shutil.copytree(extract_dir, root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", symlinks=True)
-									print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"版本和信息")
-									# 数据库添加
-								else:
-									print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"信息。无版本更新")
-									# 数据库更新
+							lock_pool.acquire()
+							hold_lock_pool = True
+							if apk_key[1] in name_pool:
+								lock_pool.release()
+								hold_lock_pool = False
+								continue
 							else:
+								name_pool.add(apk_key[1])
+								lock_pool.release()
+								hold_lock_pool = False
+							if os.path.exists(root+market+"/"+apk_key[1]):
+								if not os.path.exists(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}"): # 之前有这个应用，但是没有这个版本
+									state = 1 
+								else: # 之前有这个应用，也有这个版本
+									state = 2 
+									if not os.path.isfile(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}/end"): # 之前这个版本的应用信息不完整，相当于没有
+										shutil.rmtree(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", ignore_errors=True)
+										state = 4
+							else: # 之前没有这个应用
 								os.makedirs(root+market+"/"+apk_key[1])
+								state = 3
+							if state == 1 or state == 3 or state == 4:
 								download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
+								cur_time = str(int(time.time()))
 								fout = codecs.open(extract_dir+"/Index.txt", "w", "utf-8")
 								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 								fout.close()
@@ -282,14 +274,23 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 									if market != 'googleplay': shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
 									else: shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.webp")
 								shutil.copytree(extract_dir, root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", symlinks=True)
-								print (apk_key[0]+threadidstr+"：新增"+apk_key[1])
-								# 数据库添加
+							else:
+								cur_time = str(int(time.time()))
 							if not os.path.exists(root+market+"/"+apk_key[1]+"/["+cur_time+"]"):
 								os.makedirs(root+market+"/"+apk_key[1]+"/["+cur_time+"]")
-							write_text_information(root+market+"/"+apk_key[1]+"/["+cur_time+"]/", response)
-							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
-							fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
-							fout.close()
+							if not os.path.isfile(root+market+"/"+apk_key[1]+"/["+cur_time+"]/end"):
+								write_text_information(root+market+"/"+apk_key[1]+"/["+cur_time+"]/", response)
+								fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
+								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
+								fout.close()
+								open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/end", "w").close()								
+							if state == 1 or state == 3 or state == 4:
+								open(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}/end", "w").close()
+							if state == 1: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"版本和信息")
+							elif state == 2: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"信息。无版本更新")
+							elif state == 3: print (apk_key[0]+threadidstr+"：新增"+apk_key[1])
+							elif state == 4: print (apk_key[0]+threadidstr+"：修复"+apk_key[1])
+							# 在此处可添加数据库接口
 							lock_pool.acquire()
 							hold_lock_pool = True
 							name_pool.remove(apk_key[1])
@@ -304,19 +305,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 								lock_set.release()
 								hold_lock_set = False
 							update += 1
-							if (update % (thread_num*5) == 0):
-								update = 0
-								lock_set.acquire()
-								hold_lock_set = True
-								shutil.move(root+market+"_url_list.txt", root+market+"_~url_list.txt")
-								fout = codecs.open(root+market+"_url_list.txt", "w", "utf-8")
-								for temp_url in url_set:
-									fout.write(temp_url+"\n")
-								fout.close()
-								os.remove(root+market+"_~url_list.txt")
-								lock_set.release()
-								hold_lock_set = False
-								print (market+threadidstr+"：更新链接列表")
 							lock_log.acquire()
 							hold_lock_log = True
 							flog = open(root+'__log__/'+market+'.log', 'a')
