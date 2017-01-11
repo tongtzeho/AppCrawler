@@ -13,12 +13,12 @@ from _extender import *
 from _checker import *
 
 #Windows
-#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-#root = 'G:/'
+phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+root = 'D:/Android/'
 
 #Linux
-phantomjs_path = '/usr/bin/phantomjs'
-root = '../Android/'
+#phantomjs_path = '/usr/bin/phantomjs'
+#root = '../Android/'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -173,7 +173,7 @@ def write_text_information(dir, response):
 			fout.write(response[11])
 			fout.close()
 	
-def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config):
+def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
@@ -190,20 +190,10 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 		for short_url in url_list:
 			try:
 				if os.path.exists("~"+market+"tmp"+threadidstr): shutil.rmtree("~"+market+"tmp"+threadidstr, ignore_errors=True)
-				if os.path.isfile('.exit'):
+				if os.path.isfile('exit'):
 					print (market+threadidstr+"：结束")
 					return
 				url = url_prefix[market]+short_url
-				lock_pool.acquire()
-				hold_lock_pool = True
-				if short_url in url_pool:
-					lock_pool.release()
-					hold_lock_pool = False
-					continue
-				else:
-					url_pool.add(short_url)
-					lock_pool.release()
-					hold_lock_pool = False
 				print (market+threadidstr+"：开始连接（"+url+"）")
 				response = open_url(market, url)
 				if not len(response):
@@ -235,38 +225,35 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					flog.close()
 					lock_log.release()
 					hold_lock_log = False
-					lock_pool.acquire()
-					hold_lock_pool = True
-					url_pool.remove(short_url)
-					lock_pool.release()
-					hold_lock_pool = False
 					continue
 				if not len(response[0]):
 					print (market+threadidstr+"：访问链接失败（"+url+"）")
-					lock_pool.acquire()
-					hold_lock_pool = True
-					url_pool.remove(short_url)
-					lock_pool.release()
-					hold_lock_pool = False
 					continue
 				print (market+threadidstr+"：准备下载APK（"+response[4]+"）")
-				if os.path.isfile('.exit'):
+				if os.path.isfile('exit'):
 					print (market+threadidstr+"：结束")
 					return				
 				if not download_apk(market, response[4], "~"+market+"tmp"+threadidstr+".apk", config):
 					print (market+threadidstr+"：下载APK失败（"+url+"）")
-					lock_pool.acquire()
-					hold_lock_pool = True
-					url_pool.remove(short_url)
-					lock_pool.release()
-					hold_lock_pool = False
 					continue
 				extract_dir = unzip_apk("~"+market+"tmp"+threadidstr+".apk")
 				if len(extract_dir):
 					manifest_file = binxml2strxml(extract_dir+"/AndroidManifest.xml")
 					if len(manifest_file):
 						apk_key = get_apk_key(market, "~"+market+"tmp"+threadidstr+".apk", manifest_file)
-						if len(apk_key) == 3:
+						if len(apk_key) == 3:					
+							while True:
+								lock_pool.acquire()
+								hold_lock_pool = True
+								if apk_key[1] in name_pool:
+									lock_pool.release()
+									hold_lock_pool = False
+									os.sleep(1)
+								else:
+									name_pool.add(apk_key[1])
+									lock_pool.release()
+									hold_lock_pool = False
+									break
 							cur_time = str(int(time.time()))
 							if os.path.exists(root+market+"/"+apk_key[1]):
 								if not os.path.exists(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}"):
@@ -303,6 +290,11 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 							fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
 							fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 							fout.close()
+							lock_pool.acquire()
+							hold_lock_pool = True
+							name_pool.remove(apk_key[1])
+							lock_pool.release()
+							hold_lock_pool = False
 							if need_extend:	
 								lock_set.acquire()
 								hold_lock_set = True
@@ -338,11 +330,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 						print (market+threadidstr+"：读取二进制XML失败（"+url+"）")
 				else:
 					print (market+threadidstr+"：解压缩APK失败（"+url+"）")
-				lock_pool.acquire()
-				hold_lock_pool = True
-				url_pool.remove(short_url)
-				lock_pool.release()
-				hold_lock_pool = False
 			except:
 				print (market+threadidstr+"：未知错误（"+url+"）")
 				if hold_lock_pool: lock_pool.release()
@@ -357,7 +344,7 @@ def initialization(param):
 	set_maxsize = param[4]
 	print ("初始化进程：("+market+", "+str(thread_num)+", "+str(rate_per_iteration)+")")
 	lock_pool = threading.Lock()
-	url_pool = set()
+	name_pool = set()
 	lock_set = threading.Lock()
 	url_set = read_url(market)
 	lock_log = threading.Lock()
@@ -366,10 +353,10 @@ def initialization(param):
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	threads = []
 	for i in range(1, thread_num):
-		threads.append(threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)))
+		threads.append(threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)))
 	for t in threads:
 		t.start()
-	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, url_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
+	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
 	for t in threads:
 		t.join()
 	print ("进程"+market+"退出")
@@ -404,7 +391,7 @@ if False:
 if __name__ == '__main__':
 	if not os.path.isfile(phantomjs_path) or (not os.path.exists(root) and len(root) > 0) or not os.path.isfile("settings.txt"): exit()
 	if not os.path.exists(root+"__log__"): os.makedirs(root+"__log__")
-	if os.path.isfile('.exit'): os.remove('.exit')
+	if os.path.isfile('exit'): os.remove('exit')
 	fin_settings = open("settings.txt", "r")
 	param_list = []
 	market_set = set()
