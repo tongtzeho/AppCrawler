@@ -294,7 +294,7 @@ class GooglePlayAPI(object):
 
             #response = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True)
             #return response.content
-            web = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True, stream=True, timeout=30)
+            web = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True, stream=True, timeout=45)
             with open(apkfile, 'wb') as fout:
                 for chunk in web.iter_content(chunk_size=204800):
                     if chunk:

@@ -13,12 +13,12 @@ from _extender import *
 from _checker import *
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-root = 'G:/'
+#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+#root = 'G:/'
 
 #Linux
-#phantomjs_path = '/usr/bin/phantomjs'
-#root = '../Android/'
+phantomjs_path = '/usr/bin/phantomjs'
+root = '../Android/'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -44,7 +44,7 @@ def open_url(market, url):
 		else:
 			try:
 				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-				driver.set_page_load_timeout(60)
+				driver.set_page_load_timeout(45)
 				if market == 'googleplay':
 					driver.get(url+"&hl=zh")
 					try:
@@ -78,7 +78,7 @@ def open_url(market, url):
 		for i in range(10):
 			try:
 				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-				driver.set_page_load_timeout(60)
+				driver.set_page_load_timeout(45)
 				driver.get(url+"&hl=en")
 				try:
 					driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
@@ -189,6 +189,7 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 		random.shuffle(url_list)
 		for short_url in url_list:
 			try:
+				if os.path.exists("~"+market+"tmp"+threadidstr): shutil.rmtree("~"+market+"tmp"+threadidstr, ignore_errors=True)
 				if os.path.isfile('.exit'):
 					print (market+threadidstr+"：结束")
 					return
@@ -204,7 +205,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					lock_pool.release()
 					hold_lock_pool = False
 				print (market+threadidstr+"：开始连接（"+url+"）")
-				if os.path.exists("~"+market+"tmp"+threadidstr): shutil.rmtree("~"+market+"tmp"+threadidstr, ignore_errors=True)
 				response = open_url(market, url)
 				if not len(response):
 					print (market+threadidstr+"：无效的链接（"+url+"）")
@@ -258,6 +258,9 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, ur
 					lock_set.release()
 					hold_lock_set = False
 				print (market+threadidstr+"：准备下载APK（"+response[4]+"）")
+				if os.path.isfile('.exit'):
+					print (market+threadidstr+"：结束")
+					return				
 				if not download_apk(market, response[4], "~"+market+"tmp"+threadidstr+".apk", config):
 					print (market+threadidstr+"：下载APK失败（"+url+"）")
 					lock_pool.acquire()
