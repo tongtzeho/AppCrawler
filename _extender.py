@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 
+from selenium import webdriver
 from urllib import request
-import re, urllib
+import re, urllib, time
 
 def get_extend_urls(market, data, prefix):
 	urls = set()
@@ -252,7 +253,7 @@ if __name__ == '__main__':
 				try:				
 					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
 					driver.set_page_load_timeout(20)
-					driver.get(url)
+					driver.get(root_url)
 					time.sleep(0.5)
 					data = driver.page_source
 					driver.quit()				
