@@ -251,6 +251,39 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['System'] = replace_html(re.subn(' *<.*?> *', "", matcher[0].replace('<dt>要求</dt>', "").replace('\t', "").replace('\r', "").replace(" ", "").replace('\n', " "))[0].replace('<', ""))
 		if '<s class="tag adv-embed"></s>' in data: dict['Has_Ads'] = 'True'
 		elif '<s class="tag no-ad"></s>' in data: dict['Has_Ads'] = 'False'
+		
+	elif market == 'hiapk':
+		matcher = re.findall('id="hidAppName" value=".*?">', data)
+		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('id="hidAppName" value="', "").replace('">', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('>.*?热度</span>', data)
+		if len(matcher): dict['Download'] = replace_html(matcher[0].replace('热度</span>', "").replace('>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span id="appSize".*?>.*?</span>', data)
+		if len(matcher): dict['Size'] = replace_html(re.subn('<.*?>', "", matcher[0])[0])
+		matcher = re.findall('<div class="star_num">.*?</div>', data, re.S)
+		if len(matcher): dict['Rating'] = replace_html(re.subn('<.*?>', "", matcher[0])[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<span id="startCount">[0-9]+</span>', data)
+		if len(matcher): dict['Rating_Num'] = replace_html(matcher[0].replace('<span id="startCount">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="font14 star_per_font">.*?</div>', data, re.S)
+		if len(matcher) == 5:
+			dict['5-Star_Rating_Num'] = replace_html(matcher[0].replace('<div class="font14 star_per_font">', "").replace('</div>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['4-Star_Rating_Num'] = replace_html(matcher[1].replace('<div class="font14 star_per_font">', "").replace('</div>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['3-Star_Rating_Num'] = replace_html(matcher[2].replace('<div class="font14 star_per_font">', "").replace('</div>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['2-Star_Rating_Num'] = replace_html(matcher[3].replace('<div class="font14 star_per_font">', "").replace('</div>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['1-Star_Rating_Num'] = replace_html(matcher[4].replace('<div class="font14 star_per_font">', "").replace('</div>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('类别：</span>.*?</span>', data, re.S)
+		if len(matcher): dict['Category'] = replace_html(re.subn('<.*?>', "", matcher[0].replace("类别：", ""))[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<div id="appSoftName" class="detail_title left">.*?</div>', data, re.S)
+		if len(matcher) and 'Name' in dict: dict['Edition'] = replace_html(re.subn('<.*?>', "", matcher[0].replace(dict['Name'], ""))[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", "").replace("(", "").replace(")", ""))
+		matcher = re.findall('<span class="d_u_line">.*?</span>', data)
+		if len(matcher): dict['Developer'] = replace_html(matcher[0].replace('<span class="d_u_line">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="font14">上架时间：</span>.*?</span>', data, re.S)
+		if len(matcher): dict['Update_Time'] = replace_html(re.subn('<.*?>', "", matcher[0].replace("上架时间：", ""))[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<span class="font14 detailMiniSdk d_gj_line left">.*?</span>', data)
+		if len(matcher): dict['System'] = replace_html(matcher[0].replace('<span class="font14 detailMiniSdk d_gj_line left">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="font14">语言：</span>.*?</span>', data, re.S)
+		if len(matcher): dict['Language'] = replace_html(re.subn('<.*?>', "", matcher[0].replace("语言：", ""))[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		if '<div class="app_adv adv_result">' in data: dict['Has_Ads'] = 'True'
+		elif '<div class="no_adv">' in data: dict['Has_Ads'] = 'False'
 
 	return dict
 
@@ -355,6 +388,15 @@ def get_app_description(market, data):
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
 			
+	elif market == 'hiapk':
+		matcher = re.findall('<pre id="softIntroduce">.*?</pre>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
 	return ""
 	
 def get_app_release_note(market, data):
@@ -397,6 +439,15 @@ def get_app_release_note(market, data):
 			
 	elif market == 'wandoujia':
 		matcher = re.findall('<div data-originheight="100" class="con">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+	
+	elif market == 'hiapk':
+		matcher = re.findall('<pre class="soft_imprint_font">.*?</pre>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]

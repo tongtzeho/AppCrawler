@@ -27,7 +27,8 @@ url_prefix = {
 'googleplay': 'https://play.google.com/store/apps/details?id=',
 'huawei': 'http://appstore.huawei.com/app/',
 'xiaomi': 'http://app.mi.com/details?id=',
-'wandoujia': 'http://www.wandoujia.com/apps/'
+'wandoujia': 'http://www.wandoujia.com/apps/',
+'hiapk': 'http://apk.hiapk.com/appinfo/'
 }
 	
 def open_url(market, url):
@@ -54,6 +55,7 @@ def open_url(market, url):
 						pass
 				else:
 					driver.get(url)
+					time.sleep(0.5)
 				data = driver.page_source
 				driver.quit()
 			except:
@@ -350,8 +352,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://www.wandoujia.com/apps/com.netease.railwayticke12313t'
-	response = open_url('wandoujia', myurl)
+	myurl = 'http://apk.hiapk.com/appinfo/com.joym.datouadventure.baidu91'
+	response = open_url('hiapk', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -372,8 +374,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('huawei', response[4], '~huaweitmp0.apk', {})
-	download_icon('huawei', response[7], '~huaweitmp0.png')	
+	download_apk('hiapk', response[4], '~hiapktmp0.apk', {})
+	download_icon('hiapk', response[7], '~hiapktmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

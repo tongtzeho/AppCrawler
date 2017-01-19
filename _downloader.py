@@ -31,6 +31,10 @@ def get_apk_download_link(market, data, url):
 		
 	elif market == 'wandoujia':
 		return url+"/download"
+		
+	elif market == 'hiapk':
+		matcher = re.findall('<a href="/appdown/.*?" class="link_btn"', data)
+		if len(matcher): return 'http://apk.hiapk.com'+matcher[0].replace('<a href="', "").replace('" class="link_btn"', "")
 
 	return ""
 	
@@ -62,6 +66,12 @@ def get_icon_download_link(market, data):
 	elif market == 'wandoujia':
 		matcher = re.findall('<img src=".*?" itemprop="image" width="110" height="110"', data)
 		if len(matcher): return matcher[0].split('"')[-8]
+		
+	elif market == 'hiapk':
+		matcher = re.findall('<img.*?src=".*?".*?ICON"', data)
+		if len(matcher):
+			matcher = re.findall('src=".*?"', matcher[0])
+			if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 

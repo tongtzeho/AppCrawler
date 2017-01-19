@@ -56,6 +56,11 @@ def get_extend_urls(market, data, prefix):
 			full_url = 'http://www.wandoujia.com'+url.replace('<a href="', "").replace('/download"', "").replace('"', "")
 			if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
 			
+	elif market == 'hiapk':
+		matcher = re.findall('<a href="/appinfo/.*?">.*?<', data)
+		for url in matcher:
+			urls.add(re.subn('/.+', "", re.subn('".+', "", url.replace('<a href="/appinfo/', ""))[0])[0])
+			
 	return urls
 	
 def get_similar_apps(market, data, prefix):
@@ -107,6 +112,11 @@ def get_similar_apps(market, data, prefix):
 			for url in matcher:
 				full_url = 'http://app.mi.com'+url.replace('<a href="', "").replace('">', "")
 				if full_url.startswith(prefix): urls.add(full_url.replace(prefix, ""))
+				
+	elif market == 'hiapk':
+		matcher = re.findall('<a href="/appinfo/.*?">.*?<', data)
+		for url in matcher:
+			urls.add(re.subn('/.+', "", re.subn('".+', "", url.replace('<a href="/appinfo/', ""))[0])[0])				
 	
 	return urls
 
@@ -208,10 +218,19 @@ def generate_url(market):
 		for key, val in category_size.items():
 			for i in range(1, val+1):
 				result.append("http://www.wandoujia.com/category/"+key+"_"+str(i))
+				
+	elif market == 'hiapk':
+		category_name = ("/apps/MediaAndVideo", "/apps/DailyLife", "/apps/Social", "/apps/Finance", "/apps/Tools", "/apps/TravelAndLocal", "/apps/Communication", "/apps/Shopping", "/apps/Reading", "/apps/Education", "/apps/NewsAndMagazines", "/apps/HealthAndFitness", "/apps/AntiVirus", "/apps/Browser", "/apps/Productivity", "/apps/Personalization", "/apps/Input", "/apps/Photography", "/games/OnlineGames", "/games/Casual", "/games/RolePlaying", "/games/BrainAndPuzzle", "/games/Shooting", "/games/Sports", "/games/Children", "/games/Chess", "/games/Strategy", "/games/Simulation", "/games/Racing")
+		for c in category_name:
+			for i in [5, 8, 9]:
+				for p in range(1, 51):
+					result.append("http://apk.hiapk.com"+c+"?sort="+str(i)+"&pi="+str(p))
 	
 	return tuple(result)
 	
 if __name__ == '__main__':
+	
+	phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 	
 	url_prefix = {
 	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -220,19 +239,27 @@ if __name__ == '__main__':
 	'googleplay': 'https://play.google.com/store/apps/details?id=',
 	'huawei': 'http://appstore.huawei.com/app/',
 	'xiaomi': 'http://app.mi.com/details?id=',
-	'wandoujia': 'http://www.wandoujia.com/apps/'
+	'wandoujia': 'http://www.wandoujia.com/apps/',
+	'hiapk': 'http://apk.hiapk.com/appinfo/'
 	}
 	
 	for key in url_prefix:
+		#if key != 'hiapk': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
 			while True:
-				try:
-					web = request.urlopen(root_url, timeout=20)
-					charset = str(web.headers.get_content_charset())
-					if charset == "None": charset = "utf-8"
-					data = web.read().decode(charset)
+				try:				
+					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					driver.set_page_load_timeout(20)
+					driver.get(url)
+					time.sleep(0.5)
+					data = driver.page_source
+					driver.quit()				
+					#web = request.urlopen(root_url, timeout=20)
+					#charset = str(web.headers.get_content_charset())
+					#if charset == "None": charset = "utf-8"
+					#data = web.read().decode(charset)					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)
 					break

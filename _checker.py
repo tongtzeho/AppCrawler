@@ -17,6 +17,8 @@ def page_invalid(market, data):
 		return '<title>小米应用商店</title>' in data and '<h1 class="sidebar-h">应用分类</h1>' in data
 	elif market == 'wandoujia':
 		return '<title>「豌豆荚」官方网站</title>' in data and '<span class="v-m">下载手机版豌豆荚</span>' in data
+	elif market == 'hiapk':
+		return '<div class="font14 tipline30">您要查看的页面可能已经被删除、名称被更改，或者暂时不可用</div>' in data
 	return False	
 
 def check_response(market, result):
@@ -106,4 +108,15 @@ def check_response(market, result):
 		if not 'Developer' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
 		if not len(result[2]): return False
+	elif market == 'hiapk':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False 
 	return True
