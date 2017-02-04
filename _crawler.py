@@ -352,7 +352,7 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if True:
+if False:
 	myurl = 'http://www.anzhi.com/soft_2733375.html'
 	response = open_url('anzhi', myurl)
 	for key, val in response[0].items():
