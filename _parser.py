@@ -284,6 +284,29 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['Language'] = replace_html(re.subn('<.*?>', "", matcher[0].replace("语言：", ""))[0].replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
 		if '<div class="app_adv adv_result">' in data: dict['Has_Ads'] = 'True'
 		elif '<div class="no_adv">' in data: dict['Has_Ads'] = 'False'
+		
+	elif market == 'anzhi':
+		matcher = re.findall('var SOFT_NAME=".*?";', data)
+		if len(matcher): dict['Name'] = replace_html(matcher[0].replace('var SOFT_NAME="', "").replace('";', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="spaceleft">下载：.*?</span>', data)
+		if len(matcher): dict['Download'] = replace_html(matcher[0].replace('<span class="spaceleft">下载：', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="spaceleft">大小：.*?</span>', data)
+		if len(matcher): dict['Size'] = replace_html(matcher[0].replace('<span class="spaceleft">大小：', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div id="stars_detail" class="stars center" style="background-position:0 -[0-9]+px;"></div>', data)
+		if len(matcher): dict['Rating'] = str(int(matcher[0].replace('<div id="stars_detail" class="stars center" style="background-position:0 -', "").replace('px;"></div>', ""))/15)
+		matcher = re.findall('style="position:relative;">评论\([0-9]+\)', data)
+		if len(matcher): dict['Rating_Num'] = replace_html(matcher[0].replace('style="position:relative;">评论(', "").replace(')', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>分类：.*?</li>', data)
+		if len(matcher): dict['Category'] = replace_html(matcher[0].replace('<li>分类：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="app_detail_version">.*?</span>', data)
+		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('<span class="app_detail_version">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace('(', "").replace(')', ""))
+		matcher = re.findall('<li>作者：.*?</li>', data)
+		if len(matcher): dict['Developer'] = replace_html(matcher[0].replace('<li>作者：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>时间：.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = replace_html(matcher[0].replace('<li>时间：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>系统：.*?</li>', data)
+		if len(matcher): dict['System'] = replace_html(matcher[0].replace('<li>系统：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		if '<span class="spaceleft">资费：免费</span>' in data: dict['Free'] = 'True'
 
 	return dict
 
@@ -397,6 +420,15 @@ def get_app_description(market, data):
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
 			
+	elif market == 'anzhi':
+		matcher = re.findall('<div class="app_detail_title">简介：</div>.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<div class="app_detail_title">简介：</div>', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
 	return ""
 	
 def get_app_release_note(market, data):
@@ -450,6 +482,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('<pre class="soft_imprint_font">.*?</pre>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
+	elif market == 'anzhi':
+		matcher = re.findall('<div class="app_detail_title">更新说明：</div>.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<div class="app_detail_title">更新说明：</div>', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

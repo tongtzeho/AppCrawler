@@ -35,6 +35,10 @@ def get_apk_download_link(market, data, url):
 	elif market == 'hiapk':
 		matcher = re.findall('<a href="/appdown/.*?" class="link_btn"', data)
 		if len(matcher): return 'http://apk.hiapk.com'+matcher[0].replace('<a href="', "").replace('" class="link_btn"', "")
+		
+	elif market == 'anzhi':
+		matcher = re.findall('<a href="#" onclick="opendown\([0-9]+\);"', data)
+		if len(matcher): return 'http://www.anzhi.com/dl_app.php?s='+matcher[0].replace('<a href="#" onclick="opendown(', "").replace(');"', "")+'&n=5'
 
 	return ""
 	
@@ -72,6 +76,10 @@ def get_icon_download_link(market, data):
 		if len(matcher):
 			matcher = re.findall('src=".*?"', matcher[0])
 			if len(matcher): return matcher[0].split('"')[-2]
+			
+	elif market == 'anzhi':
+		matcher = re.findall('var ICON="http://.*?";', data)
+		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 
@@ -108,15 +116,19 @@ def download_apk(market, url, apkfile, config):
 	return False
 	
 def download_icon(market, url, pngfile):
-	if not len(url): return False
-	for i in range(10):
-		try:
-			web = request.urlopen(url, timeout=30)
-			data = web.read()
-			File = open(pngfile, "wb")
-			File.write(data)
-			File.close()
-			return True
-		except:
-			continue
+	if not len(url):
+		return False
+	else:
+		for i in range(10):
+			try:
+				web = requests.get(url, stream=True, timeout=30)
+				with open(pngfile, 'wb') as fout:
+					for chunk in web.iter_content(chunk_size=204800):
+						if chunk:
+							fout.write(chunk)
+							fout.flush()
+				fout.close()
+				return True
+			except:
+				continue
 	return False

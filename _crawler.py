@@ -28,7 +28,8 @@ url_prefix = {
 'huawei': 'http://appstore.huawei.com/app/',
 'xiaomi': 'http://app.mi.com/details?id=',
 'wandoujia': 'http://www.wandoujia.com/apps/',
-'hiapk': 'http://apk.hiapk.com/appinfo/'
+'hiapk': 'http://apk.hiapk.com/appinfo/',
+'anzhi': 'http://www.anzhi.com/'
 }
 	
 def open_url(market, url):
@@ -351,9 +352,9 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if False:
-	myurl = 'http://apk.hiapk.com/appinfo/com.joym.datouadventure.baidu91'
-	response = open_url('hiapk', myurl)
+if True:
+	myurl = 'http://www.anzhi.com/soft_2733375.html'
+	response = open_url('anzhi', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -374,8 +375,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('hiapk', response[4], '~hiapktmp0.apk', {})
-	download_icon('hiapk', response[7], '~hiapktmp0.png')	
+	download_apk('anzhi', response[4], '~anzhitmp0.apk', {})
+	download_icon('anzhi', response[7], '~anzhitmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

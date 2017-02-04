@@ -62,6 +62,14 @@ def get_extend_urls(market, data, prefix):
 		for url in matcher:
 			urls.add(re.subn('/.+', "", re.subn('".+', "", url.replace('<a href="/appinfo/', ""))[0])[0])
 			
+	elif market == 'anzhi':
+		matcher = re.findall('<a href="/soft_[0-9]+.html" class="recommend', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="/', "").replace('" class="recommend', ""))
+		matcher = re.findall('<a href="/soft_[0-9]+.html">', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="/', "").replace('">', ""))
+			
 	return urls
 	
 def get_similar_apps(market, data, prefix):
@@ -226,6 +234,12 @@ def generate_url(market):
 			for i in [5, 8, 9]:
 				for p in range(1, 51):
 					result.append("http://apk.hiapk.com"+c+"?sort="+str(i)+"&pi="+str(p))
+					
+	elif market == 'anzhi':
+		for i in range(1, 10001):
+			result.append("http://www.anzhi.com/list_1_"+str(i)+"_hot.html")
+		for i in range(1, 66):
+			result.append("http://www.anzhi.com/list_2_"+str(i)+"_hot.html")
 	
 	return tuple(result)
 	
@@ -241,26 +255,27 @@ if __name__ == '__main__':
 	'huawei': 'http://appstore.huawei.com/app/',
 	'xiaomi': 'http://app.mi.com/details?id=',
 	'wandoujia': 'http://www.wandoujia.com/apps/',
-	'hiapk': 'http://apk.hiapk.com/appinfo/'
+	'hiapk': 'http://apk.hiapk.com/appinfo/',
+	'anzhi': 'http://www.anzhi.com/'
 	}
 	
 	for key in url_prefix:
-		#if key != 'hiapk': continue
+		#if key != 'anzhi': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
 			while True:
 				try:				
-					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-					driver.set_page_load_timeout(20)
-					driver.get(root_url)
-					time.sleep(0.5)
-					data = driver.page_source
-					driver.quit()				
-					#web = request.urlopen(root_url, timeout=20)
-					#charset = str(web.headers.get_content_charset())
-					#if charset == "None": charset = "utf-8"
-					#data = web.read().decode(charset)					
+					#driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					#driver.set_page_load_timeout(20)
+					#driver.get(root_url)
+					#time.sleep(0.5)
+					#data = driver.page_source
+					#driver.quit()				
+					web = request.urlopen(root_url, timeout=20)
+					charset = str(web.headers.get_content_charset())
+					if charset == "None": charset = "utf-8"
+					data = web.read().decode(charset)					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)
 					break
