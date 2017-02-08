@@ -292,8 +292,8 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['Download'] = replace_html(matcher[0].replace('<span class="spaceleft">下载：', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<span class="spaceleft">大小：.*?</span>', data)
 		if len(matcher): dict['Size'] = replace_html(matcher[0].replace('<span class="spaceleft">大小：', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
-		matcher = re.findall('<div id="stars_detail" class="stars center" style="background-position:0 -[0-9]+px;"></div>', data)
-		if len(matcher): dict['Rating'] = str(int(matcher[0].replace('<div id="stars_detail" class="stars center" style="background-position:0 -', "").replace('px;"></div>', ""))/15)
+		matcher = re.findall('<div id="stars_detail" class="stars center" style="background-position:0 -?[0-9]+px;"></div>', data)
+		if len(matcher): dict['Rating'] = str(int(abs(int(matcher[0].replace('<div id="stars_detail" class="stars center" style="background-position:0 ', "").replace('px;"></div>', ""))/15)))
 		matcher = re.findall('style="position:relative;">评论\([0-9]+\)', data)
 		if len(matcher): dict['Rating_Num'] = replace_html(matcher[0].replace('style="position:relative;">评论(', "").replace(')', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<li>分类：.*?</li>', data)
@@ -307,6 +307,53 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<li>系统：.*?</li>', data)
 		if len(matcher): dict['System'] = replace_html(matcher[0].replace('<li>系统：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		if '<span class="spaceleft">资费：免费</span>' in data: dict['Free'] = 'True'
+		
+	elif market == '91':
+		matcher = re.findall('<h1 class="ff f20 fb fl">.*?</h1>', data, re.S)
+		if len(matcher): dict['Name'] = replace_html(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('下载次数：.*?\r?\n.*?</li>', data)
+		if len(matcher): dict['Download'] = replace_html(re.subn('<.*?>', "", matcher[0])[0].replace("下载次数：", "").replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<li>文件大小：.*?</li>', data)
+		if len(matcher): dict['Size'] = replace_html(matcher[0].replace('<li>文件大小：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="spr star"><a class="w. spr"></a></span><span class="ding spr">', data)
+		if len(matcher): dict['Rating'] = matcher[0].replace('<span class="spr star"><a class="w', "").replace(' spr"></a></span><span class="ding spr">', "")
+		matcher = re.findall('<span class="ding spr">.*?</span>', data, re.S)
+		if len(matcher): dict['Like_Num'] = replace_html(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<span class="cai spr">.*?</span>', data, re.S)
+		if len(matcher): dict['Dislike_Num'] = replace_html(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		_91categorydict = {
+		"/game/34_1_5": "休闲娱乐", "/game/44_1_5": "竞速游戏", "/game/36_1_5": "益智游戏", "/game/35_1_5": "射击游戏", "/game/40_1_5": "策略游戏", "/game/42_1_5": "动作游戏",
+		"/game/33_1_5": "角色扮演", "/game/41_1_5": "模拟经营", "/game/43_1_5": "体育竞技", "/game/39_1_5": "冒险游戏", "/game/37_1_5": "棋牌天地", "/game/53_1_5": "网络游戏",
+		"/game/45_1_5": "格斗游戏", "/game/38_1_5": "情景游戏", "/soft/7_1_5": "系统工具", "/soft/18_1_5": "日常应用", "/soft/27_1_5": "影音媒体", "/soft/29_1_5": "视频软件",
+		"/soft/51_1_5": "图书教育", "/soft/6_1_5": "网络应用", "/soft/2_1_5": "即时聊天", "/soft/28_1_5": "音频软件", "/soft/26_1_5": "其他工具", "/soft/48_1_5": "书籍杂志",
+		"/soft/49_1_5": "社区交友", "/soft/47_1_5": "生活健康", "/soft/30_1_5": "图像处理", "/soft/17_1_5": "查询参考", "/soft/8_1_5": "系统管理", "/soft/5_1_5": "浏览辅助",
+		"/soft/12_1_5": "主题美化", "/soft/16_1_5": "地图导航", "/soft/10_1_5": "安全防范", "/soft/19_1_5": "新闻阅读", "/soft/31_1_5": "照相增强", "/soft/52_1_5": "儿童教学",
+		"/soft/15_1_5": "电子词典", "/soft/23_1_5": "时钟日历", "/soft/20_1_5": "理财工具", "/soft/11_1_5": "中文输入", "/soft/3_1_5": "通话辅助", "/soft/25_1_5": "名片管理",
+		"/soft/22_1_5": "文档处理", "/soft/9_1_5": "文件管理", "/soft/24_1_5": "日程备忘", "/soft/4_1_5": "短信增强", "/soft/14_1_5": "词典查询", "/soft/21_1_5": "计算工具",
+		"/soft/13_1_5": "蓝牙红外", "/soft/1_1_5": "网络通信"
+		}
+		matcher = re.findall('<a href=".*?" class="more fr">更多>></a>', data)
+		if len(matcher):
+			categoryid = replace_html(matcher[0].replace('<a href="', "").replace('" class="more fr">更多>></a>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+			if categoryid in _91categorydict: dict['Category'] = _91categorydict[categoryid]
+		matcher = re.findall('<li class="long">热门标签：.*?</li>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href=.*?>.*?</a>', matcher[0], re.S)
+			if len(matcher):
+				tagall = ""
+				for tag in matcher:
+					tagall += replace_html(re.subn('<.*?>', "", tag)[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))+";"
+				dict['Tag'] = tagall[:-1]
+		matcher = re.findall('<li>版本：.+', data)
+		if len(matcher): dict['Edition'] = replace_html(matcher[0].replace('<li>版本：', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="long">开发商：.*?</li>', data)
+		if len(matcher): dict['Developer'] = replace_html(matcher[0].replace('<li class="long">开发商：', "").replace('</li>', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>分享日期：.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = replace_html(matcher[0].replace('<li>分享日期：', "").replace('</li>', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>适用固件：.*?</li>', data)
+		if len(matcher): dict['System'] = replace_html(matcher[0].replace('<li>适用固件：', "").replace('</li>', " ").replace('\r', "").replace('\n', " "))
+		if '>无广告</em>' in data: dict['Has_Ads'] = 'False'
+		elif '>内嵌广告</em>' in data: dict['Has_Ads'] = 'True'
 
 	return dict
 
@@ -424,6 +471,15 @@ def get_app_description(market, data):
 		matcher = re.findall('<div class="app_detail_title">简介：</div>.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<div class="app_detail_title">简介：</div>', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+			
+	elif market == '91':
+		matcher = re.findall('<h3 class="h3_txt">内容介绍</h3>.*?</div>.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3 class="h3_txt">内容介绍</h3>', "").replace('<p>', "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', replace_html(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

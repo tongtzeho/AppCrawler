@@ -29,12 +29,13 @@ url_prefix = {
 'xiaomi': 'http://app.mi.com/details?id=',
 'wandoujia': 'http://www.wandoujia.com/apps/',
 'hiapk': 'http://apk.hiapk.com/appinfo/',
-'anzhi': 'http://www.anzhi.com/'
+'anzhi': 'http://www.anzhi.com/',
+'91': 'http://apk.91.com/Soft/Android/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: web = request.urlopen(url+"&type=pad", timeout=30)
 				else: web = request.urlopen(url, timeout=30)
@@ -353,8 +354,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://www.anzhi.com/soft_2733375.html'
-	response = open_url('anzhi', myurl)
+	myurl = 'http://apk.91.com/Soft/Android/com.yodo1.SD001.timetravel.html'
+	response = open_url('91', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -375,8 +376,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('anzhi', response[4], '~anzhitmp0.apk', {})
-	download_icon('anzhi', response[7], '~anzhitmp0.png')	
+	download_apk('91', response[4], '~91tmp0.apk', {})
+	download_icon('91', response[7], '~91tmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

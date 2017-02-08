@@ -39,6 +39,10 @@ def get_apk_download_link(market, data, url):
 	elif market == 'anzhi':
 		matcher = re.findall('<a href="#" onclick="opendown\([0-9]+\);"', data)
 		if len(matcher): return 'http://www.anzhi.com/dl_app.php?s='+matcher[0].replace('<a href="#" onclick="opendown(', "").replace(');"', "")+'&n=5'
+		
+	elif market == '91':
+		matcher = re.findall(' href=".*?">下载到电脑', data)
+		if len(matcher): return 'http://apk.91.com'+matcher[0].replace(' href="', "").replace('">下载到电脑', "")
 
 	return ""
 	
@@ -80,6 +84,10 @@ def get_icon_download_link(market, data):
 	elif market == 'anzhi':
 		matcher = re.findall('var ICON="http://.*?";', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+	
+	elif market == '91':
+		matcher = re.findall('<img src=".*?" alt=".*?"', data)
+		if len(matcher): return matcher[0].split('"')[-4]
 		
 	return ""
 
