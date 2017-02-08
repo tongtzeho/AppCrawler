@@ -76,7 +76,7 @@ def get_extend_urls(market, data, prefix):
 			urls.add(re.subn('-.*?\.html', ".html", url.replace('a target="_blank" href="/Soft/Android/', "").replace('"', ""))[0])
 		matcher = re.findall('<a class="down_btn" href="/Soft/Android/.*?.html">', data)
 		for url in matcher:
-			urls.add(re.subn('-.*?\.html', ".html", url.replace('<a class="down_btn" href="/Soft/Android/', "").replace('"', ""))[0])
+			urls.add(re.subn('-.*?\.html', ".html", url.replace('<a class="down_btn" href="/Soft/Android/', "").replace('">', ""))[0])
 			
 	return urls
 	
@@ -255,12 +255,10 @@ def generate_url(market):
 			result.append("http://www.anzhi.com/list_2_"+str(i)+"_hot.html")
 			
 	elif market == '91':
-		category_name = ("/game/34", "/game/44", "/game/36", "/game/35", "/game/40", "/game/42", "/game/33", "/game/41", "/game/43", "/game/39", "/game/37", "/game/53", "/game/45", "/game/38", "/soft/7", "/soft/18", "/soft/27", "/soft/29", "/soft/51", "/soft/6", "/soft/2", "/soft/28", "/soft/26", "/soft/48", "/soft/49", "/soft/47", "/soft/30", "/soft/17", "/soft/8", "/soft/5", "/soft/12", "/soft/16", "/soft/10", "/soft/19", "/soft/31", "/soft/52", "/soft/15", "/soft/23", "/soft/20", "/soft/11", "/soft/3", "/soft/25", "/soft/22", "/soft/9", "/soft/24", "/soft/4", "/soft/14", "/soft/21", "/soft/13", "/soft/1")
-		typearr = ("5", "27", "13")
+		category_name = ("/game/0", "/soft/0", "/game/34", "/game/44", "/game/36", "/game/35", "/game/40", "/game/42", "/game/33", "/game/41", "/game/43", "/game/39", "/game/37", "/game/53", "/game/45", "/game/38", "/soft/7", "/soft/18", "/soft/27", "/soft/29", "/soft/51", "/soft/6", "/soft/2", "/soft/28", "/soft/26", "/soft/48", "/soft/49", "/soft/47", "/soft/30", "/soft/17", "/soft/8", "/soft/5", "/soft/12", "/soft/16", "/soft/10", "/soft/19", "/soft/31", "/soft/52", "/soft/15", "/soft/23", "/soft/20", "/soft/11", "/soft/3", "/soft/25", "/soft/22", "/soft/9", "/soft/24", "/soft/4", "/soft/14", "/soft/21", "/soft/13", "/soft/1")
 		for category in category_name:
 			for i in range(1, 21):
-				for type in typearr:
-					result.append('http://apk.91.com'+category+"_"+str(i)+"_"+type)
+				result.append('http://apk.91.com'+category+"_"+str(i)+"_13")
 	
 	return tuple(result)
 	
@@ -289,18 +287,19 @@ if __name__ == '__main__':
 			while True:
 				try:
 					#动态加载
-					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-					driver.set_page_load_timeout(20)
-					driver.get(root_url)
-					time.sleep(0.5)
-					data = driver.page_source
-					
+					#driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					#driver.set_page_load_timeout(20)
+					#driver.get(root_url)
+					#time.sleep(0.5)
+					#data = driver.page_source
 					#driver.quit()
+					
 					#静态加载
-					#web = request.urlopen(root_url, timeout=20)
-					#charset = str(web.headers.get_content_charset())
-					#if charset == "None": charset = "utf-8"
-					#data = web.read().decode(charset)
+					web = request.urlopen(root_url, timeout=20)
+					charset = str(web.headers.get_content_charset())
+					if charset == "None": charset = "utf-8"
+					data = web.read().decode(charset)
+					if key == '91' and data.startswith("WOW"): continue
 					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)
