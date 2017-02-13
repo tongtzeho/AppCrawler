@@ -4,7 +4,7 @@
 
 from urllib import request
 from selenium import webdriver
-import multiprocessing, threading, random, urllib, time, os, codecs, shutil, sys
+import multiprocessing, threading, random, requests, urllib, time, os, codecs, shutil, sys
 
 from _downloader import *
 from _decoder import *
@@ -13,12 +13,14 @@ from _extender import *
 from _checker import *
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-root = 'D:/Android/'
+#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+#root = 'D:/Android/'
 
 #Linux
-#phantomjs_path = '/usr/bin/phantomjs'
-#root = '../Android/'
+phantomjs_path = '/usr/bin/phantomjs'
+root = '../Android/'
+
+user_agent = 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -37,8 +39,10 @@ def open_url(market, url):
 	for i in range(10):
 		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91':
 			try:
-				if market == 'xiaomi' and i % 3 == 2: web = request.urlopen(url+"&type=pad", timeout=30)
-				else: web = request.urlopen(url, timeout=30)
+				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
+				else: req = request.Request(url)
+				req.add_header('User-Agent', user_agent);
+				web = request.urlopen(req, timeout=30)
 				charset = str(web.headers.get_content_charset())
 				if charset == "None": charset = "utf-8"
 				data = web.read().decode(charset)
@@ -354,8 +358,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://apk.91.com/Soft/Android/com.yodo1.SD001.timetravel.html'
-	response = open_url('91', myurl)
+	myurl = 'http://appstore.huawei.com/app/C64729'
+	response = open_url('huawei', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -375,9 +379,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
-	download_apk('91', response[4], '~91tmp0.apk', {})
-	download_icon('91', response[7], '~91tmp0.png')	
+	#exit()
+	download_apk('huawei', response[4], '~huaweitmp0.apk', {})
+	download_icon('huawei', response[7], '~huaweitmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
