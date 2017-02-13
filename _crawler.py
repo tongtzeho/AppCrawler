@@ -392,7 +392,7 @@ if __name__ == '__main__':
 	param_list = []
 	market_set = set()
 	for line in fin_settings:
-		if line.startswith('#'): continue
+		if line.startswith('#') or (not len(line)): continue
 		market = line.split(" ")[0].lower()
 		thread_num = int(line.split(" ")[1])
 		rate_per_iteration = float(line.split(" ")[2])
