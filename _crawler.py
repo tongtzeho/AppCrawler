@@ -12,15 +12,19 @@ from _parser import *
 from _extender import *
 from _checker import *
 
+#phantom_js目录
+
 #Windows
-#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-#root = 'D:/Android/'
+phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+root = 'E:/Android/'
 
 #Linux
-phantomjs_path = '/usr/bin/phantomjs'
-root = '../Android/'
+#phantomjs_path = '/usr/bin/phantomjs'
+#root = '../Android/'
 
-user_agent = 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
+#Header的User Agent
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+#user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -358,8 +362,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://appstore.huawei.com/app/C64729'
-	response = open_url('huawei', myurl)
+	myurl = 'http://apk.hiapk.com/appinfo/com.simos.warlords_rts'
+	response = open_url('hiapk', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -379,7 +383,7 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	#exit()
+	exit()
 	download_apk('huawei', response[4], '~huaweitmp0.apk', {})
 	download_icon('huawei', response[7], '~huaweitmp0.png')	
 	exit()
