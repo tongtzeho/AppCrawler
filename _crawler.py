@@ -15,16 +15,16 @@ from _checker import *
 #phantom_js目录
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-root = 'E:/Android/'
+#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+#root = 'E:/Android/'
 
 #Linux
-#phantomjs_path = '/usr/bin/phantomjs'
-#root = '../Android/'
+phantomjs_path = '/usr/bin/phantomjs'
+root = '../Android/'
 
 #Header的User Agent
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-#user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
+#user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -290,6 +290,13 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 								cur_time = str(int(time.time()))
 							if not os.path.exists(root+market+"/"+apk_key[1]+"/["+cur_time+"]"):
 								os.makedirs(root+market+"/"+apk_key[1]+"/["+cur_time+"]")
+							lock_log.acquire()
+							hold_lock_log = True
+							flog = open(root+'__log__/'+market+'.log', 'a')
+							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+'\n')
+							flog.close()
+							lock_log.release()
+							hold_lock_log = False
 							if not os.path.isfile(root+market+"/"+apk_key[1]+"/["+cur_time+"]/end"):
 								write_text_information(root+market+"/"+apk_key[1]+"/["+cur_time+"]/", response)
 								fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
@@ -302,7 +309,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 							elif state == 2: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"信息。无版本更新")
 							elif state == 3: print (apk_key[0]+threadidstr+"：新增"+apk_key[1])
 							elif state == 4: print (apk_key[0]+threadidstr+"：修复"+apk_key[1])
-							# 在此处可添加数据库接口
 							lock_pool.acquire()
 							hold_lock_pool = True
 							name_pool.remove(apk_key[1])
@@ -317,13 +323,6 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 								lock_set.release()
 								hold_lock_set = False
 							update += 1
-							lock_log.acquire()
-							hold_lock_log = True
-							flog = open(root+'__log__/'+market+'.log', 'a')
-							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+'\n')
-							flog.close()
-							lock_log.release()
-							hold_lock_log = False
 						else:
 							print (market+threadidstr+"：解析XML失败（"+url+"）")
 					else:
@@ -362,8 +361,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://apk.hiapk.com/appinfo/com.simos.warlords_rts'
-	response = open_url('hiapk', myurl)
+	myurl = 'http://zhushou.360.cn/detail/index/soft_id/1942007'
+	response = open_url('360', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -383,9 +382,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
-	download_apk('huawei', response[4], '~huaweitmp0.apk', {})
-	download_icon('huawei', response[7], '~huaweitmp0.png')	
+	#exit()
+	download_apk('360', response[4], '~360tmp0.apk', {})
+	download_icon('360', response[7], '~360tmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
