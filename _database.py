@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 
-import multiprocessing, re, time, datetime, os
+# 需要安装pymysql
+
+import pymysql, multiprocessing, re, time, datetime, os
 
 #windows
 #root = 'G:/'
@@ -21,6 +23,14 @@ market_id_dict = {
 	'anzhi': '9',
 	'91': '10'
 }
+
+def connect_mysql():
+	try:
+		conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+		return conn
+	except:
+		print ("数据库连接失败")
+		return None
 
 def parse_number(market, line):
 	cnword_multi_2 = {
@@ -121,7 +131,7 @@ def parse_info(market, info):
 		line = line.replace("\r", "").replace("\n", "")
 		if line.startswith("\t"):
 			if key == "Name" or key == "Category" or key == "Tag" or key == "Developer" or key == "Edition":
-				result[key] = line[1:]
+				result[key] = line[1:].replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"")
 			elif key == "Rating":
 				result[key] = parse_rating(market, line[1:])
 			elif key == "Rating_Num":
@@ -144,16 +154,146 @@ def parse_info(market, info):
 	return result
 
 def update_apk_metadata(marketid, pkgname, md5str, info_dict, perm_all, desc_all, rlnt_all):
-	pass
+	conn = connect_mysql()
+	if (conn == None): return False
+	cursor = conn.cursor()
+	try:
+		if "Update_Time" in info_dict:
+			ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and UpTime =(select max(UpTime) from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and UpTime < "+info_dict["Update_Time"]+")")
+			if (ifexists == 0):
+				last_id = None
+			else:
+				last_id = str(cursor.fetchall()[0][0])
+		else:
+			last_id = None
+		ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and MD5 = '"+md5str+"'")
+		if (ifexists == 0):
+			cursor.execute("insert into Market_APK_Metadata (MarketID, Package_Name, MD5) values ("+marketid+", '"+pkgname+"', '"+md5str+"')")
+			conn.commit()
+			ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and MD5 = '"+md5str+"'")
+		update_id = str(cursor.fetchall()[0][0])
+		update_str = ""
+		if "Edition" in info_dict: update_str += ", Version='"+info_dict['Edition'][:29]+"'"
+		if last_id != None: update_str += ", Last_ID="+last_id
+		if "Category" in info_dict: update_str += ", Category='"+info_dict['Category'][:39]+"'"
+		if "Tag" in info_dict: update_str += ", Tag='"+info_dict['Tag'][:119]+"'"
+		if desc_all != None: update_str += ", Description='"+desc_all[:4999]+"'"
+		if perm_all != None: update_str += ", PermEx='"+perm_all[:2999]+"'"
+		if "Update_Time" in info_dict: update_str += ", UpTime="+info_dict['Update_Time']
+		if rlnt_all != None: update_str += ", ReleaseNote='"+rlnt_all[:1499]+"'"
+		if len(update_str):
+			cursor.execute("update Market_APK_Metadata set"+update_str[1:]+" where id = "+update_id)
+			conn.commit()
+		cursor.close()
+		conn.close()
+		return True
+	except:
+		cursor.close()
+		conn.close()
+		print (marketid+"：错误！"+pkgname+"/{"+md5str+"} (APK_MetaData Exception)")
+		return False
 
 def update_time_metadata(marketid, pkgname, timestr, info_dict):
-	pass
+	conn = connect_mysql()
+	if (conn == None): return False
+	cursor = conn.cursor()
+	try:
+		ifexists = cursor.execute("select ID from Market_Time_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and Time = "+timestr)
+		if (ifexists == 0):
+			cursor.execute("insert into Market_Time_Metadata (MarketID, Package_Name, Time) values ("+marketid+", '"+pkgname+"', "+timestr+")")
+			conn.commit()
+			ifexists = cursor.execute("select ID from Market_Time_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and Time = "+timestr)
+		update_id = str(cursor.fetchall()[0][0])
+		update_str = ""
+		if "Rating" in info_dict: update_str += ", Avg_rating="+info_dict['Rating']
+		if "Download" in info_dict: update_str += ", Downloads="+info_dict['Download']
+		if "Rating_Num" in info_dict: update_str += ", Total_rating="+info_dict['Rating_Num']
+		if "Similar_Apps" in info_dict: update_str += ", SimilarApps='"+info_dict['Similar_Apps'][:499]+"'"
+		if "Star_Rating_Num" in info_dict: update_str += ", Stars='"+info_dict['Star_Rating_Num'][:59]+"'"
+		if len(update_str):
+			cursor.execute("update Market_Time_Metadata set"+update_str[1:]+" where id = "+update_id)
+			conn.commit()
+		cursor.close()
+		conn.close()
+		return True
+	except:
+		cursor.close()
+		conn.close()
+		print (marketid+"：错误！"+pkgname+"/["+timestr+"] (Time_MetaData Exception)")
+		return False
 
-def update_app_metadata(marketid, pkgname, timestr, md5str, info_dict):
-	pass
+def update_app_metadata(marketid, pkgname, urlsuffix, timestr, md5str, info_dict):
+	conn = connect_mysql()
+	if (conn == None): return False
+	cursor = conn.cursor()
+	try:
+		ifexists = cursor.execute("select ID from Market_APP_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"'")
+		if (ifexists == 0):
+			cursor.execute("insert into Market_APP_Metadata (MarketID, Package_Name) values ("+marketid+", '"+pkgname+"')")
+			conn.commit()
+			ifexists = cursor.execute("select ID from Market_APP_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"'")
+		update_id = str(cursor.fetchall()[0][0])
+		update_str = ""
+		ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and UpTime =(select max(UpTime) from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"')")
+		if (ifexists != 0): update_str += ", Market_APK_ID="+str(cursor.fetchall()[0][0])
+		update_str += ", Url_Suffix='"+urlsuffix[:319]+"'"
+		if "Name" in info_dict: update_str += ", App_Name='"+info_dict['Name'][:99]+"'"
+		if "Developer" in info_dict: update_str += ", Developer='"+info_dict['Developer'][:59]+"'"
+		if "Category" in info_dict: update_str += ", Category='"+info_dict['Category'][:39]+"'"
+		if "Tag" in info_dict: update_str += ", Tag='"+info_dict['Tag'][:119]+"'"
+		if "Update_Time" in info_dict:
+			ifexists = cursor.execute("select UpTime from Market_APP_Metadata where ID="+update_id)
+			exist_updatetime = cursor.fetchall()[0][0]
+			if exist_updatetime == None or int(info_dict["Update_Time"]) > exist_updatetime: update_str += ", UpTime="+info_dict['Update_Time']
+		ifexists = cursor.execute("select Visittime from Market_APP_Metadata where ID="+update_id)
+		exist_visittime = cursor.fetchall()[0][0]
+		if exist_visittime == None or int(timestr) > exist_visittime: update_str += ", Visittime="+timestr
+		ifexists = cursor.execute("select Deltime from Market_APP_Metadata where ID="+update_id)
+		exist_deltime = cursor.fetchall()[0][0]
+		if exist_deltime != None and int(timestr) > exist_deltime: update_str += ", Deltime=null"
+		cursor.execute("update Market_APP_Metadata set"+update_str[1:]+" where ID="+update_id)
+		conn.commit()
+		cursor.close()
+		conn.close()
+		return True
+	except:
+		cursor.close()
+		conn.close()
+		print (marketid+"：错误！"+pkgname+"/["+timestr+"] (APP_MetaData Exception)")
+		return False
 
-def set_invalid_app_metadata(marketid, urlprefix, timestr):
-	pass
+def set_invalid_app_metadata(marketid, urlsuffix, timestr):
+	conn = connect_mysql()
+	if (conn == None): return False
+	cursor = conn.cursor()
+	try:
+		ifexists = cursor.execute("select ID from Market_APP_Metadata where MarketID = "+marketid+" and Url_Suffix = '"+urlsuffix+"'")
+		if (ifexists == 0):
+			cursor.close()
+			conn.close()
+			return False
+		update_id = str(cursor.fetchall()[0][0])
+		ifexists = cursor.execute("select Visittime from Market_APP_Metadata where ID="+update_id)
+		exist_visittime = cursor.fetchall()[0][0]
+		if (int(timestr) > exist_visittime):
+			ifexists = cursor.execute("select Deltime from Market_APP_Metadata where ID="+update_id)
+			exist_deltime = cursor.fetchall()[0][0]
+			if (exist_deltime == None):
+				cursor.execute("update Market_APP_Metadata set Deltime="+timestr+" where ID="+update_id)
+				conn.commit()
+				ret = True
+			else:
+				ret = False
+		else:
+			ret = False
+		cursor.close()
+		conn.close()
+		return ret
+	except:
+		cursor.close()
+		conn.close()
+		print (marketid+"：错误！"+urlsuffix+":["+timestr+"] (APP_MetaData_Invalid Exception)")
+		return False
 
 def store(param):
 	market = param
@@ -164,8 +304,7 @@ def store(param):
 		market = "googleplay"
 	while True:
 		fin = open(root+'__log__/'+market+'.log', "r")
-		update_num = 0
-		invalid_num = 0
+		success_num = 0
 		for line in fin:
 			if os.path.isfile('db_exit'):
 				fin.close()
@@ -173,10 +312,10 @@ def store(param):
 				return
 			line = line.replace("\r", "").replace("\n", "")
 			splitspace = line.split(" ")
-			try:
-				if len(splitspace) == 5 and splitspace[1] == 'success':
+		#	try:
+			if len(splitspace) == 5 and splitspace[1] == 'success':
 					timestr = splitspace[0]
-					urlprefix = splitspace[2]
+					urlsuffix = splitspace[2]
 					pkgname = splitspace[3]
 					md5str = splitspace[4]
 					if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"}/end"):
@@ -207,58 +346,42 @@ def store(param):
 								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Star_Rating_Num)")
 								continue
 							if not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"}/db"+iseng)):
-								# store apk metadata
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
 									fin_perm = open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r")
-									perm_all = fin_perm.read()
+									perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
 									fin_perm.close()
 								else:
-									perm_all = ""
+									perm_all = None
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt"):
 									fin_desc = open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r")
-									desc_all = fin_desc.read()
+									desc_all = fin_desc.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
 									fin_desc.close()
 								else:
-									desc_all = ""
+									desc_all = None
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt"):
 									fin_rlnt = open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r")
-									rlnt_all = fin_rlnt.read()
+									rlnt_all = fin_rlnt.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
 									fin_rlnt.close()
 								else:
-									rlnt_all = ""
-								try:
-									update_apk_metadata(market_id, pkgname, md5str, info_dict, perm_all, desc_all, rlnt_all)
-								except:
-									print (market+iseng+"：错误！"+pkgname+"/{"+md5str+"} (APK_MetaData Exception)")
-									continue
+									rlnt_all = None
+								if not update_apk_metadata(market_id, pkgname, md5str, info_dict, perm_all, desc_all, rlnt_all): continue
+								success_num += 1
+								if (success_num % 50 == 0): print (market+iseng+"：成功！"+pkgname+"/{"+md5str+"}")
 								#open(root+market+"/"+pkgname+"/{"+md5str+"}/db"+iseng, "w").close()						
 							if not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng)):
-								# store time metadata
-								try:
-									update_time_metadata(market_id, pkgname, timestr, info_dict)
-								except:
-									print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Time_MetaData Exception)")
-									continue
+								if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
+								if not update_app_metadata(market_id, pkgname, urlsuffix, timestr, md5str, info_dict): continue
+								success_num += 1
+								if (success_num % 50 == 0): print (market+iseng+"：成功！"+pkgname+"/["+timestr+"]")
 								#open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
-							try:					
-								update_app_metadata(market_id, pkgname, timestr, md5str, info_dict)
-								update_num += 1
-							except:
-								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (APP_MetaData Exception)")
-				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
+			elif len(splitspace) == 3 and splitspace[1] == 'invalid':
 					timestr = splitspace[0]
-					urlprefix = splitspace[2]
-					# search the urlprefix in app metadata
-					try:
-						set_invalid_app_metadata(market_id, urlprefix, timestr)
-						invalid_num += 1
-					except:
-						print (market+iseng+"：错误！"+urlprefix+":["+timestr+"] (APP_MetaData_Invalid Exception)")
-			except:
-				print (market+iseng+"：Unknown Error - "+line)
+					urlsuffix = splitspace[2]
+					if not set_invalid_app_metadata(market_id, urlsuffix, timestr): continue
+					print (market+iseng+"：无效！"+urlsuffix)
+		#	except:
+		#		print (market+iseng+"：Unknown Error - "+line)
 		fin.close()
-		print (update_num)
-		print (invalid_num)
 		return
 
 if False:

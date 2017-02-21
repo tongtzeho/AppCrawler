@@ -318,7 +318,7 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<li>版本：.+', data)
 		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<li>版本：', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<li class="long">开发商：.*?</li>', data)
-		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<li class="long">开发商：', "").replace('</li>', " ").replace('\r', "").replace('\n', " "))
+		if len(matcher): dict['Developer'] = re.subn('<.*?>', "", unescape(matcher[0].replace('<li class="long">开发商：', "").replace('</li>', " ").replace('\r', "").replace('\n', " ")))[0]
 		matcher = re.findall('<li>分享日期：.*?</li>', data)
 		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<li>分享日期：', "").replace('</li>', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<li>适用固件：.*?</li>', data)
