@@ -77,6 +77,14 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('<a class="down_btn" href="/Soft/Android/.*?.html">', data)
 		for url in matcher:
 			urls.add(re.subn('-.*?\.html', ".html", url.replace('<a class="down_btn" href="/Soft/Android/', "").replace('">', ""))[0])
+
+	elif market == 'oppo':
+		matcher = re.findall('<a href="http://store.oppomobile.com/product/.*?\?from=.*?">', data)
+		for url in matcher:
+			full_url = re.subn('\?from=.+', "", url.replace('<a href="', ""))[0]
+			if full_url.startswith(prefix):
+				full_url = re.subn('_[0-9]+', "_0", full_url)[0]
+				urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -138,7 +146,15 @@ def get_similar_apps(market, data, prefix):
 	elif market == '91':
 		matcher = re.findall('a target="_blank" href="/Soft/Android/.*?.html"', data)
 		for url in matcher:
-			urls.add(re.subn('-.*?\.html', ".html", url.replace('a target="_blank" href="/Soft/Android/', "").replace('"', ""))[0])			
+			urls.add(re.subn('-.*?\.html', ".html", url.replace('a target="_blank" href="/Soft/Android/', "").replace('"', ""))[0])
+
+	elif market == 'oppo':
+		matcher = re.findall('<a href="http://store.oppomobile.com/product/.*?\?from=.*?">', data)
+		for url in matcher:
+			full_url = re.subn('\?from=.+', "", url.replace('<a href="', ""))[0]
+			if full_url.startswith(prefix):
+				full_url = re.subn('_[0-9]+', "_0", full_url)[0]
+				urls.add(full_url.replace(prefix, ""))	
 	
 	return urls
 
@@ -259,12 +275,22 @@ def generate_url(market):
 		for category in category_name:
 			for i in range(1, 21):
 				result.append('http://apk.91.com'+category+"_"+str(i)+"_13")
+
+	elif market == 'oppo':
+		for i in range(1, 764):
+			result.append('http://store.oppomobile.com/product/category/22_7_'+str(i)+'.html')
+		for i in range(1, 179):
+			result.append('http://store.oppomobile.com/product/category/22_8_'+str(i)+'.html')
 	
 	return tuple(result)
 	
 if __name__ == '__main__':
 	
-	phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+	#Windows
+	#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+	
+	#Linux
+	phantomjs_path = '/usr/bin/phantomjs'
 	
 	url_prefix = {
 	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -276,30 +302,31 @@ if __name__ == '__main__':
 	'wandoujia': 'http://www.wandoujia.com/apps/',
 	'hiapk': 'http://apk.hiapk.com/appinfo/',
 	'anzhi': 'http://www.anzhi.com/',
-	'91': 'http://apk.91.com/Soft/Android/'
+	'91': 'http://apk.91.com/Soft/Android/',
+	'oppo': 'http://store.oppomobile.com/product/'
 	}
 	
 	for key in url_prefix:
-		#if key != '91': continue
+		if key != 'oppo': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
 			while True:
 				try:
 					#动态加载
-					#driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-					#driver.set_page_load_timeout(20)
-					#driver.get(root_url)
-					#time.sleep(0.5)
-					#data = driver.page_source
-					#driver.quit()
+					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					driver.set_page_load_timeout(20)
+					driver.get(root_url)
+					time.sleep(0.5)
+					data = driver.page_source
+					driver.quit()
 					
 					#静态加载
-					web = request.urlopen(root_url, timeout=20)
-					charset = str(web.headers.get_content_charset())
-					if charset == "None": charset = "utf-8"
-					data = web.read().decode(charset)
-					if key == '91' and data.startswith("WOW"): continue
+					#web = request.urlopen(root_url, timeout=20)
+					#charset = str(web.headers.get_content_charset())
+					#if charset == "None": charset = "utf-8"
+					#data = web.read().decode(charset)
+					#if key == '91' and data.startswith("WOW"): continue
 					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)

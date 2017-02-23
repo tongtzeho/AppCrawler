@@ -23,6 +23,8 @@ def page_invalid(market, data):
 		return '<p>对不起，您所查看的软件找不到了。请关注我们推荐的热门搜索排行。</p>' in data
 	elif market == '91':
 		return '<span class="errorTip">非常抱歉！资源未找到...</span>' in data
+	elif market == 'oppo':
+		return '<span>呀，真不走运，此页面消失了</span>' in data or '如果您的页面没有自动跳转，请点击这里</a></div>' in data
 	return False	
 
 def check_response(market, result):
@@ -142,6 +144,16 @@ def check_response(market, result):
 		if not 'Category' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'oppo':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
 		if not len(result[2]): return False
 	return True

@@ -36,12 +36,13 @@ url_prefix = {
 'wandoujia': 'http://www.wandoujia.com/apps/',
 'hiapk': 'http://apk.hiapk.com/appinfo/',
 'anzhi': 'http://www.anzhi.com/',
-'91': 'http://apk.91.com/Soft/Android/'
+'91': 'http://apk.91.com/Soft/Android/',
+'oppo': 'http://store.oppomobile.com/product/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -361,8 +362,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://zhushou.360.cn/detail/index/soft_id/1942007'
-	response = open_url('360', myurl)
+	myurl = 'http://store.oppomobile.com/product/0010/875/713_1.html'
+	response = open_url('oppo', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -382,9 +383,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	#exit()
-	download_apk('360', response[4], '~360tmp0.apk', {})
-	download_icon('360', response[7], '~360tmp0.png')	
+	exit()
+	download_apk('oppo', response[4], '~oppotmp0.apk', {})
+	download_icon('oppo', response[7], '~oppotmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

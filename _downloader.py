@@ -44,6 +44,10 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall(' href=".*?">下载到电脑', data)
 		if len(matcher): return 'http://apk.91.com'+matcher[0].replace(' href="', "").replace('">下载到电脑', "")
 
+	elif market == 'oppo':
+		matcher = re.findall('<a class="detail_down" onclick="detailInfoDownload\([0-9]+\)">下载到电脑</a>', data)
+		if len(matcher): return 'http://store.oppomobile.com/product/download.html?id='+matcher[0].replace('<a class="detail_down" onclick="detailInfoDownload(', "").replace(')">下载到电脑</a>', "")+'&from=0_0'
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -88,6 +92,10 @@ def get_icon_download_link(market, data):
 	elif market == '91':
 		matcher = re.findall('<img src=".*?" alt=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[-4]
+
+	elif market == 'oppo':
+		matcher = re.findall('<img class=".*?" dataimg="http://.*?" />', data)
+		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 

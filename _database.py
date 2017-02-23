@@ -21,7 +21,8 @@ market_id_dict = {
 	'wandoujia': '7',
 	'hiapk': '8',
 	'anzhi': '9',
-	'91': '10'
+	'91': '10',
+	'oppo': '11'
 }
 
 def connect_mysql():
@@ -74,7 +75,8 @@ def parse_rating(market, line):
 		'xiaomi': 10,
 		'hiapk': 5,
 		'anzhi': 10,
-		'91': 5
+		'91': 5,
+		'oppo': 50
 	}
 	numstr = re.findall("[0-9\.]+", line)
 	if len(numstr):
@@ -108,7 +110,7 @@ def parse_date(market, line):
 				if len(matcher):
 					day = matcher[0].replace("日", "")
 					updatetimestr = year+"-"+month+"-"+day+" 00:00:00"
-	elif market == '360' or market == 'huawei' or market == 'xiaomi' or market == 'hiapk':
+	elif market == '360' or market == 'huawei' or market == 'xiaomi' or market == 'hiapk' or market == 'oppo':
 		updatetimestr = line+" 00:00:00"
 	elif market == '91':
 		updatetimestr = line[:-1]+":00"
