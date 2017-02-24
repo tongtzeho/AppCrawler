@@ -85,6 +85,11 @@ def get_extend_urls(market, data, prefix):
 			if full_url.startswith(prefix):
 				full_url = re.subn('_[0-9]+', "_0", full_url)[0]
 				urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'pp':
+		matcher = re.findall('<a href="/android/detail_[0-9]+/"', data)
+		for url in matcher:
+			urls.add(prefix+url.replace('<a href="/', "").replace('/"', ""))
 			
 	return urls
 	
@@ -154,7 +159,14 @@ def get_similar_apps(market, data, prefix):
 			full_url = re.subn('\?from=.+', "", url.replace('<a href="', ""))[0]
 			if full_url.startswith(prefix):
 				full_url = re.subn('_[0-9]+', "_0", full_url)[0]
-				urls.add(full_url.replace(prefix, ""))	
+				urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'pp':
+		matcher = re.findall('<h3 class="title"><i class="icon"></i>你可能是要下载</h3>.+', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href="/android/detail_[0-9]+/"', matcher[0])
+			for url in matcher:
+				urls.add(prefix+url.replace('<a href="/', "").replace('/"', ""))
 	
 	return urls
 
@@ -281,6 +293,16 @@ def generate_url(market):
 			result.append('http://store.oppomobile.com/product/category/22_7_'+str(i)+'.html')
 		for i in range(1, 179):
 			result.append('http://store.oppomobile.com/product/category/22_8_'+str(i)+'.html')
+
+	elif market == 'pp':
+		soft_category = ('5029', '5018', '5014', '5024', '5019', '5016', '5026', '5017', '5023', '5020', '5021', '5028', '5022', '5027')
+		for c in soft_category:
+			for i in range(1, 43):
+				result.append('http://www.25pp.com/android/soft/fenlei/'+c+'/'+str(i)+'/')
+		game_category = ('6001', '6003', '6008', '6004', '6002', '6007', '6009', '6005', '6006', '5015')
+		for c in game_category:
+			for i in range(1, 43):
+				result.append('http://www.25pp.com/android/game/fenlei/'+c+'/'+str(i)+'/')
 	
 	return tuple(result)
 	
@@ -293,21 +315,22 @@ if __name__ == '__main__':
 	phantomjs_path = '/usr/bin/phantomjs'
 	
 	url_prefix = {
-	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
-	'baidu': 'http://shouji.baidu.com/software/',
-	'360': 'http://zhushou.360.cn/detail/index/soft_id/',
-	'googleplay': 'https://play.google.com/store/apps/details?id=',
-	'huawei': 'http://appstore.huawei.com/app/',
-	'xiaomi': 'http://app.mi.com/details?id=',
-	'wandoujia': 'http://www.wandoujia.com/apps/',
-	'hiapk': 'http://apk.hiapk.com/appinfo/',
-	'anzhi': 'http://www.anzhi.com/',
-	'91': 'http://apk.91.com/Soft/Android/',
-	'oppo': 'http://store.oppomobile.com/product/'
+		'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
+		'baidu': 'http://shouji.baidu.com/software/',
+		'360': 'http://zhushou.360.cn/detail/index/soft_id/',
+		'googleplay': 'https://play.google.com/store/apps/details?id=',
+		'huawei': 'http://appstore.huawei.com/app/',
+		'xiaomi': 'http://app.mi.com/details?id=',
+		'wandoujia': 'http://www.wandoujia.com/apps/',
+		'hiapk': 'http://apk.hiapk.com/appinfo/',
+		'anzhi': 'http://www.anzhi.com/',
+		'91': 'http://apk.91.com/Soft/Android/',
+		'oppo': 'http://store.oppomobile.com/product/',
+		'pp': 'http://www.25pp.com/android/'
 	}
 	
 	for key in url_prefix:
-		if key != 'oppo': continue
+		if key != 'pp': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

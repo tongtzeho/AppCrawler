@@ -27,22 +27,23 @@ root = '../Android/'
 user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
-'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
-'baidu': 'http://shouji.baidu.com/software/',
-'360': 'http://zhushou.360.cn/detail/index/soft_id/',
-'googleplay': 'https://play.google.com/store/apps/details?id=',
-'huawei': 'http://appstore.huawei.com/app/',
-'xiaomi': 'http://app.mi.com/details?id=',
-'wandoujia': 'http://www.wandoujia.com/apps/',
-'hiapk': 'http://apk.hiapk.com/appinfo/',
-'anzhi': 'http://www.anzhi.com/',
-'91': 'http://apk.91.com/Soft/Android/',
-'oppo': 'http://store.oppomobile.com/product/'
+	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
+	'baidu': 'http://shouji.baidu.com/software/',
+	'360': 'http://zhushou.360.cn/detail/index/soft_id/',
+	'googleplay': 'https://play.google.com/store/apps/details?id=',
+	'huawei': 'http://appstore.huawei.com/app/',
+	'xiaomi': 'http://app.mi.com/details?id=',
+	'wandoujia': 'http://www.wandoujia.com/apps/',
+	'hiapk': 'http://apk.hiapk.com/appinfo/',
+	'anzhi': 'http://www.anzhi.com/',
+	'91': 'http://apk.91.com/Soft/Android/',
+	'oppo': 'http://store.oppomobile.com/product/',
+	'pp': 'http://www.25pp.com/android/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -362,8 +363,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://store.oppomobile.com/product/0010/875/713_1.html'
-	response = open_url('oppo', myurl)
+	myurl = 'http://www.25pp.com/android/detail_37577/'
+	response = open_url('pp', myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
@@ -384,8 +385,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('oppo', response[4], '~oppotmp0.apk', {})
-	download_icon('oppo', response[7], '~oppotmp0.png')	
+	download_apk('pp', response[4], '~pptmp0.apk', {})
+	download_icon('pp', response[7], '~pptmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
