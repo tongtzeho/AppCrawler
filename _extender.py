@@ -89,7 +89,8 @@ def get_extend_urls(market, data, prefix):
 	elif market == 'pp':
 		matcher = re.findall('<a href="/android/detail_[0-9]+/"', data)
 		for url in matcher:
-			urls.add(prefix+url.replace('<a href="/', "").replace('/"', ""))
+			full_url = prefix+url.replace('<a href="/android/', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -166,7 +167,8 @@ def get_similar_apps(market, data, prefix):
 		if len(matcher):
 			matcher = re.findall('<a href="/android/detail_[0-9]+/"', matcher[0])
 			for url in matcher:
-				urls.add(prefix+url.replace('<a href="/', "").replace('/"', ""))
+				full_url = prefix+url.replace('<a href="/android/', "").replace('"', "")
+				urls.add(full_url.replace(prefix, ""))
 	
 	return urls
 

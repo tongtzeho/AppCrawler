@@ -363,8 +363,9 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
+	market = 'pp'
 	myurl = 'http://www.25pp.com/android/detail_37577/'
-	response = open_url('pp', myurl)
+	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		print (key+": "+val)
 	print ("-----------")
