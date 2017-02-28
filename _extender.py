@@ -91,6 +91,12 @@ def get_extend_urls(market, data, prefix):
 		for url in matcher:
 			full_url = prefix+url.replace('<a href="/android/', "").replace('"', "")
 			urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'sogou':
+		matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?">', data)
+		for url in matcher:
+			full_url = url.replace('<a href="', "").replace('">', "")
+			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -168,6 +174,14 @@ def get_similar_apps(market, data, prefix):
 			matcher = re.findall('<a href="/android/detail_[0-9]+/"', matcher[0])
 			for url in matcher:
 				full_url = prefix+url.replace('<a href="/android/', "").replace('"', "")
+				urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'sogou':
+		matcher = re.findall('<div class="rec r2">.*?</div>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?">', matcher[0])
+			for url in matcher:
+				full_url = url.replace('<a href="', "").replace('">', "")
 				urls.add(full_url.replace(prefix, ""))
 	
 	return urls

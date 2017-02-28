@@ -38,12 +38,13 @@ url_prefix = {
 	'anzhi': 'http://www.anzhi.com/',
 	'91': 'http://apk.91.com/Soft/Android/',
 	'oppo': 'http://store.oppomobile.com/product/',
-	'pp': 'http://www.25pp.com/android/'
+	'pp': 'http://www.25pp.com/android/',
+	'sogou': 'http://zhushou.sogou.com/apps/detail/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -362,12 +363,12 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if False:
-	market = 'pp'
-	myurl = 'http://www.25pp.com/android/detail_37577/'
+if True:
+	market = 'sogou'
+	myurl = 'http://zhushou.sogou.com/apps/detail/59212.html'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
-		print (key+": "+val)
+		if len(val): print (key+": "+val)
 	print ("-----------")
 	for permission in response[1]:
 		print (permission)
@@ -385,9 +386,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
-	download_apk('pp', response[4], '~pptmp0.apk', {})
-	download_icon('pp', response[7], '~pptmp0.png')	
+	#exit()
+	download_apk('sogou', response[4], '~pptmp0.apk', {})
+	#download_icon('pp', response[7], '~pptmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

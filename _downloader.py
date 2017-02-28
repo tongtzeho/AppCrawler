@@ -52,6 +52,9 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall('appdownurl=".*?" onclick="return ppOneKeySetup\(this,\'android\'\)" data-stat-act="down">立即下载</a>', data)
 		if len(matcher): return matcher[0].replace('appdownurl="', "").replace('" onclick="return ppOneKeySetup(this,\'android\')" data-stat-act="down">立即下载</a>', "")
 
+	elif market == 'sogou':
+		return "http://zhushou.sogou.com/apps/download.html?appid="+url.split('/')[-1].replace(".html", "")
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -108,7 +111,7 @@ def get_icon_download_link(market, data):
 	return ""
 
 def download_apk(market, url, apkfile, config):
-	if market != 'googleplay':
+	if market != 'googleplay' and market != 'sogou':
 		if not len(url): return False
 		for i in range(10):
 			try:
@@ -120,6 +123,30 @@ def download_apk(market, url, apkfile, config):
 							fout.flush()
 				fout.close()
 				return True
+			except:
+				continue
+	elif market == 'sogou':
+		if not len(url): return False
+		for i in range(10):
+			try:
+				web = requests.get(url, stream=True, timeout=30)
+				content = ""
+				for chunk in web.iter_content(chunk_size=204800):
+					if chunk:
+						content += chunk.decode()
+				matcher = re.findall('"file_url":".*?"', content)
+				if len(matcher):
+					file_url = matcher[0].replace('"file_url":"', "").replace('"', "").replace('\\', "")
+					web = requests.get(file_url, stream=True, timeout=30)
+					with open(apkfile, 'wb') as fout:
+						for chunk in web.iter_content(chunk_size=204800):
+							if chunk:
+								fout.write(chunk)
+								fout.flush()
+					fout.close()
+					return True
+				else:
+					continue
 			except:
 				continue
 	else:

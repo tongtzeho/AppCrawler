@@ -367,6 +367,41 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['System'] = unescape(re.subn('<.*?<strong>', "", matcher[0])[0].replace('</strong>', "").replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
 		if '<span class="icon-done safe-tag">无广告</span>' in data: dict['Has_Ads'] = 'False'
 
+	elif market == 'sogou':
+		matcher = re.findall('<p class="name">.*?</p>\n.*?<p class="stars.*/p>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<span>.*?次下载</span>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<span>', "").replace('次下载</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<span>大小：.*?</span>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<span>大小：', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<p class="stars s[0-9]+">', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('<p class="stars s', "").replace('">', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<label>分类：</label>.*?</td>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href=.*?</a>', matcher[0])
+			if len(matcher): dict['Category'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<label>标签：</label>.*?</td>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href=.*?</a>', matcher[0])
+			if len(matcher):
+				tagall = ""
+				for tag in matcher:
+					tagall += unescape(re.subn('<.*?>', "", tag)[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))+";"
+				dict['Tag'] = tagall[:-1]
+		matcher = re.findall('<label>版本：</label>.*?</td>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<label>版本：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<label>更新时间：</label>.*?</td>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<label>更新时间：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<label>作者：</label>.*?</td>', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<label>作者：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		matcher = re.findall('<label>平台：</label>.*?</td>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<label>平台：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<label>语言：</label>.*?</td>', data)
+		if len(matcher): dict['Language'] = unescape(matcher[0].replace('<label>语言：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		if '<span>免费</span>' in data: dict['Free'] = 'True'
+		if '<span>有广告</span>' in data: dict['Has_Ads'] = 'True'
+		elif '<span>无广告</span>' in data: dict['Has_Ads'] = 'False'
+
 	return dict
 
 def get_app_permission(market, data):
@@ -515,6 +550,15 @@ def get_app_description(market, data):
 
 	elif market == 'pp':
 		matcher = re.findall('<div class="app-detail-intro expand-panel">.*?</div>', data)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'sogou':
+		matcher = re.findall('<div class="article">\n.*?<div class="textcon">\n.*?<div class="text">.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
