@@ -39,12 +39,13 @@ url_prefix = {
 	'91': 'http://apk.91.com/Soft/Android/',
 	'oppo': 'http://store.oppomobile.com/product/',
 	'pp': 'http://www.25pp.com/android/',
-	'sogou': 'http://zhushou.sogou.com/apps/detail/'
+	'sogou': 'http://zhushou.sogou.com/apps/detail/',
+	'gfan': 'http://apk.gfan.com/Product/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -364,8 +365,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'sogou'
-	myurl = 'http://zhushou.sogou.com/apps/detail/283556.html'
+	market = 'gfan'
+	myurl = 'http://apk.gfan.com/Product/App1119022.html'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -387,8 +388,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('sogou', response[4], '~sogoutmp0.apk', {})
-	download_icon('pp', response[7], '~sogoutmp0.png')	
+	download_apk('gfan', response[4], '~gfantmp0.apk', {})
+	download_icon('gfan', response[7], '~gfantmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

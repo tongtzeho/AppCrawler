@@ -28,7 +28,9 @@ def page_invalid(market, data):
 	elif market == 'pp':
 		return '<h1>哎呀，一不小心就迷路了</h1>' in data
 	elif market == 'sogou':
-		return '<p>点击<a href="javascript:history.back()">返回</a>，查看更多热门应用</p>'
+		return '<p>点击<a href="javascript:history.back()">返回</a>，查看更多热门应用</p>' in data
+	elif market == 'gfan':
+		return '<p>文件大小：0.00B</p>' in data and '<h4 class="curr-tit"></h4>' in data
 	return False	
 
 def check_response(market, result):
@@ -174,6 +176,17 @@ def check_response(market, result):
 		if not 'Download' in result[0]: return False
 		if not 'Size' in result[0]: return False
 		if not 'Rating' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'gfan':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
 		if not 'Category' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False

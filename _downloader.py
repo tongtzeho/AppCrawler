@@ -55,6 +55,10 @@ def get_apk_download_link(market, data, url):
 	elif market == 'sogou':
 		return "http://zhushou.sogou.com/apps/download.html?appid="+url.split('/')[-1].replace(".html", "")
 
+	elif market == 'gfan':
+		matcher = re.findall('<a href=".*?".*?title="下载到电脑"><i class="bt-ico3"></i>下载到电脑</a>', data)
+		if len(matcher): return matcher[0].split('"')[1]
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -111,22 +115,26 @@ def get_icon_download_link(market, data):
 	elif market == 'sogou':
 		matcher = re.findall('<img class="icon" width="[0-9]+" height="[0-9]+" src=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+
+	elif market == 'gfan':
+		matcher = re.findall('<img class="app-view png" src=".*?" alt=".*?"/>', data)
+		if len(matcher): return matcher[0].split('"')[-4]
 		
 	return ""
 
 def download_apk(market, url, apkfile, config):
-	if market != 'googleplay' and market != 'sogou':
+	if market == 'googleplay':
 		if not len(url): return False
+		packagename = url.split("=")[1]
 		for i in range(10):
 			try:
-				web = requests.get(url, stream=True, timeout=30)
-				with open(apkfile, 'wb') as fout:
-					for chunk in web.iter_content(chunk_size=204800):
-						if chunk:
-							fout.write(chunk)
-							fout.flush()
-				fout.close()
-				return True
+				api = GooglePlayAPI(config['ANDROID_ID'])
+				api.login(config['GOOGLE_LOGIN'], config['GOOGLE_PASSWORD'])
+				m = api.details(packagename)
+				doc = m.docV2
+				vc = doc.details.appDetails.versionCode
+				ot = doc.offer[0].offerType
+				if api.download(packagename, vc, ot, apkfile): return True
 			except:
 				continue
 	elif market == 'sogou':
@@ -153,18 +161,45 @@ def download_apk(market, url, apkfile, config):
 					continue
 			except:
 				continue
-	else:
+	elif market == 'gfan':
 		if not len(url): return False
-		packagename = url.split("=")[1]
+		if not 'apk=' in url: return False
+		referer = 'http://apk.gfan.com/Product/App'+url.split('=')[-1]+'.html'
+		headers = {'Referer': referer}
 		for i in range(10):
 			try:
-				api = GooglePlayAPI(config['ANDROID_ID'])
-				api.login(config['GOOGLE_LOGIN'], config['GOOGLE_PASSWORD'])
-				m = api.details(packagename)
-				doc = m.docV2
-				vc = doc.details.appDetails.versionCode
-				ot = doc.offer[0].offerType
-				if api.download(packagename, vc, ot, apkfile): return True
+				urlnew = url
+				web = requests.get(urlnew, stream=True, timeout=30, headers=headers)
+				j = 0
+				while web.status_code == 302 and j <= 4:
+					j += 1
+					if 'Location' in web.headers:
+						urlnew = web.headers['Location']
+						web = requests.get(urlnew, stream=True, timeout=30, headers=headers)
+					else:
+						break
+				if web.status_code == 200:
+					with open(apkfile, 'wb') as fout:
+						for chunk in web.iter_content(chunk_size=204800):
+							if chunk:
+								fout.write(chunk)
+								fout.flush()
+					fout.close()
+					return True
+			except:
+				continue
+	else:
+		if not len(url): return False
+		for i in range(10):
+			try:
+				web = requests.get(url, stream=True, timeout=30)
+				with open(apkfile, 'wb') as fout:
+					for chunk in web.iter_content(chunk_size=204800):
+						if chunk:
+							fout.write(chunk)
+							fout.flush()
+				fout.close()
+				return True
 			except:
 				continue
 		

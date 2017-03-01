@@ -100,6 +100,12 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?\.html" title=".*?">', data)
 		for url in matcher:
 			urls.add(url.split('"')[-4].replace(prefix, ""))
+
+	elif market == 'gfan':
+		matcher = re.findall('<a href="/Product/.*?\.html"', data)
+		for url in matcher:
+			full_url = 'http://apk.gfan.com'+url.replace('<a href="', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -338,6 +344,13 @@ def generate_url(market):
 		)
 		for c in category_list:
 			result.append('http://zhushou.sogou.com/apps/list/'+c+'.html')
+
+	elif market == 'gfan':
+		soft_dict = {1:42, 21:24, 2:191, 141:98, 125:1, 3:70, 123:3, 26:1, 124:4, 22:21, 27:107, 122:2, 55:86, 61:44, 49:4, 25:28, 13:69, 6:76, 5:12, 12:26, 11:9, 56:58}
+		for key, val in soft_dict.items():
+			for i in range(1, val+1):
+				result.append('http://apk.gfan.com/apps_'+str(key)+'_1_'+str(i)+'.html')
+		result.append('http://apk.gfan.com/gamess_8_1_1.html')
 	
 	return tuple(result)
 	
@@ -362,11 +375,12 @@ if __name__ == '__main__':
 		'91': 'http://apk.91.com/Soft/Android/',
 		'oppo': 'http://store.oppomobile.com/product/',
 		'pp': 'http://www.25pp.com/android/',
-		'sogou': 'http://zhushou.sogou.com/apps/detail/'
+		'sogou': 'http://zhushou.sogou.com/apps/detail/',
+		'gfan': 'http://apk.gfan.com/Product/'
 	}
 	
 	for key in url_prefix:
-		if key != 'sogou': continue
+		if key != 'gfan': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

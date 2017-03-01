@@ -402,6 +402,30 @@ def get_app_basic_info(market, data):
 		if '<span>有广告</span>' in data: dict['Has_Ads'] = 'True'
 		elif '<span>无广告</span>' in data: dict['Has_Ads'] = 'False'
 
+	elif market == 'gfan':
+		matcher = re.findall('<h4 class="curr-tit">.*?</h4>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<span class="fl">热度</span>.*?</p>', data)
+		if len(matcher):
+			matcher = re.findall('<i></i>', matcher[0])
+			dict['Download'] = str(len(matcher))
+		matcher = re.findall('<p>文件大小：.*?</p>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<p>文件大小：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<i class="marking png" style=".*?"></i>.*?</span>', data)
+		if len(matcher): dict['Rating'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<span class="marking-tips">[0-9]+次评分', data)
+		if len(matcher): dict['Rating_Num'] = unescape(matcher[0].replace('<span class="marking-tips">', "").replace('次评分', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<h3 class="curr-site">.+&gt;.+', data)
+		if len(matcher): dict['Category'] = unescape(re.subn('\(.*?\)', "", re.subn('<.*?>', "", matcher[0].split(';')[-1])[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<p>版 本 号：.*?</p>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<p>版 本 号：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p>发布时间：.*?</p>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<p>发布时间：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p>开 发 者：.*?</p>', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<p>开 发 者：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p>支持固件：.*?</p>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<p>支持固件：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -561,6 +585,15 @@ def get_app_description(market, data):
 		matcher = re.findall('<div class="article">\n.*?<div class="textcon">\n.*?<div class="text">.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'gfan':
+		matcher = re.findall('<div class="app-intro">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', re.subn('<h5>.*?</h5>' , "", matcher[0])[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
