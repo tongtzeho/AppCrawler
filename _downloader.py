@@ -107,6 +107,10 @@ def get_icon_download_link(market, data):
 	elif market == 'pp':
 		matcher = re.findall('<div class="detail-header clearfix"><div class="app-icon"><img src=".*?".*?</div>', data)
 		if len(matcher): return matcher[0].split('"')[5]
+
+	elif market == 'sogou':
+		matcher = re.findall('<img class="icon" width="[0-9]+" height="[0-9]+" src=".*?"', data)
+		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 

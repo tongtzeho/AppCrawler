@@ -393,7 +393,7 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<label>更新时间：</label>.*?</td>', data)
 		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<label>更新时间：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<label>作者：</label>.*?</td>', data)
-		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<label>作者：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " ").replace(" ", ""))
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<label>作者：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<label>平台：</label>.*?</td>', data)
 		if len(matcher): dict['System'] = unescape(matcher[0].replace('<label>平台：</label>', "").replace('</td>', "").replace('\t', "").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<label>语言：</label>.*?</td>', data)

@@ -363,9 +363,9 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if True:
+if False:
 	market = 'sogou'
-	myurl = 'http://zhushou.sogou.com/apps/detail/59212.html'
+	myurl = 'http://zhushou.sogou.com/apps/detail/283556.html'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -386,9 +386,9 @@ if True:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	#exit()
-	download_apk('sogou', response[4], '~pptmp0.apk', {})
-	#download_icon('pp', response[7], '~pptmp0.png')	
+	exit()
+	download_apk('sogou', response[4], '~sogoutmp0.apk', {})
+	download_icon('pp', response[7], '~sogoutmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

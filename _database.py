@@ -23,7 +23,8 @@ market_id_dict = {
 	'anzhi': '9',
 	'91': '10',
 	'oppo': '11',
-	'pp': '12'
+	'pp': '12',
+	'sogou': '13'
 }
 
 def connect_mysql():
@@ -78,7 +79,8 @@ def parse_rating(market, line):
 		'anzhi': 10,
 		'91': 5,
 		'oppo': 50,
-		'pp': 5
+		'pp': 5,
+		'sogou': 10
 	}
 	numstr = re.findall("[0-9\.]+", line)
 	if len(numstr):
@@ -116,6 +118,8 @@ def parse_date(market, line):
 		updatetimestr = line+" 00:00:00"
 	elif market == '91':
 		updatetimestr = line[:-1]+":00"
+	elif market == 'sogou':
+		updatetimestr = line
 	elif market == 'googleplayeng' or market == 'wandoujia':
 		if line[0:3] in engmonth_num:
 			month = engmonth_num[line[0:3]]
@@ -334,6 +338,9 @@ def store(param):
 		market = "googleplay"
 	prevcount = 0
 	while True:
+		if not os.path.isfile(root+'__log__/'+market+'.log'):
+			time.sleep(1)
+			continue
 		fin = open(root+'__log__/'+market+'.log', "r")
 		for line in fin:
 			if os.path.isfile('db_exit'):

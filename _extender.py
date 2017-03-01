@@ -93,10 +93,13 @@ def get_extend_urls(market, data, prefix):
 			urls.add(full_url.replace(prefix, ""))
 
 	elif market == 'sogou':
-		matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?">', data)
+		matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?\.html">', data)
 		for url in matcher:
 			full_url = url.replace('<a href="', "").replace('">', "")
 			urls.add(full_url.replace(prefix, ""))
+		matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?\.html" title=".*?">', data)
+		for url in matcher:
+			urls.add(url.split('"')[-4].replace(prefix, ""))
 			
 	return urls
 	
@@ -319,6 +322,22 @@ def generate_url(market):
 		for c in game_category:
 			for i in range(1, 43):
 				result.append('http://www.25pp.com/android/game/fenlei/'+c+'/'+str(i)+'/')
+
+	elif market == 'sogou':
+		category_list = (
+			'3514-0', '0-5579', '0-5581', '0-5580', '0-5576', '0-5658', '0-5578', '0-5577', '0-6549', '3511-0', '0-5570', '0-5631', '0-5568', '0-5569', '0-5571', '0-5572', '0-5575', '0-5574', '0-5573', 
+			'0-6543', '3512-0', '0-5553', '0-5555', '0-5554', '0-5557', '0-5558', '0-5629', '0-5659', '0-5660', '3507-0', '0-5627', '0-5621', '0-5624', '0-5626', '6488-0', '0-5564', '0-5565', '0-5663', 
+			'0-6521', '0-6519', '0-5664', '0-6520', '0-6550', '6489-0', '0-6522', '0-6523', '0-6524', '0-6525', '0-6526', '3509-0', '0-5560', '0-5559', '0-6530', '0-6531', '0-6529', '0-6545', '0-6527', 
+			'0-6528', '3510-0', '0-5607', '0-5609', '0-5611', '0-5666', '0-5591', '0-5613', '0-5592', '3513-0', '0-5583', '0-5586', '0-5587', '0-5590', '0-5589', '0-6533', '0-6542', '3506-0', '0-5635', 
+			'0-5633', '0-5637', '0-5634', '0-5673', '0-5672', '6491-0', '0-6534', '0-5671', '0-6535', '3508-0', '0-5619', '0-5618', '0-5617', '0-5616', '0-5674', '6494-0', '0-5567', '0-6499', '0-3560', 
+			'0-6498', '0-6500', '0-6551', '6495-0', '0-6538', '0-6537', '0-6536', '0-6539', '0-6540', '0-6541', '3495-0', '3503-0', '0-5605', '0-5610', '0-5606', '0-5675', '0-5608', '0-5612', '0-5614', 
+			'0-6552', '3504-0', '0-6514', '0-5623', '0-6513', '0-5615', '0-5625', '0-5620', '0-5622', '6493-0', '0-6508', '0-6509', '0-6511', '0-6512', '6492-0', '0-6503', '0-6505', '0-6504', '0-6502', 
+			'0-6501', '0-6506', '3499-0', '0-5599', '0-5603', '0-5602', '0-5598', '0-5601', '0-5604', '0-5600', '3497-0', '0-5594', '0-5593', '0-5595', '0-5597', '0-5596', '0-6553', '3498-0', '0-5641', 
+			'0-5642', '0-5643', '0-5676', '0-5644', '0-5640', '0-6554', '3496-0', '0-5645', '0-5646', '0-6515', '0-6518', '0-6516', '0-5648', '0-5650', '0-6517', '3500-0', '0-5652', '0-5677', '0-5655', 
+			'0-5657', '0-5653', '0-5680', '0-5654', '0-6555', '3505-0', '0-5632', '0-5630', '0-5636', '0-5628', '0-5639', '0-5638', '0-6658'
+		)
+		for c in category_list:
+			result.append('http://zhushou.sogou.com/apps/list/'+c+'.html')
 	
 	return tuple(result)
 	
@@ -342,30 +361,31 @@ if __name__ == '__main__':
 		'anzhi': 'http://www.anzhi.com/',
 		'91': 'http://apk.91.com/Soft/Android/',
 		'oppo': 'http://store.oppomobile.com/product/',
-		'pp': 'http://www.25pp.com/android/'
+		'pp': 'http://www.25pp.com/android/',
+		'sogou': 'http://zhushou.sogou.com/apps/detail/'
 	}
 	
 	for key in url_prefix:
-		if key != 'pp': continue
+		if key != 'sogou': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
 			while True:
 				try:
 					#动态加载
-					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-					driver.set_page_load_timeout(20)
-					driver.get(root_url)
-					time.sleep(0.5)
-					data = driver.page_source
-					driver.quit()
+					#driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					#driver.set_page_load_timeout(20)
+					#driver.get(root_url)
+					#time.sleep(0.5)
+					#data = driver.page_source
+					#driver.quit()
 					
 					#静态加载
-					#web = request.urlopen(root_url, timeout=20)
-					#charset = str(web.headers.get_content_charset())
-					#if charset == "None": charset = "utf-8"
-					#data = web.read().decode(charset)
-					#if key == '91' and data.startswith("WOW"): continue
+					web = request.urlopen(root_url, timeout=20)
+					charset = str(web.headers.get_content_charset())
+					if charset == "None": charset = "utf-8"
+					data = web.read().decode(charset)
+					if key == '91' and data.startswith("WOW"): continue
 					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)

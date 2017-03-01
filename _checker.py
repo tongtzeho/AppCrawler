@@ -27,6 +27,8 @@ def page_invalid(market, data):
 		return '<span>呀，真不走运，此页面消失了</span>' in data or '如果您的页面没有自动跳转，请点击这里</a></div>' in data
 	elif market == 'pp':
 		return '<h1>哎呀，一不小心就迷路了</h1>' in data
+	elif market == 'sogou':
+		return '<p>点击<a href="javascript:history.back()">返回</a>，查看更多热门应用</p>'
 	return False	
 
 def check_response(market, result):
@@ -166,5 +168,15 @@ def check_response(market, result):
 		if not 'Tag' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'sogou':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not 'Developer' in result[0]: return False
 		if not len(result[2]): return False
 	return True
