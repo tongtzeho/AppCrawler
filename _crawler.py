@@ -40,7 +40,8 @@ url_prefix = {
 	'oppo': 'http://store.oppomobile.com/product/',
 	'pp': 'http://www.25pp.com/android/',
 	'sogou': 'http://zhushou.sogou.com/apps/detail/',
-	'gfan': 'http://apk.gfan.com/Product/'
+	'gfan': 'http://apk.gfan.com/Product/',
+	'meizu': 'http://app.meizu.com/'
 }
 	
 def open_url(market, url):
@@ -365,8 +366,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'gfan'
-	myurl = 'http://apk.gfan.com/Product/App1119022.html'
+	market = 'meizu'
+	myurl = 'http://app.meizu.com/games/public/detail?package_name=com.yodo1.rodeo.YODO1'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -387,9 +388,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
-	download_apk('gfan', response[4], '~gfantmp0.apk', {})
-	download_icon('gfan', response[7], '~gfantmp0.png')	
+	#exit()
+	download_apk('meizu', response[4], '~meizutmp0.apk', {})
+	download_icon('meizu', response[7], '~meizutmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

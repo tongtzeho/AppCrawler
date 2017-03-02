@@ -12,3 +12,5 @@ anzhi
 oppo
 pp
 sogou
+gfan
+meizu

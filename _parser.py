@@ -281,7 +281,7 @@ def get_app_basic_info(market, data):
 		
 	elif market == '91':
 		matcher = re.findall('<h1 class="ff f20 fb fl">.*?</h1>', data, re.S)
-		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		if len(matcher): dict['Name'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('\t', " ").replace('\r', "").replace('\n', ""))[0])
 		matcher = re.findall('下载次数：.*?\r?\n.*?</li>', data)
 		if len(matcher): dict['Download'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace("下载次数：", "").replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
 		matcher = re.findall('<li>文件大小：.*?</li>', data)
@@ -328,7 +328,7 @@ def get_app_basic_info(market, data):
 
 	elif market == 'oppo':
 		matcher = re.findall('<div class="soft_info_middle">.*?<h3>.*?</h3>', data, re.S)
-		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		if len(matcher): dict['Name'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('\t', " ").replace('\r', "").replace('\n', ""))[0])
 		matcher = re.findall('&nbsp;&nbsp;.*?次下载', data)
 		if len(matcher): dict['Download'] = unescape(matcher[0].replace('&nbsp;&nbsp;', "").replace('次下载', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<li>大小：.*?</li>', data)
@@ -348,7 +348,7 @@ def get_app_basic_info(market, data):
 
 	elif market == 'pp':
 		matcher = re.findall('<h1 class="app-title ellipsis" title=".*?">.*?</h1>', data)
-		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
 		matcher = re.findall('<div class="app-downs">.*?下载&nbsp;\|', data)
 		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<div class="app-downs">', "").replace('下载&nbsp;|', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
 		matcher = re.findall('<span class="ellipsis">大[&nbsp;]*小[&nbsp;]*<strong>.*?</strong>', data)
@@ -369,7 +369,7 @@ def get_app_basic_info(market, data):
 
 	elif market == 'sogou':
 		matcher = re.findall('<p class="name">.*?</p>\n.*?<p class="stars.*/p>', data)
-		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		if len(matcher): dict['Name'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('\t', " ").replace('\r', "").replace('\n', ""))[0])
 		matcher = re.findall('<span>.*?次下载</span>', data)
 		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<span>', "").replace('次下载</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(" ", ""))
 		matcher = re.findall('<span>大小：.*?</span>', data)
@@ -425,6 +425,37 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<p>开 发 者：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		matcher = re.findall('<p>支持固件：.*?</p>', data)
 		if len(matcher): dict['System'] = unescape(matcher[0].replace('<p>支持固件：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+
+	elif market == 'meizu':
+		matcher = re.findall('<div class="detail_top">\n.*?<h3>.*?</h3>', data)
+		if len(matcher): dict['Name'] = unescape(re.findall('<h3>.*?</h3>', matcher[0])[0].replace('<h3>', "").replace('</h3>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="app_content"><span>.*?</span></div>', data)
+		if len(matcher): dict['Download'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('小：</span>\n.*?<div class="app_content">\n.*?\n', data)
+		if len(matcher): dict['Size'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('小：', "").replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall(' data-num="[0-9]+"></div></div>', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace(' data-num="', "").replace('"></div></div>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall(' href="javascript:void\(0\)">[0-9]+', data)
+		if len(matcher):
+			maxpagenum = int(matcher[-1].replace(' href="javascript:void(0)">', ""))
+			matcher = re.findall(' href="javascript:void\(0\)" rno="[0-9]+', data)
+			if len(matcher): maxpagenum = int(matcher[0].replace(' href="javascript:void(0)" rno="', ""))
+			dict['Comment_Num'] = dict['Rating_Num'] = str(maxpagenum*10)
+		elif '<div id="eva">暂无评论</div>' in data:
+			dict['Comment_Num'] = dict['Rating_Num'] = '0'
+		else:
+			matcher = re.findall('<div class="user_comment"><ul><li>', data)
+			if len(matcher): dict['Comment_Num'] = dict['Rating_Num'] = str(len(matcher))
+		matcher = re.findall('<div class="app_content">.*?</a></div>', data)
+		if len(matcher): dict['Category'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<div class="app_content ellipsis noPointer">.*?</div>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<div class="app_content ellipsis noPointer">', "").replace('</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="app_content">[0-9\-]+</div>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<div class="app_content">', "").replace('</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="app_content ellipsis">\n.*?\n.*?</div>', data)
+		if len(matcher): dict['Developer'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('\t', " ").replace('\r', "").replace('\n', ""))[0])
+		matcher = re.findall('本：</span>\n.*?<div class="app_content">\n.*?\n', data)
+		if len(matcher): dict['System'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('\t', " ").replace('\r', "").replace('\n', ""))[0].replace('本：', ""))
 
 	return dict
 
@@ -598,6 +629,15 @@ def get_app_description(market, data):
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
+
+	elif market == 'meizu':
+		matcher = re.findall('应用简介：</span>.*?<div class="description_detail".*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', re.subn('应用简介：</span>' , "", matcher[0])[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
 			
 	return ""
 	
@@ -670,6 +710,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('<div class="app-detail-log expand-panel">.*?</div>', data)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'meizu':
+		matcher = re.findall('版本描述：</span>.*?<div class="description_detail".*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', re.subn('版本描述：</span>' , "", matcher[0])[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

@@ -106,6 +106,16 @@ def get_extend_urls(market, data, prefix):
 		for url in matcher:
 			full_url = 'http://apk.gfan.com'+url.replace('<a href="', "").replace('"', "")
 			urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'meizu':
+		matcher = re.findall('<a href="/apps/public/detail\?package_name=.*?"', data)
+		for url in matcher:
+			full_url = 'http://app.meizu.com'+url.replace('<a href="', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
+		matcher = re.findall('<a href="/games/public/detail\?package_name=.*?"', data)
+		for url in matcher:
+			full_url = 'http://app.meizu.com'+url.replace('<a href="', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -191,6 +201,18 @@ def get_similar_apps(market, data, prefix):
 			matcher = re.findall('<a href="http://zhushou.sogou.com/apps/detail/.*?">', matcher[0])
 			for url in matcher:
 				full_url = url.replace('<a href="', "").replace('">', "")
+				urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'meizu':
+		matcher = re.findall('<h3>相关推荐</h3>.+', data, re.S)
+		if len(matcher):
+			matcher1 = re.findall('<a href="/apps/public/detail\?package_name=.*?"', matcher[0])
+			for url in matcher1:
+				full_url = 'http://app.meizu.com'+url.replace('<a href="', "").replace('"', "")
+				urls.add(full_url.replace(prefix, ""))
+			matcher = re.findall('<a href="/games/public/detail\?package_name=.*?"', matcher[0])
+			for url in matcher:
+				full_url = 'http://app.meizu.com'+url.replace('<a href="', "").replace('"', "")
 				urls.add(full_url.replace(prefix, ""))
 	
 	return urls
@@ -351,6 +373,16 @@ def generate_url(market):
 			for i in range(1, val+1):
 				result.append('http://apk.gfan.com/apps_'+str(key)+'_1_'+str(i)+'.html')
 		result.append('http://apk.gfan.com/gamess_8_1_1.html')
+
+	elif market == 'meizu':
+		app_cate_dict = {'9014':5, '103':3, '102':4, '101':2, '100':3, '104':8, '105':7, '106':5, '338':5, '339':3, '344':4}
+		for key, val in app_cate_dict.items():
+			for i in range(0, val):
+				result.append('http://app.meizu.com/apps/public/category/'+key+'/all/new/index/'+str(i*18)+'/18')
+		game_cate_dict = {'1000':3, '1005':2, '1001':2, '1004':2, '9012':2, '1003':2, '1007':2, '9013':2, '1002':2}
+		for key, val in app_cate_dict.items():
+			for i in range(0, val):
+				result.append('http://app.meizu.com/games/public/category/'+key+'/all/new/index/'+str(i*18)+'/18')
 	
 	return tuple(result)
 	
@@ -376,11 +408,12 @@ if __name__ == '__main__':
 		'oppo': 'http://store.oppomobile.com/product/',
 		'pp': 'http://www.25pp.com/android/',
 		'sogou': 'http://zhushou.sogou.com/apps/detail/',
-		'gfan': 'http://apk.gfan.com/Product/'
+		'gfan': 'http://apk.gfan.com/Product/',
+		'meizu': 'http://app.meizu.com/'
 	}
 	
 	for key in url_prefix:
-		if key != 'gfan': continue
+		if key != 'meizu': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
