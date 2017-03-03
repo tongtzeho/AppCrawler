@@ -457,6 +457,28 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('本：</span>\n.*?<div class="app_content">\n.*?\n', data)
 		if len(matcher): dict['System'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('\t', " ").replace('\r', "").replace('\n', ""))[0].replace('本：', ""))
 
+	elif market == 'sina':
+		matcher = re.findall('<h1 class="avName">.*?</h1>', data)
+		if len(matcher): dict['Name'] = unescape(matcher[0].replace('<h1 class="avName">', "").replace('</h1>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="downValue">下载 \(.*?\)</span>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<span class="downValue">下载 (', "").replace(')</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="avInfoItem">大小：.*?</li>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<li class="avInfoItem">大小：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="rateStarM rateStarM-[0-9]">', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('<span class="rateStarM rateStarM-', "").replace('">', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="voteValue">\([0-9]+\)</span>', data)
+		if len(matcher): dict['Rating_Num'] = unescape(matcher[0].replace('<span class="voteValue">(', "").replace(')</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="meta">\([0-9]+条\)</span>', data)
+		if len(matcher): dict['Comment_Num'] = unescape(matcher[0].replace('<span class="meta">(', "").replace('条)</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('secondcat=[0-9]+&">.*?</a>', data)
+		if len(matcher): dict['Category'] = unescape(re.subn('.+>', "", matcher[0].replace('</a>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))[0])
+		matcher = re.findall('<li class="avInfoItem">版本：.*?</li>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<li class="avInfoItem">版本：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="avInfoItem">更新时间：.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<li class="avInfoItem">更新时间：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="avInfoItem">系统要求：.*?</li>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<li class="avInfoItem">系统要求：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -634,6 +656,15 @@ def get_app_description(market, data):
 		matcher = re.findall('应用简介：</span>.*?<div class="description_detail".*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', re.subn('应用简介：</span>' , "", matcher[0])[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'sina':
+		matcher = re.findall('<p id="description_p" .*?<div', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', re.subn('<div' , "", matcher[0])[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

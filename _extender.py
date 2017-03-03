@@ -116,6 +116,12 @@ def get_extend_urls(market, data, prefix):
 		for url in matcher:
 			full_url = 'http://app.meizu.com/apps'+url.replace('<a href="/games', "").replace('"', "")
 			urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'sina':
+		matcher = re.findall('<a href="/appdetail.php\?appID=.*?"', data)
+		for url in matcher:
+			full_url = 'http://app.sina.com.cn'+re.subn('&.+', '&', url.replace('<a href="', "").replace('"', ""))[0]
+			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -409,7 +415,8 @@ if __name__ == '__main__':
 		'pp': 'http://www.25pp.com/android/',
 		'sogou': 'http://zhushou.sogou.com/apps/detail/',
 		'gfan': 'http://apk.gfan.com/Product/',
-		'meizu': 'http://app.meizu.com/apps/public/detail?package_name='
+		'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
+		'sina': 'http://app.sina.com.cn/appdetail.php?appID='
 	}
 	
 	for key in url_prefix:

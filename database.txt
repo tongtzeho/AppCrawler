@@ -14,3 +14,4 @@ pp
 sogou
 gfan
 meizu
+sina

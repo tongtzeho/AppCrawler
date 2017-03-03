@@ -41,12 +41,13 @@ url_prefix = {
 	'pp': 'http://www.25pp.com/android/',
 	'sogou': 'http://zhushou.sogou.com/apps/detail/',
 	'gfan': 'http://apk.gfan.com/Product/',
-	'meizu': 'http://app.meizu.com/apps/public/detail?package_name='
+	'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
+	'sina': 'http://app.sina.com.cn/appdetail.php?appID='
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -365,9 +366,9 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if True:
-	market = 'meizu'
-	myurl = 'http://app.meizu.com/apps/public/detail?package_name=com.mzyw.sgkptt.mz'
+if False:
+	market = 'sina'
+	myurl = 'http://app.sina.com.cn/appdetail.php?appID=1127558&'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -389,8 +390,8 @@ if True:
 	print ("-----------")
 	print (response[7])
 	#exit()
-	download_apk('meizu', response[4], '~meizutmp0.apk', {})
-	download_icon('meizu', response[7], '~meizutmp0.png')	
+	download_apk('sina', response[4], '~sinatmp0.apk', {})
+	download_icon('sina', response[7], '~sinatmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

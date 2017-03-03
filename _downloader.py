@@ -63,6 +63,10 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall('data-appid="[0-9]+', data)
 		if '?' in url and len(matcher): return url.split('?')[0].replace('detail', 'download.json?app_id=')+matcher[0].replace('data-appid="', "")
 
+	elif market == 'sina':
+		matcher = re.findall('<a href=".*?" class="avBtn avBtn-down">立即下载</a>', data)
+		if len(matcher): return 'http://app.sina.com.cn'+matcher[0].split('"')[1]
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -127,6 +131,10 @@ def get_icon_download_link(market, data):
 	elif market == 'meizu':
 		matcher = re.findall('<img class="app_img" src=".*?">\n', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+
+	elif market == 'sina':
+		matcher = re.findall('<div class="avIcon"><img src=".*?".*?</div>', data)
+		if len(matcher): return matcher[0].split('"')[3]
 		
 	return ""
 
