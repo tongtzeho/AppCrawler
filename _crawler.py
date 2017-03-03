@@ -41,7 +41,7 @@ url_prefix = {
 	'pp': 'http://www.25pp.com/android/',
 	'sogou': 'http://zhushou.sogou.com/apps/detail/',
 	'gfan': 'http://apk.gfan.com/Product/',
-	'meizu': 'http://app.meizu.com/'
+	'meizu': 'http://app.meizu.com/apps/public/detail?package_name='
 }
 	
 def open_url(market, url):
@@ -365,9 +365,9 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if False:
+if True:
 	market = 'meizu'
-	myurl = 'http://app.meizu.com/games/public/detail?package_name=com.yodo1.rodeo.YODO1'
+	myurl = 'http://app.meizu.com/apps/public/detail?package_name=com.mzyw.sgkptt.mz'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)

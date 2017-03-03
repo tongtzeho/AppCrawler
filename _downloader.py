@@ -203,7 +203,9 @@ def download_apk(market, url, apkfile, config):
 		if not len(url): return False
 		for i in range(10):
 			try:
-				web = requests.get(url, stream=True, timeout=30)
+				if i % 2 == 0: urlnew = url.replace('/games/', '/apps/')
+				else: urlnew = url.replace('/apps/', '/games/')
+				web = requests.get(urlnew, stream=True, timeout=30)
 				content = ""
 				for chunk in web.iter_content(chunk_size=204800):
 					if chunk:

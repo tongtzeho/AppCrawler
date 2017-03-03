@@ -114,7 +114,7 @@ def get_extend_urls(market, data, prefix):
 			urls.add(full_url.replace(prefix, ""))
 		matcher = re.findall('<a href="/games/public/detail\?package_name=.*?"', data)
 		for url in matcher:
-			full_url = 'http://app.meizu.com'+url.replace('<a href="', "").replace('"', "")
+			full_url = 'http://app.meizu.com/apps'+url.replace('<a href="/games', "").replace('"', "")
 			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
@@ -212,7 +212,7 @@ def get_similar_apps(market, data, prefix):
 				urls.add(full_url.replace(prefix, ""))
 			matcher = re.findall('<a href="/games/public/detail\?package_name=.*?"', matcher[0])
 			for url in matcher:
-				full_url = 'http://app.meizu.com'+url.replace('<a href="', "").replace('"', "")
+				full_url = 'http://app.meizu.com/apps'+url.replace('<a href="/games', "").replace('"', "")
 				urls.add(full_url.replace(prefix, ""))
 	
 	return urls
@@ -409,7 +409,7 @@ if __name__ == '__main__':
 		'pp': 'http://www.25pp.com/android/',
 		'sogou': 'http://zhushou.sogou.com/apps/detail/',
 		'gfan': 'http://apk.gfan.com/Product/',
-		'meizu': 'http://app.meizu.com/'
+		'meizu': 'http://app.meizu.com/apps/public/detail?package_name='
 	}
 	
 	for key in url_prefix:
