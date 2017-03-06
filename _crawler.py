@@ -16,12 +16,10 @@ from _checker import *
 
 #Windows
 #phantomjs_path = 'phantomjs/bin/phantomjs.exe'
-#root = 'E:/Android/'
 
 #Linux
 #export QT_QPA_PLATFORM=offscreen
 phantomjs_path = 'phantomjs'
-root = '/storage/Android/'
 
 #Header的User Agent
 #user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
@@ -123,7 +121,7 @@ def open_url(market, url):
 		result += resulten
 	return result
 
-def read_url(market):
+def read_url(root, market):
 	result = set()
 	if os.path.isfile(root+market+"_~url_list.txt"):
 		shutil.move(root+market+"_~url_list.txt", root+market+"_url_list.txt")
@@ -192,7 +190,7 @@ def write_text_information(dir, response):
 			fout.write(response[11])
 			fout.close()
 	
-def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config):
+def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
@@ -344,25 +342,28 @@ def main_loop(threadidstr, market, thread_num, rate_per_iteration, lock_pool, na
 
 def initialization(param):
 	market = param[0]
-	thread_num = param[1]
-	rate_per_iteration = param[2]
-	need_extend = param[3]
-	set_maxsize = param[4]
+	root = param[1]
+	if len(root) > 0 and not os.path.exists(root): return
+	if not os.path.exists(root+"__log__"): os.makedirs(root+"__log__")
+	thread_num = param[2]
+	rate_per_iteration = param[3]
+	need_extend = param[4]
+	set_maxsize = param[5]
 	print ("初始化进程：("+market+", "+str(thread_num)+", "+str(rate_per_iteration)+")")
 	lock_pool = threading.Lock()
 	name_pool = set()
 	lock_set = threading.Lock()
-	url_set = read_url(market)
+	url_set = read_url(root, market)
 	lock_log = threading.Lock()
 	if market == 'googleplay': config = read_config()
 	else: config = {}
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	threads = []
 	for i in range(1, thread_num):
-		threads.append(threading.Thread(target=main_loop, args=(str(i), market, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)))
+		threads.append(threading.Thread(target=main_loop, args=(str(i), market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)))
 	for t in threads:
 		t.start()
-	main_loop('0', market, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
+	main_loop('0', market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
 	for t in threads:
 		t.join()
 	print ("进程"+market+"退出")
@@ -396,27 +397,27 @@ if False:
 	exit()
 	
 if __name__ == '__main__':
-	if not os.path.isfile(phantomjs_path) or (not os.path.exists(root) and len(root) > 0) or not os.path.isfile("settings.txt"): exit()
-	if not os.path.exists(root+"__log__"): os.makedirs(root+"__log__")
+	if not os.path.isfile(phantomjs_path) or not os.path.isfile("settings.txt"): exit()
 	if os.path.isfile('exit'): os.remove('exit')
 	fin_settings = open("settings.txt", "r")
 	param_list = []
 	market_set = set()
 	for line in fin_settings:
-		if line.startswith('#') or len(line) <= 3: continue
+		if line.startswith('#') or len(line.split(" ")) < 4: continue
 		market = line.split(" ")[0].lower()
-		thread_num = int(line.split(" ")[1])
-		rate_per_iteration = float(line.split(" ")[2])
-		if len(line.split(" ")) <= 3 or int(line.split(" ")[3]) <= 0:
+		root = line.split(" ")[1][:]
+		thread_num = int(line.split(" ")[2])
+		rate_per_iteration = float(line.split(" ")[3])
+		if len(line.split(" ")) <= 4 or int(line.split(" ")[4]) <= 0:
 			need_extend = False
 			set_maxsize = 0
 		else:
 			need_extend = True
-			set_maxsize = int(line.split(" ")[3])
+			set_maxsize = int(line.split(" ")[4])
 		if market in market_set: exit()
 		if thread_num <= 0 or thread_num > 50: exit()
 		if rate_per_iteration <= 0 or rate_per_iteration > 1: exit()
-		param_list.append((market, thread_num, rate_per_iteration, need_extend, set_maxsize))
+		param_list.append((market, root, thread_num, rate_per_iteration, need_extend, set_maxsize))
 		market_set.add(market)
 	fin_settings.close()
 	processes = []

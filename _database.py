@@ -4,12 +4,6 @@
 
 import pymysql, multiprocessing, re, time, datetime, os
 
-#windows
-#root = 'G:/'
-
-#Linux
-root = '/storage/Android/'
-
 market_id_dict = {
 	'googleplay': '0',
 	'googleplayeng': '1',
@@ -336,7 +330,9 @@ def update_market(marketid, prevcount):
 		return None
 
 def store(param):
-	market = param
+	market = param[0]
+	root = param[1]
+	if (not os.path.exists(root) and len(root) > 0) or not os.path.exists(root+"__log__"): return
 	market_id = market_id_dict[market]
 	iseng = ""
 	if market == 'googleplayeng':
@@ -445,34 +441,21 @@ def clear_tag():
 							rm_num += 1
 	print ("Remove "+str(rm_num)+" Tag(s).")
 
-if False:
-	clear_tag()
-	exit()
-	market = 'googleplayeng'
-	fin_info = open("/home/tzeho/Android/googleplay/univers.jaigoga.haneymoon/[1487152503]/Information(eng).txt", "r")
-	info_all = fin_info.read()
-	fin_info.close()
-	info_dict = parse_info(market, info_all)
-	for key, value in info_dict.items():
-		print (key+" : "+value)
-	if "Update_Time" in info_dict:
-		print (datetime.datetime.utcfromtimestamp(int(info_dict["Update_Time"])).strftime("%Y-%m-%d %H:%M:%S"))
-	exit()
-
 if __name__ == '__main__':
-	if (not os.path.exists(root) and len(root) > 0) or not os.path.exists(root+"__log__") or not os.path.isfile("database.txt"): exit()
+	if not os.path.isfile("database.txt"): exit()
 	if os.path.isfile('db_exit'): os.remove('db_exit')
 	fin_settings = open("database.txt", "r")
 	market_set = set()
 	param_list = []
 	for line in fin_settings:
 		line = line.replace("\r", "").replace("\n", "")
-		if line.startswith('#') or len(line) <= 1: continue
-		market = line
+		if line.startswith('#') or len(line.split(' ')) < 2: continue
+		market = line.split(' ')[0]
+		root = line.split(' ')[1][:]
 		if market in market_set: exit()
 		if market in market_id_dict:
 			market_set.add(market)
-			param_list.append(market)
+			param_list.append((market, root))
 	fin_settings.close()
 	processes = []
 	for param in param_list:

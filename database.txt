@@ -1,17 +1,17 @@
-googleplay
-googleplayeng
-yingyongbao
-baidu
-360
-huawei
-xiaomi
-wandoujia
-hiapk
-anzhi
-91
-oppo
-pp
-sogou
-gfan
-meizu
-sina
+googleplay /data1/
+googleplayeng /data1/
+yingyongbao /data1/
+baidu /data1/
+360 /data1/
+huawei /data1/
+xiaomi /data1/
+wandoujia /data1/
+hiapk /data1/
+anzhi /data1/
+91 /data2/
+oppo /data2/
+pp /data2/
+sogou /data2/
+gfan /data2/
+meizu /data2/
+sina /data2/
