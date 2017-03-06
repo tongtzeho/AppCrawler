@@ -19,8 +19,9 @@ from _checker import *
 #root = 'E:/Android/'
 
 #Linux
-phantomjs_path = '/usr/bin/phantomjs'
-root = '../Android/'
+#export QT_QPA_PLATFORM=offscreen
+phantomjs_path = 'phantomjs'
+root = '/storage/Android/'
 
 #Header的User Agent
 #user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'

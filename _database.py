@@ -8,7 +8,7 @@ import pymysql, multiprocessing, re, time, datetime, os
 #root = 'G:/'
 
 #Linux
-root = '../Android/'
+root = '/storage/Android/'
 
 market_id_dict = {
 	'googleplay': '0',
@@ -32,7 +32,7 @@ market_id_dict = {
 
 def connect_mysql():
 	try:
-		conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+		conn = pymysql.connect(host='localhost', port=3306, user='tzh', password='pkuoslab', db='Android', charset='utf8')
 		return conn
 	except:
 		print ("数据库连接失败 - "+time.asctime(time.localtime(time.time())))

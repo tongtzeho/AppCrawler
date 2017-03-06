@@ -118,7 +118,7 @@ def get_extend_urls(market, data, prefix):
 			urls.add(full_url.replace(prefix, ""))
 
 	elif market == 'sina':
-		matcher = re.findall('<a href="/appdetail.php\?appID=.*?"', data)
+		matcher = re.findall('<a href="/appdetail.php\?appID=[0-9]+&"', data)
 		for url in matcher:
 			full_url = 'http://app.sina.com.cn'+re.subn('&.+', '&', url.replace('<a href="', "").replace('"', ""))[0]
 			urls.add(full_url.replace(prefix, ""))
@@ -389,6 +389,12 @@ def generate_url(market):
 		for key, val in app_cate_dict.items():
 			for i in range(0, val):
 				result.append('http://app.meizu.com/games/public/category/'+key+'/all/new/index/'+str(i*18)+'/18')
+
+	elif market == 'sina':
+		for soft_cate_id in range(101, 116):
+			result.append('http://app.sina.cn/catlist.php?cat=100&secondcat='+str(soft_cate_id)+'&')
+		for game_cate_id in range(201, 213):
+			result.append('http://app.sina.cn/catlist.php?cat=200&secondcat='+str(game_cate_id)+'&')
 	
 	return tuple(result)
 	
@@ -398,7 +404,7 @@ if __name__ == '__main__':
 	#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 	
 	#Linux
-	phantomjs_path = '/usr/bin/phantomjs'
+	phantomjs_path = 'phantomjs'
 	
 	url_prefix = {
 		'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -420,7 +426,7 @@ if __name__ == '__main__':
 	}
 	
 	for key in url_prefix:
-		if key != 'meizu': continue
+		if key != 'sina': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

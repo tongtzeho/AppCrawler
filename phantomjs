@@ -1,0 +1,5 @@
+#!/bin/sh
+LD_LIBRARY_PATH="/usr/lib/phantomjs:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH
+exec "/usr/lib/phantomjs/phantomjs" "$@"
+
