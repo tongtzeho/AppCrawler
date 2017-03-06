@@ -344,6 +344,9 @@ def store(param):
 		market = "googleplay"
 	prevcount = 0
 	while True:
+		if os.path.isfile('db_exit'):
+			print (market+"：结束")
+			return
 		if not os.path.isfile(root+'__log__/'+market+'.log'):
 			time.sleep(1)
 			continue
