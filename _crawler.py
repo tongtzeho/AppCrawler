@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+# sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
 # 需要安装chardet, selenium, google, protobuf，安装phantomjs并设置路径，下载AXMLPrinter2.jar放在当前目录中
 
 from urllib import request

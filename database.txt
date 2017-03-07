@@ -7,7 +7,7 @@ huawei /data1/
 xiaomi /data1/
 wandoujia /data1/
 hiapk /data1/
-anzhi /data1/
+anzhi /data2/
 91 /data2/
 oppo /data2/
 pp /data2/

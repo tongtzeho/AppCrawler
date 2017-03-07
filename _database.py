@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-
+# sudo nohup bash _database.sh >_database.log 2>&1 &
 # 需要安装pymysql
 
 import pymysql, multiprocessing, re, time, datetime, os

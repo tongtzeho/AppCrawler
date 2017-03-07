@@ -6,7 +6,7 @@ huawei /data1/ 2 0.6 100000
 xiaomi /data1/ 2 0.6 100000
 wandoujia /data1/ 2 0.6 100000
 hiapk /data1/ 2 0.6 100000
-anzhi /data1/ 2 0.6 200000
+anzhi /data2/ 2 0.6 200000
 91 /data2/ 2 0.6 100000
 oppo /data2/ 2 0.6 100000
 pp /data2/ 2 0.6 100000
