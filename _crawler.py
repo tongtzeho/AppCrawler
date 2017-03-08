@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+# export QT_QPA_PLATFORM=offscreen
 # sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
 # 需要安装chardet, selenium, google, protobuf，安装phantomjs并设置路径，下载AXMLPrinter2.jar放在当前目录中
 
@@ -18,7 +19,6 @@ from _checker import *
 #phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 
 #Linux
-#export QT_QPA_PLATFORM=offscreen
 phantomjs_path = 'phantomjs'
 
 #Header的User Agent
