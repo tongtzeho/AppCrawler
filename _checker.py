@@ -35,6 +35,8 @@ def page_invalid(market, data):
 		return '<p>很抱歉，您要访问的页面无法正常显示，可能是因为如下原因：<br>' in data and '<h2>Error</h2>' in data
 	elif market == 'sina':
 		return '<div class="pagesErr">' in data
+	elif market == 'dcn':
+		return '<div class="f-0-f"></div>' in data
 	return False	
 
 def check_response(market, result):
@@ -215,5 +217,14 @@ def check_response(market, result):
 		if not 'Rating_Num' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'dcn':
+		if not 'Name' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not 'Developer' in result[0]: return False
 		if not len(result[2]): return False
 	return True

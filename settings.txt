@@ -14,3 +14,4 @@ sogou /data2/ 4 0.5 600000
 gfan /data2/ 4 0.5 600000
 meizu /data2/ 4 0.5 600000
 sina /data2/ 4 0.5 600000
+dcn /data2/ 4 0.5 600000

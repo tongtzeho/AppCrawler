@@ -15,3 +15,4 @@ sogou /data2/
 gfan /data2/
 meizu /data2/
 sina /data2/
+dcn /data2/

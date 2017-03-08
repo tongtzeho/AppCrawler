@@ -122,6 +122,22 @@ def get_extend_urls(market, data, prefix):
 		for url in matcher:
 			full_url = 'http://app.sina.com.cn'+re.subn('&.+', '&', url.replace('<a href="', "").replace('"', ""))[0]
 			urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'dcn':
+		matcher = re.findall('href="http://android.d.cn/software/[0-9]+.html"', data)
+		for url in matcher:
+			full_url = url.replace('href="', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
+		matcher = re.findall('href="http://android.d.cn/game/[0-9]+.html"', data)
+		for url in matcher:
+			full_url = url.replace('href="', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
+		matcher = re.findall('href="/software/[0-9]+.html"', data)
+		for url in matcher:
+			urls.add(url.replace('href="/', "").replace('"', ""))
+		matcher = re.findall('href="/game/[0-9]+.html"', data)
+		for url in matcher:
+			urls.add(url.replace('href="/', "").replace('"', ""))
 			
 	return urls
 	
@@ -395,6 +411,12 @@ def generate_url(market):
 			result.append('http://app.sina.cn/catlist.php?cat=100&secondcat='+str(soft_cate_id)+'&')
 		for game_cate_id in range(201, 213):
 			result.append('http://app.sina.cn/catlist.php?cat=200&secondcat='+str(game_cate_id)+'&')
+
+	elif market == 'dcn':
+		for i in range(1, 177):
+			result.append('http://android.d.cn/game/list_2_1_0_0_0_0_0_0_0_0_0_'+str(i)+'_0.html')
+		for i in range(1, 361):
+			result.append('http://android.d.cn/software/list_2_0_0_'+str(i)+'.html')
 	
 	return tuple(result)
 	
@@ -422,11 +444,12 @@ if __name__ == '__main__':
 		'sogou': 'http://zhushou.sogou.com/apps/detail/',
 		'gfan': 'http://apk.gfan.com/Product/',
 		'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
-		'sina': 'http://app.sina.com.cn/appdetail.php?appID='
+		'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
+		'dcn': 'http://android.d.cn/'
 	}
 	
 	for key in url_prefix:
-		if key != 'sina': continue
+		if key != 'dcn': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

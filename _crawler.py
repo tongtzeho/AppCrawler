@@ -41,7 +41,8 @@ url_prefix = {
 	'sogou': 'http://zhushou.sogou.com/apps/detail/',
 	'gfan': 'http://apk.gfan.com/Product/',
 	'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
-	'sina': 'http://app.sina.com.cn/appdetail.php?appID='
+	'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
+	'dcn': 'http://android.d.cn/'
 }
 	
 def open_url(market, url):
@@ -369,8 +370,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'sina'
-	myurl = 'http://app.sina.com.cn/appdetail.php?appID=1127558&'
+	market = 'dcn'
+	myurl = 'http://android.d.cn/software/50.html'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -391,9 +392,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	#exit()
-	download_apk('sina', response[4], '~sinatmp0.apk', {})
-	download_icon('sina', response[7], '~sinatmp0.png')	
+	exit()
+	download_apk('dcn', response[4], '~dcntmp0.apk', {})
+	download_icon('dcn', response[7], '~dcntmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
