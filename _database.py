@@ -22,7 +22,8 @@ market_id_dict = {
 	'gfan': '14',
 	'meizu': '15',
 	'sina': '16',
-	'dcn': '17'
+	'dcn': '17',
+	'liqucn': '18'
 }
 
 def connect_mysql():

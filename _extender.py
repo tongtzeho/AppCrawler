@@ -445,7 +445,8 @@ if __name__ == '__main__':
 		'gfan': 'http://apk.gfan.com/Product/',
 		'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
 		'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
-		'dcn': 'http://android.d.cn/'
+		'dcn': 'http://android.d.cn/',
+		'liqucn': 'http://os-android.liqucn.com/'
 	}
 	
 	for key in url_prefix:

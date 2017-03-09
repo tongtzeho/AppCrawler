@@ -519,6 +519,22 @@ def get_app_basic_info(market, data):
 		if '<i class="no-ad"></i>无广告' in data: dict['Has_Ads'] = 'False'
 		elif '<i class="has-ad"></i>有广告' in data: dict['Has_Ads'] = 'True'
 
+	elif market == 'liqucn':
+		matcher = re.findall('<h3>.*?</h3><p>', data)
+		if len(matcher): dict['Name'] = unescape(matcher[0].replace('<h3>', "").replace('</h3><p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('下载次数：<em>.*?</em>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('下载次数：<em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('文件大小：<em>.*?</em>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('文件大小：<em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('类型：<em>.*?</em>', data)
+		if len(matcher): dict['Category'] = unescape(matcher[0].replace('类型：<em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('<h1>.*?</h1>', data)
+		if len(matcher) and 'Name' in dict: dict['Edition'] = unescape(matcher[0].replace('<h1>', "").replace('</h1>', "").replace('<em class="app_gf">官方</em>', "").replace(dict['Name'], "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('更新：<em>.*?</em>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('更新：<em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('开发商：<em>.*?</em>', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('开发商：<em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -718,6 +734,15 @@ def get_app_description(market, data):
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
+
+	elif market == 'liqucn':
+		matcher = re.findall('<div class="info_brife">.*?</div>.*?<div class="p_info">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
 			
 	return ""
 	
@@ -799,6 +824,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('版本描述：</span>.*?<div class="description_detail".*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', re.subn('版本描述：</span>' , "", matcher[0])[0].replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'liqucn':
+		matcher = re.findall('<h3>更新说明</h3><div class="p_info">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3>更新说明</h3>' , "").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
