@@ -832,7 +832,7 @@ def get_app_release_note(market, data):
 	elif market == 'liqucn':
 		matcher = re.findall('<h3>更新说明</h3><div class="p_info">.*?</div>', data, re.S)
 		if len(matcher):
-			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3>更新说明</h3>' , "").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3>更新说明</h3>' , "").replace('<p>', "\n").replace("<br/>", "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

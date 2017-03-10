@@ -37,6 +37,8 @@ def page_invalid(market, data):
 		return '<div class="pagesErr">' in data
 	elif market == 'dcn':
 		return '<div class="f-0-f"></div>' in data
+	elif market == 'liqucn':
+		return '内容不存在.<a href="http://www.liqucn.com/">点击查看更多</a>' in data
 	return False	
 
 def check_response(market, result):
@@ -222,6 +224,15 @@ def check_response(market, result):
 		if not 'Name' in result[0]: return False
 		if not 'Size' in result[0]: return False
 		if not 'Rating' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'liqucn':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
 		if not 'Category' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False

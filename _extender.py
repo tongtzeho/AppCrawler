@@ -138,6 +138,12 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('href="/game/[0-9]+.html"', data)
 		for url in matcher:
 			urls.add(url.replace('href="/', "").replace('"', ""))
+
+	elif market == 'liqucn':
+		matcher = re.findall('<a href="http://os-android.liqucn.com/[rwy][jyx]/[0-9]+.shtml"', data)
+		for url in matcher:
+			full_url = url.replace('<a href="', "").replace('"', "")
+			urls.add(full_url.replace(prefix, ""))
 			
 	return urls
 	
@@ -235,6 +241,14 @@ def get_similar_apps(market, data, prefix):
 			matcher = re.findall('<a href="/games/public/detail\?package_name=.*?"', matcher[0])
 			for url in matcher:
 				full_url = 'http://app.meizu.com/apps'+url.replace('<a href="/games', "").replace('"', "")
+				urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'liqucn':
+		matcher = re.findall('app相关推荐</div>.*?</ul>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href="http://os-android.liqucn.com/[rwy][jyx]/[0-9]+.shtml"', matcher[0])
+			for url in matcher:
+				full_url = url.replace('<a href="', "").replace('"', "")
 				urls.add(full_url.replace(prefix, ""))
 	
 	return urls
@@ -417,6 +431,17 @@ def generate_url(market):
 			result.append('http://android.d.cn/game/list_2_1_0_0_0_0_0_0_0_0_0_'+str(i)+'_0.html')
 		for i in range(1, 361):
 			result.append('http://android.d.cn/software/list_2_0_0_'+str(i)+'.html')
+
+	elif market == 'liqucn':
+		result.append('http://os-android.liqucn.com/rj/')
+		for i in range(2000, 5681):
+			result.append('http://os-android.liqucn.com/rj/?page='+str(i))
+		result.append('http://os-android.liqucn.com/yx/')
+		for i in range(1, 1478):
+			result.append('http://os-android.liqucn.com/yx/?page='+str(i))
+		result.append('http://os-android.liqucn.com/wy/')
+		for i in range(1, 265):
+			result.append('http://os-android.liqucn.com/wy/?page='+str(i))
 	
 	return tuple(result)
 	
@@ -450,7 +475,7 @@ if __name__ == '__main__':
 	}
 	
 	for key in url_prefix:
-		if key != 'dcn': continue
+		if key != 'liqucn': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

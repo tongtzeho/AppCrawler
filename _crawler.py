@@ -370,9 +370,9 @@ def initialization(param):
 		t.join()
 	print ("进程"+market+"退出")
 
-if True:
+if False:
 	market = 'liqucn'
-	myurl = 'http://os-android.liqucn.com/yx/81496.shtml'
+	myurl = 'http://os-android.liqucn.com/rj/25337.shtml'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -393,7 +393,7 @@ if True:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	#exit()
+	exit()
 	download_apk('liqucn', response[4], '~liqucntmp0.apk', {})
 	download_icon('liqucn', response[7], '~liqucntmp0.png')	
 	exit()
