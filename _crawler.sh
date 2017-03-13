@@ -1,1 +1,1 @@
-python3 -u /home/tzh/Android_Market_Crawler/_crawler.py
+python3 -u _crawler.py

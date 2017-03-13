@@ -131,7 +131,7 @@ def read_url(root, market):
 		pass
 	else:
 		return result
-	fin = open(root+market+"_url_list.txt", "r")
+	fin = codecs.open(root+market+"_url_list.txt", "r", "utf-8")
 	for line in fin:
 		result.add(line.replace('\r', "").replace('\n', ""))
 	fin.close()
