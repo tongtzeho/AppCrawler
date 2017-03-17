@@ -49,8 +49,8 @@ def get_apk_download_link(market, data, url):
 		if len(matcher): return 'http://store.oppomobile.com/product/download.html?id='+matcher[0].replace('<a class="detail_down" onclick="detailInfoDownload(', "").replace(')">下载到电脑</a>', "")+'&from=0_0'
 
 	elif market == 'pp':
-		matcher = re.findall('appdownurl=".*?" onclick="return ppOneKeySetup\(this,\'android\'\)" data-stat-act="down">立即下载</a>', data)
-		if len(matcher): return matcher[0].replace('appdownurl="', "").replace('" onclick="return ppOneKeySetup(this,\'android\')" data-stat-act="down">立即下载</a>', "")
+		matcher = re.findall('appdownurl=".*?" onclick="return ppOneKeySetup.*?" data.*?">立即下载</a>', data)
+		if len(matcher): return matcher[0].split('"')[1]
 
 	elif market == 'sogou':
 		return "http://zhushou.sogou.com/apps/download.html?appid="+url.split('/')[-1].replace(".html", "")
@@ -74,6 +74,10 @@ def get_apk_download_link(market, data, url):
 	elif market == 'liqucn':
 		matcher = re.findall('<a href=".*?" target=".*?">下载到电脑</a>', data)
 		if len(matcher): return matcher[0].split('"')[1]
+
+	elif market == 'appchina':
+		matcher = re.findall('onclick="freeDownload\(this,&#39;.*?;\)">免费下载</a>', data)
+		if len(matcher): return matcher[0].split(';')[1]
 
 	return ""
 	
@@ -151,6 +155,10 @@ def get_icon_download_link(market, data):
 	elif market == 'liqucn':
 		matcher = re.findall('<img src=".*?" />\n.*?<h1>', data)
 		if len(matcher): return matcher[0].split('"')[1]
+
+	elif market == 'appchina':
+		matcher = re.findall('<img class="Content_Icon".*?title=".*?" src=".*?"', data)
+		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 

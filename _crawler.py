@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 # export QT_QPA_PLATFORM=offscreen
 # sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
-# 需要安装chardet, selenium, google, protobuf，安装phantomjs并设置路径，下载AXMLPrinter2.jar放在当前目录中
+# 安装python3，安装pip3，用pip3安装chardet, selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
+# 如果在阿里云安装不了Java和phantomjs，输入apt-get update
 
 from urllib import request
 from selenium import webdriver
@@ -43,12 +44,13 @@ url_prefix = {
 	'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
 	'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
 	'dcn': 'http://android.d.cn/',
-	'liqucn': 'http://os-android.liqucn.com/'
+	'liqucn': 'http://os-android.liqucn.com/',
+	'appchina': 'http://www.appchina.com/app/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -371,8 +373,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'liqucn'
-	myurl = 'http://os-android.liqucn.com/rj/25337.shtml'
+	market = 'appchina'
+	myurl = 'http://www.appchina.com/app/com.rovio.baba.kunlun.yyh'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -394,8 +396,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('liqucn', response[4], '~liqucntmp0.apk', {})
-	download_icon('liqucn', response[7], '~liqucntmp0.png')	
+	download_apk('appchina', response[4], '~appchinatmp0.apk', {})
+	download_icon('appchina', response[7], '~appchinatmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

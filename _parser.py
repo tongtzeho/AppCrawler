@@ -535,6 +535,30 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('开发商：<em>.*?</em>', data)
 		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('开发商：<em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 
+	elif market == 'appchina':
+		matcher = re.findall('<h1 class="app-name">.*?</h1>', data)
+		if len(matcher): dict['Name'] = unescape(matcher[0].replace('<h1 class="app-name">', "").replace('</h1>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="art-content">大小：.*?</p>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<p class="art-content">大小：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="art-content">分类：.*?</p>', data)
+		if len(matcher): dict['Category'] = unescape(matcher[0].replace('<p class="art-content">分类：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="art-content">版本：.*?</p>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<p class="art-content">版本：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="art-content">更新：.*?</p>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<p class="art-content">更新：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="art-content">要求：.*?</p>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<p class="art-content">要求：', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="app-statistic">[0-9]+人评论</span>', data)
+		if len(matcher): dict['Comment_Num'] = unescape(matcher[0].replace('<span class="app-statistic">', "").replace('人评论</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('good_4.png">[0-9]+</img>', data)
+		if len(matcher): dict['Like_Num'] = unescape(matcher[0].replace('good_4.png">', "").replace('</img>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('bad_4.png">[0-9]+</img>', data)
+		if len(matcher): dict['Dislike_Num'] = unescape(matcher[0].replace('bad_4.png">', "").replace('</img>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		if '<span>无广告</span>' in data: dict['Has_Ads'] = 'False'
+		elif '<span>有广告</span>' in data: dict['Has_Ads'] = 'True'
+		if '<span>中文</span>' in data: dict['Language'] = '中文'
+		elif '<span>英文</span>' in data: dict['Language'] = '英文'
+
 	return dict
 
 def get_app_permission(market, data):
@@ -566,6 +590,13 @@ def get_app_permission(market, data):
 
 	elif market == 'pp':
 		matcher = re.findall('<div class="permission-list none"><p>该应用需要以下重要权限：</p><ul class="clearfix">.*?</div>', data)
+		if len(matcher):
+			matcher = re.findall('<li>.*?</li>', matcher[0])
+			for permission in matcher:
+				list.append(unescape(permission.replace('<li>', "").replace('</li>', "")))
+
+	elif market == 'appchina':
+		matcher = re.findall('<ul class="permissions-list">.*?</ul>', data, re.S)
 		if len(matcher):
 			matcher = re.findall('<li>.*?</li>', matcher[0])
 			for permission in matcher:
@@ -743,6 +774,15 @@ def get_app_description(market, data):
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
+
+	elif market == 'appchina':
+		matcher = re.findall('<h3>.*?</h3>.*?<p class="art-content">.*?</p>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', re.subn('<h3>.+</h3>', "", matcher[0])[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
 			
 	return ""
 	
@@ -833,6 +873,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('<h3>更新说明</h3><div class="p_info">.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<h3>更新说明</h3>' , "").replace('<p>', "\n").replace("<br/>", "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'appchina':
+		matcher = re.findall('版本更新</h2>.*?<p class="art-content">.*?</p>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('版本更新</h2>' , "").replace('<p>', "\n").replace("<br/>", "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

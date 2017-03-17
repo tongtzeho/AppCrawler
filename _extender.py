@@ -144,6 +144,11 @@ def get_extend_urls(market, data, prefix):
 		for url in matcher:
 			full_url = url.replace('<a href="', "").replace('"', "")
 			urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'appchina':
+		matcher = re.findall('<a href="/app/[^ ]*?">', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="/app/', "").replace('">', ""))
 			
 	return urls
 	
@@ -250,6 +255,13 @@ def get_similar_apps(market, data, prefix):
 			for url in matcher:
 				full_url = url.replace('<a href="', "").replace('"', "")
 				urls.add(full_url.replace(prefix, ""))
+
+	elif market == 'appchina':
+		matcher = re.findall('<ul class="srel-ul">.*?</ul>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<a href="/app/[^ ]*?">', matcher[0])
+			for url in matcher:
+				urls.add(url.replace('<a href="/app/', "").replace('">', ""))
 	
 	return urls
 
@@ -442,6 +454,12 @@ def generate_url(market):
 		result.append('http://os-android.liqucn.com/wy/')
 		for i in range(1, 265):
 			result.append('http://os-android.liqucn.com/wy/?page='+str(i))
+
+	elif market == 'appchina':
+		for i in range(1, 35):
+			result.append('http://www.appchina.com/category/30/1_1_'+str(i)+'_1_0_0_0.html')
+		for i in range(1, 35):
+			result.append('http://www.appchina.com/category/40/1_1_'+str(i)+'_1_0_0_0.html')
 	
 	return tuple(result)
 	
@@ -471,11 +489,12 @@ if __name__ == '__main__':
 		'meizu': 'http://app.meizu.com/apps/public/detail?package_name=',
 		'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
 		'dcn': 'http://android.d.cn/',
-		'liqucn': 'http://os-android.liqucn.com/'
+		'liqucn': 'http://os-android.liqucn.com/',
+		'appchina': 'http://www.appchina.com/app/'
 	}
 	
 	for key in url_prefix:
-		if key != 'liqucn': continue
+		if key != 'appchina': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
