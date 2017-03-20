@@ -559,6 +559,28 @@ def get_app_basic_info(market, data):
 		if '<span>中文</span>' in data: dict['Language'] = '中文'
 		elif '<span>英文</span>' in data: dict['Language'] = '英文'
 
+	elif market == '10086':
+		matcher = re.findall('<span title=".*?">.*?</span>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<span style="font-size:14px;"><span style="color:#ff5a00;">.*?</span>感兴趣', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<span style="font-size:14px;"><span style="color:#ff5a00;">', "").replace('</span>感兴趣', "").replace('<', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>大　　小：.*?</li>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<li>大　　小：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>所属类别：.*?</li>', data)
+		if len(matcher): dict['Category'] = unescape(matcher[0].replace('<li>所属类别：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>版　　本：.*?</li>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<li>版　　本：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>更新时间：.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<li>更新时间：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li> *开 发 者：.*?\n?.*?</li>', data)
+		if len(matcher): dict['Developer'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace("开 发 者：", "").replace('\t', " ").replace('\r', "").replace('\n', ""))[0])
+		matcher = re.findall('<li>系统支持：.*?</li>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<li>系统支持：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>价　　钱：\r?\n?.*?</li>', data)
+		if len(matcher): dict['Price'] = unescape(matcher[0].replace('<li>价　　钱：', "").replace('</li>', "").replace('\t', "").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('喜欢：<span id="l_num">[0-9]+', data)
+		if len(matcher): dict['Like_Num'] = unescape(matcher[0].replace('喜欢：<span id="l_num">', "").replace('\t', "").replace('\r', "").replace('\n', ""))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -779,6 +801,15 @@ def get_app_description(market, data):
 		matcher = re.findall('<h3>.*?</h3>.*?<p class="art-content">.*?</p>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', re.subn('<h3>.+</h3>', "", matcher[0])[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == '10086':
+		matcher = re.findall('<div class="mj_yyjs font-f-yh">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

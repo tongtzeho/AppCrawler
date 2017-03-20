@@ -41,6 +41,8 @@ def page_invalid(market, data):
 		return '内容不存在.<a href="http://www.liqucn.com/">点击查看更多</a>' in data
 	elif market == 'appchina':
 		return '您访问的资源不存在或已被删除' in data and '<p>(10秒后自动返回)</p>' in data
+	elif market == '10086':
+		return '<title>404-Mobile Market应用商场</title>' in data
 	return False	
 
 def check_response(market, result):
@@ -246,5 +248,14 @@ def check_response(market, result):
 		if not 'Category' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == '10086':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not 'Developer' in result[0]: return False
 		if not len(result[2]): return False
 	return True

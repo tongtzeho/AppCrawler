@@ -17,3 +17,4 @@ sogou /StorageSrv/ 5 0.5 600000
 #dcn /StorageSrv/ 3 0.66 600000
 liqucn /StorageSrv/ 5 0.5 600000
 #appchina /StorageSrv/ 3 0.66 600000
+10086 ../Android/ 5 0.5 600000

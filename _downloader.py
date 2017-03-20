@@ -79,6 +79,10 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall('onclick="freeDownload\(this,&#39;.*?;\)">免费下载</a>', data)
 		if len(matcher): return matcher[0].split(';')[1]
 
+	elif market == '10086':
+		matcher = re.findall('<span></span></div><a href=".*?" class="mj_xzdbd"', data)
+		if len(matcher): return matcher[0].split('"')[1]
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -158,6 +162,10 @@ def get_icon_download_link(market, data):
 
 	elif market == 'appchina':
 		matcher = re.findall('<img class="Content_Icon".*?title=".*?" src=".*?"', data)
+		if len(matcher): return matcher[0].split('"')[-2]
+
+	elif market == '10086':
+		matcher = re.findall('<img id="appicon" src=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""

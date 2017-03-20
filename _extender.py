@@ -149,6 +149,14 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('<a href="/app/[^ ]*?">', data)
 		for url in matcher:
 			urls.add(url.replace('<a href="/app/', "").replace('">', ""))
+
+	elif market == '10086':
+		matcher = re.findall('class="mj_tj_tu" href="/android/info/[0-9]+.html', data)
+		for url in matcher:
+			urls.add(url.replace('class="mj_tj_tu" href="/android/info/', ""))
+		matcher = re.findall('<a href="/android/info/[0-9]+.html', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="/android/info/', ""))
 			
 	return urls
 	
@@ -262,6 +270,13 @@ def get_similar_apps(market, data, prefix):
 			matcher = re.findall('<a href="/app/[^ ]*?">', matcher[0])
 			for url in matcher:
 				urls.add(url.replace('<a href="/app/', "").replace('">', ""))
+
+	elif market == '10086':
+		matcher = re.findall('<span>相关推荐</span></div><div class="mj_tj_list">.*?</div></div></div>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('class="mj_tj_tu" href="/android/info/[0-9]+.html', matcher[0])
+			for url in matcher:
+				urls.add(url.replace('class="mj_tj_tu" href="/android/info/', ""))
 	
 	return urls
 
@@ -460,6 +475,12 @@ def generate_url(market):
 			result.append('http://www.appchina.com/category/30/1_1_'+str(i)+'_1_0_0_0.html')
 		for i in range(1, 35):
 			result.append('http://www.appchina.com/category/40/1_1_'+str(i)+'_1_0_0_0.html')
+
+	elif market == '10086':
+		for i in range(1, 46):
+			result.append('http://mm.10086.cn/android/software/qbrj?pay=1&p='+str(i))
+		for i in range(1, 69):
+			result.append('http://mm.10086.cn/android/game/qbyx?pay=1&p='+str(i))
 	
 	return tuple(result)
 	
@@ -490,11 +511,12 @@ if __name__ == '__main__':
 		'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
 		'dcn': 'http://android.d.cn/',
 		'liqucn': 'http://os-android.liqucn.com/',
-		'appchina': 'http://www.appchina.com/app/'
+		'appchina': 'http://www.appchina.com/app/',
+		'10086': 'http://mm.10086.cn/android/info/'
 	}
 	
 	for key in url_prefix:
-		if key != 'appchina': continue
+		if key != '10086': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

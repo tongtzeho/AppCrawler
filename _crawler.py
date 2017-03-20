@@ -45,12 +45,13 @@ url_prefix = {
 	'sina': 'http://app.sina.com.cn/appdetail.php?appID=',
 	'dcn': 'http://android.d.cn/',
 	'liqucn': 'http://os-android.liqucn.com/',
-	'appchina': 'http://www.appchina.com/app/'
+	'appchina': 'http://www.appchina.com/app/',
+	'10086': 'http://mm.10086.cn/android/info/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -373,8 +374,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'appchina'
-	myurl = 'http://www.appchina.com/app/com.rovio.baba.kunlun.yyh'
+	market = '10086'
+	myurl = 'http://mm.10086.cn/android/info/300000712016.html'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -395,9 +396,9 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
-	download_apk('appchina', response[4], '~appchinatmp0.apk', {})
-	download_icon('appchina', response[7], '~appchinatmp0.png')	
+	#exit()
+	download_apk('10086', response[4], '~10086tmp0.apk', {})
+	download_icon('10086', response[7], '~10086tmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
