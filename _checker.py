@@ -43,6 +43,8 @@ def page_invalid(market, data):
 		return '您访问的资源不存在或已被删除' in data and '<p>(10秒后自动返回)</p>' in data
 	elif market == '10086':
 		return '<title>404-Mobile Market应用商场</title>' in data
+	elif market == 'lenovo':
+		return '<img src="/amp5/images/404.jpg" class="tcenter margin88">' in data
 	return False	
 
 def check_response(market, result):
@@ -257,5 +259,21 @@ def check_response(market, result):
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
 		if not 'Developer' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'lenovo':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not '5-Star_Rating_Num' in result[0]: return False
+		if not '4-Star_Rating_Num' in result[0]: return False
+		if not '3-Star_Rating_Num' in result[0]: return False
+		if not '2-Star_Rating_Num' in result[0]: return False
+		if not '1-Star_Rating_Num' in result[0]: return False
 		if not len(result[2]): return False
 	return True

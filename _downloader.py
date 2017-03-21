@@ -83,6 +83,10 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall('<span></span></div><a href=".*?" class="mj_xzdbd"', data)
 		if len(matcher): return matcher[0].split('"')[1]
 
+	elif market == 'lenovo':
+		matcher = re.findall('<a href=".*?" data-pkgname=".*?".*?<span>下载APK文件', data)
+		if len(matcher): return matcher[0].split('"')[1]
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -167,6 +171,10 @@ def get_icon_download_link(market, data):
 	elif market == '10086':
 		matcher = re.findall('<img id="appicon" src=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+
+	elif market == 'lenovo':
+		matcher = re.findall('<img src=".*?" alt=".*?"><i', data)
+		if len(matcher): return matcher[0].split('"')[1]
 		
 	return ""
 

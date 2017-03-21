@@ -157,6 +157,14 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('<a href="/android/info/[0-9]+.html', data)
 		for url in matcher:
 			urls.add(url.replace('<a href="/android/info/', ""))
+
+	elif market == 'lenovo':
+		matcher = re.findall('<a href="http://www.lenovomm.com/appdetail/.*?" target="_blank">', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="http://www.lenovomm.com/appdetail/', "").replace('" target="_blank">', ""))
+		matcher = re.findall('<a href="http://www.lenovomm.com/appdetail/.*?" target="_blank" hover>', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="http://www.lenovomm.com/appdetail/', "").replace('" target="_blank" hover>', ""))
 			
 	return urls
 	
@@ -277,6 +285,11 @@ def get_similar_apps(market, data, prefix):
 			matcher = re.findall('class="mj_tj_tu" href="/android/info/[0-9]+.html', matcher[0])
 			for url in matcher:
 				urls.add(url.replace('class="mj_tj_tu" href="/android/info/', ""))
+
+	elif market == 'lenovo':
+		matcher = re.findall('<a href="http://www.lenovomm.com/appdetail/.*?" target="_blank">', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="http://www.lenovomm.com/appdetail/', "").replace('" target="_blank">', ""))
 	
 	return urls
 
@@ -481,6 +494,12 @@ def generate_url(market):
 			result.append('http://mm.10086.cn/android/software/qbrj?pay=1&p='+str(i))
 		for i in range(1, 69):
 			result.append('http://mm.10086.cn/android/game/qbyx?pay=1&p='+str(i))
+
+	elif market == 'lenovo':
+		for i in range(1, 253):
+			result.append('http://www.lenovomm.com/category/qbyy_hotest_flat_'+str(i)+'.html')
+		for i in range(1, 41):
+			result.append('http://www.lenovomm.com/category/qbyx_hotest_flat_'+str(i)+'.html')
 	
 	return tuple(result)
 	
@@ -512,11 +531,12 @@ if __name__ == '__main__':
 		'dcn': 'http://android.d.cn/',
 		'liqucn': 'http://os-android.liqucn.com/',
 		'appchina': 'http://www.appchina.com/app/',
-		'10086': 'http://mm.10086.cn/android/info/'
+		'10086': 'http://mm.10086.cn/android/info/',
+		'lenovo': 'http://www.lenovomm.com/appdetail/'
 	}
 	
 	for key in url_prefix:
-		if key != '10086': continue
+		if key != 'lenovo': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

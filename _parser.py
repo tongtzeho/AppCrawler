@@ -581,6 +581,35 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('喜欢：<span id="l_num">[0-9]+', data)
 		if len(matcher): dict['Like_Num'] = unescape(matcher[0].replace('喜欢：<span id="l_num">', "").replace('\t', "").replace('\r', "").replace('\n', ""))
 
+	elif market == 'lenovo':
+		matcher = re.findall('<h1 class="f18 fl">.*?</h1>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<span class="fgrey5">下载：.*?次安装</span></div>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<span class="fgrey5">下载：', "").replace('次安装</span></div>', "").replace('大于', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('大小：<span class="fgrey5">.*?</span>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('大小：<span class="fgrey5">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="f20 ff-arial scoreTxt fb">.*?</p>', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('<p class="f20 ff-arial scoreTxt fb">', "").replace('</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="f16 ff-wryh fgrey5 userTotal"><var>[0-9]+</var>', data)
+		if len(matcher): dict['Rating_Num'] = unescape(matcher[0].replace('<p class="f16 ff-wryh fgrey5 userTotal"><var>', "").replace('</var>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<var class="fgrey1">[0-9]+%</var>', data)
+		if len(matcher) == 5:
+			dict['5-Star_Rating_Num'] = unescape(matcher[0].replace('<var class="fgrey1">', "").replace('%</var>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['4-Star_Rating_Num'] = unescape(matcher[1].replace('<var class="fgrey1">', "").replace('%</var>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['3-Star_Rating_Num'] = unescape(matcher[2].replace('<var class="fgrey1">', "").replace('%</var>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['2-Star_Rating_Num'] = unescape(matcher[3].replace('<var class="fgrey1">', "").replace('%</var>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['1-Star_Rating_Num'] = unescape(matcher[4].replace('<var class="fgrey1">', "").replace('%</var>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('class="fblue orange">.*?</a>', data)
+		if len(matcher): dict['Category'] = unescape(matcher[-1].replace('class="fblue orange">', "").replace('</a>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('版本：<span class="fgrey5">.*?</span>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('版本：<span class="fgrey5">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('开发者：<span class="fgrey5">.*?</span>', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('开发者：<span class="fgrey5">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('更新时间：<span class="fgrey5">.*?</span>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('更新时间：<span class="fgrey5">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('适用系统：<span class="fgrey5">.*?</span>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('适用系统：<span class="fgrey5">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -810,6 +839,15 @@ def get_app_description(market, data):
 		matcher = re.findall('<div class="mj_yyjs font-f-yh">.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'lenovo':
+		matcher = re.findall('<p class="f16 ff-wryh">应用简介</p>.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<p class="f16 ff-wryh">应用简介</p>', "").replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
