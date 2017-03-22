@@ -47,7 +47,8 @@ url_prefix = {
 	'liqucn': 'http://os-android.liqucn.com/',
 	'appchina': 'http://www.appchina.com/app/',
 	'10086': 'http://mm.10086.cn/android/info/',
-	'lenovo': 'http://www.lenovomm.com/appdetail/'
+	'lenovo': 'http://www.lenovomm.com/appdetail/',
+	'zol': 'http://sj.zol.com.cn/'
 }
 	
 def open_url(market, url):
@@ -375,8 +376,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'lenovo'
-	myurl = 'http://www.lenovomm.com/appdetail/com.pokercity.yzddz.lenovo/0'
+	market = 'zol'
+	myurl = 'http://sj.zol.com.cn/talkingtomcat/'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -398,8 +399,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('lenovo', response[4], '~lenovotmp0.apk', {})
-	download_icon('lenovo', response[7], '~lenovotmp0.png')	
+	download_apk('zol', response[4], '~zoltmp0.apk', {})
+	download_icon('zol', response[7], '~zoltmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

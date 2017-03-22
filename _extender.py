@@ -165,6 +165,17 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('<a href="http://www.lenovomm.com/appdetail/.*?" target="_blank" hover>', data)
 		for url in matcher:
 			urls.add(url.replace('<a href="http://www.lenovomm.com/appdetail/', "").replace('" target="_blank" hover>', ""))
+
+	elif market == 'zol':
+		matcher = re.findall('<a target="_b[al][al]nk" href="/[^/]+/"', data)
+		for url in matcher:
+			urls.add(url.split('"')[-2][1:])
+		matcher = re.findall('<a href="/[^/]+/" target="_blank"', data)
+		for url in matcher:
+			urls.add(url.split('"')[1][1:])
+	#	matcher = re.findall('<a target="_blank" href=" http://sj.zol.com.cn/[^/]+/"', data)
+	#	for url in matcher:
+	#		urls.add(url.split('/')[-2]+'/')
 			
 	return urls
 	
@@ -500,6 +511,10 @@ def generate_url(market):
 			result.append('http://www.lenovomm.com/category/qbyy_hotest_flat_'+str(i)+'.html')
 		for i in range(1, 41):
 			result.append('http://www.lenovomm.com/category/qbyx_hotest_flat_'+str(i)+'.html')
+
+	elif market == 'zol':
+		for i in range(1, 386):
+			result.append('http://sj.zol.com.cn/android_app/page_'+str(i)+'.html')
 	
 	return tuple(result)
 	
@@ -532,36 +547,41 @@ if __name__ == '__main__':
 		'liqucn': 'http://os-android.liqucn.com/',
 		'appchina': 'http://www.appchina.com/app/',
 		'10086': 'http://mm.10086.cn/android/info/',
-		'lenovo': 'http://www.lenovomm.com/appdetail/'
+		'lenovo': 'http://www.lenovomm.com/appdetail/',
+		'zol': 'http://sj.zol.com.cn/'
 	}
 	
 	for key in url_prefix:
-		if key != 'lenovo': continue
+		if key != 'zol': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
+			err_time = 0
 			while True:
 				try:
 					#动态加载
-					#driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-					#driver.set_page_load_timeout(20)
-					#driver.get(root_url)
-					#time.sleep(0.5)
-					#data = driver.page_source
-					#driver.quit()
+					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					driver.set_page_load_timeout(30)
+					driver.get(root_url)
+					time.sleep(0.5)
+					data = driver.page_source
+					driver.quit()
 					
 					#静态加载
-					web = request.urlopen(root_url, timeout=20)
-					charset = str(web.headers.get_content_charset())
-					if charset == "None": charset = "utf-8"
-					data = web.read().decode(charset)
-					if key == '91' and data.startswith("WOW"): continue
+					#web = request.urlopen(root_url, timeout=30)
+					#charset = str(web.headers.get_content_charset())
+					#if charset == "None": charset = "utf-8"
+					#data = web.read().decode(charset)
+					#if key == '91' and data.startswith("WOW"): continue
 					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)
 					break
 				except:
-					continue
+					err_time += 1
+					if err_time < 10: continue
+					print ("错误："+root_url)
+					break
 		fout = open(key+"_url_list.txt", "w")
 		for url in url_set:
 			fout.write(url+"\n")

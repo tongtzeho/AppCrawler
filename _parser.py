@@ -610,6 +610,30 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('适用系统：<span class="fgrey5">.*?</span>', data)
 		if len(matcher): dict['System'] = unescape(matcher[0].replace('适用系统：<span class="fgrey5">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 
+	elif market == 'zol':
+		matcher = re.findall('<h1 class="soft-title">.*?</h1>', data)
+		if len(matcher): dict['Name'] = unescape(matcher[0].replace('<h1 class="soft-title">', "").replace('</h1>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span>[0-9,]+次</span>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<span>', "").replace('次</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(',', ""))
+		matcher = re.findall('</span></span><em>[0-9\.]+</em></div>', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('</span></span><em>', "").replace('</em></div>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('class="join-num">共 <em>[0-9]+</em> 人参与</a>', data)
+		if len(matcher): dict['Rating_Num'] = dict['Comment_Num'] = unescape(matcher[0].replace('class="join-num">共 <em>', "").replace('</em> 人参与</a>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span>分类：</span>.*?</a>', data)
+		if len(matcher): dict['Category'] = unescape(re.subn('<.*?>', "", matcher[0].replace('<span>分类：</span>', ""))[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<span>更新：</span><em>.*?</em>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<span>更新：</span><em>', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span>厂商：</span>.*?</em>', data)
+		if len(matcher): dict['Developer'] = unescape(re.subn('<.*?>', "", matcher[0].replace('<span>厂商：</span>', ""))[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('系统要求：</span>Android.*?</li>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('系统要求：</span>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<span class="good".*?>[0-9]+</span>', data)
+		if len(matcher): dict['Like_Num'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<span class="bad".*?>[0-9]+</span>', data)
+		if len(matcher): dict['Dislike_Num'] = unescape(re.subn('<.*?>', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<span>语言：</span>.*?</em>', data)
+		if len(matcher): dict['Language'] = unescape(re.subn('<.*?>', "", matcher[0].replace('<span>语言：</span>', ""))[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -852,7 +876,16 @@ def get_app_description(market, data):
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
-			
+
+	elif market == 'zol':
+		matcher = re.findall('<div class="text">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[-1].replace('<p class="f16 ff-wryh">应用简介</p>', "").replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
 	return ""
 	
 def get_app_release_note(market, data):

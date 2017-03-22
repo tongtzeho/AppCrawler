@@ -45,6 +45,8 @@ def page_invalid(market, data):
 		return '<title>404-Mobile Market应用商场</title>' in data
 	elif market == 'lenovo':
 		return '<img src="/amp5/images/404.jpg" class="tcenter margin88">' in data
+	elif market == 'zol':
+		return '<iframe width="100%" height="100%" src="http://sj.zol.com.cn/404.html" marginwidth="0" marginheight="0" scrolling="no" frameborder="0"></iframe>' in data
 	return False	
 
 def check_response(market, result):
@@ -275,5 +277,13 @@ def check_response(market, result):
 		if not '3-Star_Rating_Num' in result[0]: return False
 		if not '2-Star_Rating_Num' in result[0]: return False
 		if not '1-Star_Rating_Num' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'zol':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
 		if not len(result[2]): return False
 	return True
