@@ -176,6 +176,11 @@ def get_extend_urls(market, data, prefix):
 	#	matcher = re.findall('<a target="_blank" href=" http://sj.zol.com.cn/[^/]+/"', data)
 	#	for url in matcher:
 	#		urls.add(url.split('/')[-2]+'/')
+
+	elif market == 'nduo':
+		matcher = re.findall('onclick="GetSoftDetail\([0-9]+\)"', data)
+		for url in matcher:
+			urls.add(url.split('(')[-1][:-2])
 			
 	return urls
 	
@@ -515,6 +520,10 @@ def generate_url(market):
 	elif market == 'zol':
 		for i in range(1, 386):
 			result.append('http://sj.zol.com.cn/android_app/page_'+str(i)+'.html')
+
+	elif market == 'nduo':
+		result.append('http://www.nduo.cn/Home/Index/0/?webType=web')
+		result.append('http://www.nduo.cn/Home/Index/1/?webType=web')
 	
 	return tuple(result)
 	
@@ -548,22 +557,27 @@ if __name__ == '__main__':
 		'appchina': 'http://www.appchina.com/app/',
 		'10086': 'http://mm.10086.cn/android/info/',
 		'lenovo': 'http://www.lenovomm.com/appdetail/',
-		'zol': 'http://sj.zol.com.cn/'
+		'zol': 'http://sj.zol.com.cn/',
+		'nduo': 'http://www.nduo.cn/Home/WebDetail/'
 	}
 	
 	for key in url_prefix:
-		if key != 'zol': continue
+		if key != 'nduo': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
 			err_time = 0
 			while True:
-				try:
+				#try:
 					#动态加载
 					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
 					driver.set_page_load_timeout(30)
 					driver.get(root_url)
-					time.sleep(0.5)
+					time.sleep(1)
+					if (key == 'nduo'):
+						for i in range(1, 21):
+							driver.find_element_by_xpath('/x:html/x:body/x:div/x:div[2]/x:div[3]/x:div[2]/x:div[3]/x:a').click()
+							time.sleep(2)
 					data = driver.page_source
 					driver.quit()
 					
@@ -577,11 +591,11 @@ if __name__ == '__main__':
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)
 					break
-				except:
-					err_time += 1
-					if err_time < 10: continue
-					print ("错误："+root_url)
-					break
+				#except:
+				#	err_time += 1
+				#	if err_time < 10: continue
+				#	print ("错误："+root_url)
+				#	break
 		fout = open(key+"_url_list.txt", "w")
 		for url in url_set:
 			fout.write(url+"\n")

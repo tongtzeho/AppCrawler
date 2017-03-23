@@ -634,6 +634,18 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('<span>语言：</span>.*?</em>', data)
 		if len(matcher): dict['Language'] = unescape(re.subn('<.*?>', "", matcher[0].replace('<span>语言：</span>', ""))[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
 
+	elif market == 'nduo':
+		matcher = re.findall('<h1 class="app-title ellipsis".*?>.*?</h1>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn(' *<.*?> *', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('下&nbsp;&nbsp;载&nbsp;&nbsp;量&nbsp;&nbsp;&nbsp;&nbsp;<strong>.*?</strong>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('下&nbsp;&nbsp;载&nbsp;&nbsp;量&nbsp;&nbsp;&nbsp;&nbsp;<strong>', "").replace('</strong>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('大&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小&nbsp;&nbsp;&nbsp;&nbsp;<strong>.*?</strong>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('大&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;小&nbsp;&nbsp;&nbsp;&nbsp;<strong>', "").replace('</strong>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('更新时间&nbsp;&nbsp;&nbsp;&nbsp;<strong>.*?</strong>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('更新时间&nbsp;&nbsp;&nbsp;&nbsp;<strong>', "").replace('</strong>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('版&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本&nbsp;&nbsp;&nbsp;&nbsp;<strong>.*?</strong>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('版&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本&nbsp;&nbsp;&nbsp;&nbsp;<strong>', "").replace('</strong>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -886,6 +898,15 @@ def get_app_description(market, data):
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
 
+	elif market == 'nduo':
+		matcher = re.findall('<div class="app-detail-intro expand-panel">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
 	return ""
 	
 def get_app_release_note(market, data):
@@ -984,6 +1005,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('版本更新</h2>.*?<p class="art-content">.*?</p>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('版本更新</h2>' , "").replace('<p>', "\n").replace("<br/>", "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'nduo':
+		matcher = re.findall('<div class="app-detail-intro expand-panelo">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

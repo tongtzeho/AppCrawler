@@ -48,12 +48,13 @@ url_prefix = {
 	'appchina': 'http://www.appchina.com/app/',
 	'10086': 'http://mm.10086.cn/android/info/',
 	'lenovo': 'http://www.lenovomm.com/appdetail/',
-	'zol': 'http://sj.zol.com.cn/'
+	'zol': 'http://sj.zol.com.cn/',
+	'nduo': 'http://www.nduo.cn/Home/WebDetail/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -376,8 +377,7 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'zol'
-	myurl = 'http://sj.zol.com.cn/talkingtomcat/'
+	myurl = 'http://www.nduo.cn/Home/WebDetail/987601'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -399,8 +399,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('zol', response[4], '~zoltmp0.apk', {})
-	download_icon('zol', response[7], '~zoltmp0.png')	
+	download_apk('nduo', response[4], '~nduotmp0.apk', {})
+	download_icon('nduo', response[7], '~nduotmp0.png')	
 	exit()
 	
 if __name__ == '__main__':
