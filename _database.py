@@ -2,7 +2,7 @@
 # sudo nohup bash _database.sh >_database.log 2>&1 &
 # 需要安装pymysql
 
-import pymysql, multiprocessing, re, time, datetime, os
+import pymysql, multiprocessing, re, time, datetime, os, codecs
 
 market_id_dict = {
 	'googleplay': '0',
@@ -375,7 +375,7 @@ def store(param):
 							if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
 								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Information File Not Found)")
 								continue
-							fin_info = open(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt", "r")
+							fin_info = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt", "r", "utf-8")
 							info_all = fin_info.read()
 							fin_info.close()
 							try:
@@ -398,19 +398,19 @@ def store(param):
 								continue
 							if not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"}/db"+iseng)):
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
-									fin_perm = open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r")
+									fin_perm = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r", "utf-8")
 									perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
 									fin_perm.close()
 								else:
 									perm_all = None
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt"):
-									fin_desc = open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r")
+									fin_desc = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r", "utf-8")
 									desc_all = fin_desc.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
 									fin_desc.close()
 								else:
 									desc_all = None
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt"):
-									fin_rlnt = open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r")
+									fin_rlnt = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r", "utf-8")
 									rlnt_all = fin_rlnt.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
 									fin_rlnt.close()
 								else:
@@ -434,7 +434,7 @@ def store(param):
 			else: time.sleep(1)
 			prevcount = count
 
-def clear_tag():
+def clear_tag(root):
 	tagcn = "db"
 	tagen = "db(eng)"
 	rm_num = 0
@@ -452,6 +452,8 @@ def clear_tag():
 	print ("Remove "+str(rm_num)+" Tag(s).")
 
 if __name__ == '__main__':
+	#clear_tag('D:/Android/')
+	#exit()
 	if not os.path.isfile("database.txt"): exit()
 	if os.path.isfile('db_exit'): os.remove('db_exit')
 	fin_settings = open("database.txt", "r")
