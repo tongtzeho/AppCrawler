@@ -3,7 +3,7 @@
 from urllib import request
 from selenium import webdriver
 from _googleplayapi import GooglePlayAPI
-import urllib, time, requests, re
+import urllib, time, requests, re, os
 
 def get_apk_download_link(market, data, url):
 	if market == 'yingyongbao':
@@ -203,6 +203,13 @@ def get_icon_download_link(market, data):
 	return ""
 
 def download_apk(market, url, apkfile, config):
+
+	#Windows
+	phantomjs_execute_path = 'phantomjs\\bin\\phantomjs.exe'
+
+	#Linux
+	#phantomjs_execute_path = 'phantomjs'
+
 	if market == 'googleplay':
 		if not len(url): return False
 		packagename = url.split("=")[1]
@@ -295,6 +302,23 @@ def download_apk(market, url, apkfile, config):
 					return True
 				else:
 					continue
+			except:
+				continue
+				
+	elif market == 'cnmo':
+		if not len(url): return False
+		for i in range(10):
+			try:
+				os.system(phantomjs_execute_path+" _location.js "+url+" >> "+apkfile)
+				urlnew = open(apkfile, 'r').read().split('\n')[-2].replace('\r', "")
+				web = requests.get(urlnew, stream=True, timeout=30)
+				with open(apkfile, 'wb') as fout:
+					for chunk in web.iter_content(chunk_size=204800):
+						if chunk:
+							fout.write(chunk)
+							fout.flush()
+				fout.close()
+				return True
 			except:
 				continue
 
