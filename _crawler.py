@@ -17,14 +17,14 @@ from _checker import *
 #phantom_js目录
 
 #Windows
-#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 
 #Linux
-phantomjs_path = 'phantomjs'
+#phantomjs_path = 'phantomjs'
 
 #Header的User Agent
-#user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+#user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -379,7 +379,7 @@ def initialization(param):
 
 if False:
 	market = 'cnmo'
-	myurl = 'http://app.cnmo.com/android/237027/'
+	myurl = 'http://app.cnmo.com/android/183850/'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -400,8 +400,10 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
-	download_apk('cnmo', response[4], '~cnmotmp0.apk', {})
+	#exit()
+	if market == 'googleplay': config = read_config()
+	else: config = {}
+	download_apk('cnmo', response[4], '~cnmotmp0.apk', config)
 	download_icon('cnmo', response[7], '~cnmotmp0.png')	
 	exit()
 	
