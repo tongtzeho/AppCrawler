@@ -646,6 +646,36 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('版&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本&nbsp;&nbsp;&nbsp;&nbsp;<strong>.*?</strong>', data)
 		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('版&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本&nbsp;&nbsp;&nbsp;&nbsp;<strong>', "").replace('</strong>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 
+	elif market == 'cnmo':
+		matcher = re.findall('<p class="reviewHdConTit">.*?</p>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn(' *<.*?> *', "", matcher[0])[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<li>应用大小：.*?</li>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<li>应用大小：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('<div class="scores fL">[0-5]分</div>', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('<div class="scores fL">', "").replace('分</div>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('已有<span class="colC00">[0-9]+</span>条点评', data)
+		if len(matcher): dict['Rating_Num'] = dict['Comment_Num'] = unescape(matcher[0].replace('已有<span class="colC00">', "").replace('</span>条点评', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<div class="comTotalMen">\r?\n?.*?[0-9]+人', data)
+		if len(matcher) == 5:
+			dict['5-Star_Rating_Num'] = unescape(re.findall('[0-9]+', matcher[0])[-1])
+			dict['4-Star_Rating_Num'] = unescape(re.findall('[0-9]+', matcher[1])[-1])
+			dict['3-Star_Rating_Num'] = unescape(re.findall('[0-9]+', matcher[2])[-1])
+			dict['2-Star_Rating_Num'] = unescape(re.findall('[0-9]+', matcher[3])[-1])
+			dict['1-Star_Rating_Num'] = unescape(re.findall('[0-9]+', matcher[4])[-1])
+		matcher = re.findall('<li>应用分类：.*?</a></li>', data)
+		if len(matcher): dict['Category'] = unescape(re.subn(' *<.*?> *', "", matcher[0].replace('<li>应用分类：', ""))[0].replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<li>版本：.*?</li>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('<li>版本：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>更新时间：.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<li>更新时间：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>开发厂商：.*?</li>', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<li>开发厂商：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>运行环境：.*?</li>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<li>运行环境：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li>语言：.*?</li>', data)
+		if len(matcher): dict['Language'] = unescape(matcher[0].replace('<li>语言：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		if '<li>应用价格：<img src="http://icon.cnmo-img.com.cn/app/indeximg/mianfei.jpg"' in data: dict['Free'] = 'True'
+
 	return dict
 
 def get_app_permission(market, data):
@@ -900,6 +930,15 @@ def get_app_description(market, data):
 
 	elif market == 'nduo':
 		matcher = re.findall('<div class="app-detail-intro expand-panel">.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'cnmo':
+		matcher = re.findall('<p id="conIntro".*?</p>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]

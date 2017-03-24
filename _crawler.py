@@ -49,16 +49,17 @@ url_prefix = {
 	'10086': 'http://mm.10086.cn/android/info/',
 	'lenovo': 'http://www.lenovomm.com/appdetail/',
 	'zol': 'http://sj.zol.com.cn/',
-	'nduo': 'http://www.nduo.cn/Home/WebDetail/'
+	'nduo': 'http://www.nduo.cn/Home/WebDetail/',
+	'cnmo': 'http://app.cnmo.com/android/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo' or market == 'cnmo':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
-				req.add_header('User-Agent', user_agent);
+				req.add_header('User-Agent', user_agent)
 				web = request.urlopen(req, timeout=30)
 				charset = str(web.headers.get_content_charset())
 				if charset == "None": charset = "utf-8"
@@ -377,7 +378,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	myurl = 'http://www.nduo.cn/Home/WebDetail/987601'
+	market = 'cnmo'
+	myurl = 'http://app.cnmo.com/android/237027/'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -399,8 +401,8 @@ if False:
 	print ("-----------")
 	print (response[7])
 	exit()
-	download_apk('nduo', response[4], '~nduotmp0.apk', {})
-	download_icon('nduo', response[7], '~nduotmp0.png')	
+	download_apk('cnmo', response[4], '~cnmotmp0.apk', {})
+	download_icon('cnmo', response[7], '~cnmotmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

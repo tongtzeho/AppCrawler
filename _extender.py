@@ -181,6 +181,11 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('onclick="GetSoftDetail\([0-9]+\)"', data)
 		for url in matcher:
 			urls.add(url.split('(')[-1][:-2])
+
+	elif market == 'cnmo':
+		matcher = re.findall('<a target="_blank" href="http://app.cnmo.com/android/[0-9]+/">', data)
+		for url in matcher:
+			urls.add(url.split('/')[-2]+'/')
 			
 	return urls
 	
@@ -524,6 +529,12 @@ def generate_url(market):
 	elif market == 'nduo':
 		result.append('http://www.nduo.cn/Home/Index/0/?webType=web')
 		result.append('http://www.nduo.cn/Home/Index/1/?webType=web')
+
+	elif market == 'cnmo':
+		for i in range(1, 397):
+			result.append('http://app.cnmo.com/android/software/l4_f'+str(i)+'.html')
+		for i in range(1, 343):
+			result.append('http://app.cnmo.com/android/game/l4_f'+str(i)+'.html')
 	
 	return tuple(result)
 	
@@ -558,44 +569,45 @@ if __name__ == '__main__':
 		'10086': 'http://mm.10086.cn/android/info/',
 		'lenovo': 'http://www.lenovomm.com/appdetail/',
 		'zol': 'http://sj.zol.com.cn/',
-		'nduo': 'http://www.nduo.cn/Home/WebDetail/'
+		'nduo': 'http://www.nduo.cn/Home/WebDetail/',
+		'cnmo': 'http://app.cnmo.com/android/'
 	}
 	
 	for key in url_prefix:
-		if key != 'nduo': continue
+		if key != 'cnmo': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:
 			err_time = 0
 			while True:
-				#try:
+				try:
 					#动态加载
-					driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-					driver.set_page_load_timeout(30)
-					driver.get(root_url)
-					time.sleep(1)
-					if (key == 'nduo'):
-						for i in range(1, 21):
-							driver.find_element_by_xpath('/x:html/x:body/x:div/x:div[2]/x:div[3]/x:div[2]/x:div[3]/x:a').click()
-							time.sleep(2)
-					data = driver.page_source
-					driver.quit()
+					#driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+					#driver.set_page_load_timeout(30)
+					#driver.get(root_url)
+					#time.sleep(1)
+					#if (key == 'nduo'):
+					#	for i in range(1, 21):
+					#		driver.find_element_by_xpath('/x:html/x:body/x:div/x:div[2]/x:div[3]/x:div[2]/x:div[3]/x:a').click()
+					#		time.sleep(2)
+					#data = driver.page_source
+					#driver.quit()
 					
 					#静态加载
-					#web = request.urlopen(root_url, timeout=30)
-					#charset = str(web.headers.get_content_charset())
-					#if charset == "None": charset = "utf-8"
-					#data = web.read().decode(charset)
-					#if key == '91' and data.startswith("WOW"): continue
+					web = request.urlopen(root_url, timeout=30)
+					charset = str(web.headers.get_content_charset())
+					if charset == "None": charset = "utf-8"
+					data = web.read().decode(charset)
+					if key == '91' and data.startswith("WOW"): continue
 					
 					url_set.update(get_extend_urls(key, data, url_prefix[key]))
 					print ("完成："+root_url)
 					break
-				#except:
-				#	err_time += 1
-				#	if err_time < 10: continue
-				#	print ("错误："+root_url)
-				#	break
+				except:
+					err_time += 1
+					if err_time < 10: continue
+					print ("错误："+root_url)
+					break
 		fout = open(key+"_url_list.txt", "w")
 		for url in url_set:
 			fout.write(url+"\n")

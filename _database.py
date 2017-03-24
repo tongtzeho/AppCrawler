@@ -28,7 +28,8 @@ market_id_dict = {
 	'10086': '20',
 	'lenovo': '21',
 	'zol': '22',
-	'nduo': '23'
+	'nduo': '23',
+	'cnmo': '24'
 }
 
 def connect_mysql():
@@ -90,7 +91,8 @@ def parse_rating(market, line):
 		'sina': 5,
 		'dcn': 5,
 		'lenovo': 5,
-		'zol': 10
+		'zol': 10,
+		'cnmo': 5
 	}
 	numstr = re.findall("[0-9\.]+", line)
 	if len(numstr):
@@ -128,7 +130,7 @@ def parse_date(market, line):
 		updatetimestr = line+" 00:00:00"
 	elif market == '91':
 		updatetimestr = line[:-1]+":00"
-	elif market == 'sogou':
+	elif market == 'sogou' or market == 'cnmo':
 		updatetimestr = line
 	elif market == 'googleplayeng' or market == 'wandoujia':
 		if line[0:3] in engmonth_num:

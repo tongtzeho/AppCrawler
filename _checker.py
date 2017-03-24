@@ -49,6 +49,8 @@ def page_invalid(market, data):
 		return '<iframe width="100%" height="100%" src="http://sj.zol.com.cn/404.html" marginwidth="0" marginheight="0" scrolling="no" frameborder="0"></iframe>' in data
 	elif market == 'nduo':
 		return '<img src="/Content/images/404img.png" /></div>' in data
+	elif market == 'cnmo':
+		return '<title>您查找的手机应用不存在_手机中国</title>' in data
 	return False	
 
 def check_response(market, result):
@@ -294,5 +296,20 @@ def check_response(market, result):
 		if not 'Size' in result[0]: return False
 		if not 'Edition' in result[0]: return False
 		if not 'Update_Time' in result[0]: return False
+		if not len(result[2]): return False
+	elif market == 'cnmo':
+		if not 'Name' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not '5-Star_Rating_Num' in result[0]: return False
+		if not '4-Star_Rating_Num' in result[0]: return False
+		if not '3-Star_Rating_Num' in result[0]: return False
+		if not '2-Star_Rating_Num' in result[0]: return False
+		if not '1-Star_Rating_Num' in result[0]: return False
 		if not len(result[2]): return False
 	return True
