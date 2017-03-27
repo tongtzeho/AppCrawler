@@ -676,6 +676,37 @@ def get_app_basic_info(market, data):
 		if len(matcher): dict['Language'] = unescape(matcher[0].replace('<li>语言：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 		if '<li>应用价格：<img src="http://icon.cnmo-img.com.cn/app/indeximg/mianfei.jpg"' in data: dict['Free'] = 'True'
 
+	elif market == 'pconline':
+		if not 'Android下载</a>' in data: return dict
+		matcher = re.findall('target="_self" title=".*?下载">.*?下载</a>', data)
+		if len(matcher): dict['Name'] = unescape(re.subn('下载">.*?下载</a>', "", matcher[0])[0].replace('target="_self" title="', "").replace('\t', " ").replace('\r', "").replace('\n', ""))
+		matcher = re.findall('<em id="span_dl_count">[0-9]+</em>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<em id="span_dl_count">', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('软件大小： </span>.*?</li>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('软件大小： </span>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('</span><i class="stars"><span style="width:[0-9]+%">', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('</span><i class="stars"><span style="width:', "").replace('%">', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('评论<em class="cmtDetail">[0-9]+</em>', data)
+		if len(matcher): dict['Comment_Num'] = unescape(matcher[0].replace('评论<em class="cmtDetail">', "").replace('</em>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('<span id="JvotePos">[0-9]+</span>', data)
+		if len(matcher): dict['Like_Num'] = unescape(matcher[0].replace('<span id="JvotePos">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('<span id="JvoteNeg">[0-9]+</span>', data)
+		if len(matcher): dict['Dislike_Num'] = unescape(matcher[0].replace('<span id="JvoteNeg">', "").replace('</span>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('[^<^>]*?</a> &gt; <a href="http://dl.pconline.com.cn/download/', data)
+		if len(matcher): dict['Category'] = unescape(matcher[0].replace('</a> &gt; <a href="http://dl.pconline.com.cn/download/', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('<h1>.*?</h1>', data)
+		if len(matcher):
+			matcher = re.findall(' [0-9\.]+ ?<?', matcher[0])
+			if len(matcher): dict['Edition'] = re.findall('[0-9\.]+', matcher[-1])[0]
+		matcher = re.findall('更新时间： </span>.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('更新时间： </span>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li title=".*?"><span class="sub">软件厂商：', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('<li title="', "").replace('"><span class="sub">软件厂商：', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		if '软件授权： </span>免费</li>' in data: dict['Free'] = 'True'
+		elif '软件授权： </span>收费</li>' in data: dict['Free'] = 'False'
+		matcher = re.findall('软件语言： </span>.*?</li>', data)
+		if len(matcher): dict['Language'] = unescape(matcher[0].replace('软件语言： </span>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+
 	return dict
 
 def get_app_permission(market, data):
@@ -714,6 +745,13 @@ def get_app_permission(market, data):
 
 	elif market == 'appchina':
 		matcher = re.findall('<ul class="permissions-list">.*?</ul>', data, re.S)
+		if len(matcher):
+			matcher = re.findall('<li>.*?</li>', matcher[0])
+			for permission in matcher:
+				list.append(unescape(permission.replace('<li>', "").replace('</li>', "")))
+
+	elif market == 'pconline':
+		matcher = re.findall('<ul class="news new-twice-d fs-14">.*?</ul>', data, re.S)
 		if len(matcher):
 			matcher = re.findall('<li>.*?</li>', matcher[0])
 			for permission in matcher:
@@ -946,6 +984,15 @@ def get_app_description(market, data):
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
 
+	elif market == 'pconline':
+		matcher = re.findall('<div class="soft-summary">.*?<[/divstrong]+>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
 	return ""
 	
 def get_app_release_note(market, data):
@@ -1053,6 +1100,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('<div class="app-detail-intro expand-panelo">.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'pconline':
+		matcher = re.findall('更新内容</strong>.*?</div>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('更新内容</strong>', "").replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

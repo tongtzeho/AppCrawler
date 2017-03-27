@@ -28,7 +28,7 @@ def binxml2strxml(manifest_file):
 		if not os.path.isfile(manifest_file):
 			return ""
 		os.rename(manifest_file, manifest_file+".xml")
-		os.system("java -jar AXMLPrinter2.jar "+manifest_file+".xml >> "+manifest_file)
+		os.system("java -jar AXMLPrinter2.jar "+manifest_file+".xml > "+manifest_file)
 		os.remove(manifest_file+".xml")
 		return manifest_file
 	except:

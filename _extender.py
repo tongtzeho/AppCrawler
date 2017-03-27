@@ -186,6 +186,11 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('<a target="_blank" href="http://app.cnmo.com/android/[0-9]+/">', data)
 		for url in matcher:
 			urls.add(url.split('/')[-2]+'/')
+
+	elif market == 'pconline':
+		matcher = re.findall('href="http://dl.pconline.com.cn/download/[0-9]+.html"', data)
+		for url in matcher:
+			urls.add(url.split('/')[-1][:-1])
 			
 	return urls
 	
@@ -535,6 +540,12 @@ def generate_url(market):
 			result.append('http://app.cnmo.com/android/software/l4_f'+str(i)+'.html')
 		for i in range(1, 343):
 			result.append('http://app.cnmo.com/android/game/l4_f'+str(i)+'.html')
+
+	elif market == 'pconline':
+		for i in range(1, 501):
+			result.append('http://dl.pconline.com.cn/sort/1402-1-'+str(i)+'.html')
+		for i in range(1, 301):
+			result.append('http://dl.pconline.com.cn/sort/1403-1-'+str(i)+'.html')
 	
 	return tuple(result)
 	
@@ -570,11 +581,12 @@ if __name__ == '__main__':
 		'lenovo': 'http://www.lenovomm.com/appdetail/',
 		'zol': 'http://sj.zol.com.cn/',
 		'nduo': 'http://www.nduo.cn/Home/WebDetail/',
-		'cnmo': 'http://app.cnmo.com/android/'
+		'cnmo': 'http://app.cnmo.com/android/',
+		'pconline': 'http://dl.pconline.com.cn/download/'
 	}
 	
 	for key in url_prefix:
-		if key != 'cnmo': continue
+		if key != 'pconline': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

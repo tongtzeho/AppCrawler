@@ -17,14 +17,14 @@ from _checker import *
 #phantom_js目录
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 
 #Linux
-#phantomjs_path = 'phantomjs'
+phantomjs_path = 'phantomjs'
 
 #Header的User Agent
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-#user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
+#user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -50,7 +50,8 @@ url_prefix = {
 	'lenovo': 'http://www.lenovomm.com/appdetail/',
 	'zol': 'http://sj.zol.com.cn/',
 	'nduo': 'http://www.nduo.cn/Home/WebDetail/',
-	'cnmo': 'http://app.cnmo.com/android/'
+	'cnmo': 'http://app.cnmo.com/android/',
+	'pconline': 'http://dl.pconline.com.cn/download/'
 }
 	
 def open_url(market, url):
@@ -378,8 +379,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'cnmo'
-	myurl = 'http://app.cnmo.com/android/183850/'
+	market = 'pconline'
+	myurl = 'http://dl.pconline.com.cn/download/172905.html'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -400,11 +401,11 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	#exit()
+	exit()
 	if market == 'googleplay': config = read_config()
 	else: config = {}
-	download_apk('cnmo', response[4], '~cnmotmp0.apk', config)
-	download_icon('cnmo', response[7], '~cnmotmp0.png')	
+	download_apk('pconline', response[4], '~pconlinetmp0.apk', config)
+	download_icon('pconline', response[7], '~pconlinetmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

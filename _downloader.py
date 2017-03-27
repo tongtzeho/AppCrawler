@@ -99,6 +99,10 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall('appLocalDownloadUrl=".*?"', data)
 		if len(matcher): return matcher[0].split('"')[1]
 
+	elif market == 'pconline':
+		matcher = re.findall('<a href=".*?\.apk" rel="nofollow" class="btn dl-btn"', data)
+		if len(matcher): return matcher[0].split('"')[1]
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -199,16 +203,20 @@ def get_icon_download_link(market, data):
 	elif market == 'cnmo':
 		matcher = re.findall('<img width="80" height="80" src=".*?">', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+
+	elif market == 'pconline':
+		matcher = re.findall('<img width="80" height="80" alt=".*?" src=".*?">\r?\n', data)
+		if len(matcher): return matcher[0].split('"')[-2]
 		
 	return ""
 
 def download_apk(market, url, apkfile, config):
 
 	#Windows
-	phantomjs_execute_path = 'phantomjs\\bin\\phantomjs.exe'
+	#phantomjs_execute_path = 'phantomjs\\bin\\phantomjs.exe'
 
 	#Linux
-	#phantomjs_execute_path = 'phantomjs'
+	phantomjs_execute_path = '/usr/lib/phantomjs/phantomjs'
 
 	if market == 'googleplay':
 		if not len(url): return False
@@ -309,7 +317,7 @@ def download_apk(market, url, apkfile, config):
 		if not len(url): return False
 		for i in range(10):
 			try:
-				os.system(phantomjs_execute_path+" _location.js "+url+" >> "+apkfile)
+				os.system(phantomjs_execute_path+" _location.js "+url+" > "+apkfile)
 				urlnew = open(apkfile, 'r').read().split('\n')[-2].replace('\r', "")
 				web = requests.get(urlnew, stream=True, timeout=30)
 				with open(apkfile, 'wb') as fout:
