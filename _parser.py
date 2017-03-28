@@ -707,6 +707,41 @@ def get_app_basic_info(market, data):
 		matcher = re.findall('软件语言： </span>.*?</li>', data)
 		if len(matcher): dict['Language'] = unescape(matcher[0].replace('软件语言： </span>', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
 
+	elif market == 'appcool':
+		matcher = re.findall('<h1 class="det-title">.*?</h1>', data)
+		if len(matcher): dict['Name'] = unescape(matcher[0].replace('<h1 class="det-title">', "").replace('</h1>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="fl">下载次数：.*?次</li>', data)
+		if len(matcher): dict['Download'] = unescape(matcher[0].replace('<li class="fl">下载次数：', "").replace('次</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="fl">文件大小：.*?</li>', data)
+		if len(matcher): dict['Size'] = unescape(matcher[0].replace('<li class="fl">文件大小：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<b>[0-9\.]+星</b><br />', data)
+		if len(matcher): dict['Rating'] = unescape(matcher[0].replace('<b>', "").replace('星</b><br />', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<p class="f14">[0-9]+ 人评分</p>', data)
+		if len(matcher): dict['Rating_Num'] = unescape(matcher[0].replace('<p class="f14">', "").replace(' 人评分</p>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('</em></span><span class="fr">[0-9]+</span></li>', data)
+		if len(matcher) == 5:
+			dict['5-Star_Rating_Num'] = unescape(matcher[0].replace('</em></span><span class="fr">', "").replace('</span></li>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['4-Star_Rating_Num'] = unescape(matcher[1].replace('</em></span><span class="fr">', "").replace('</span></li>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['3-Star_Rating_Num'] = unescape(matcher[2].replace('</em></span><span class="fr">', "").replace('</span></li>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['2-Star_Rating_Num'] = unescape(matcher[3].replace('</em></span><span class="fr">', "").replace('</span></li>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+			dict['1-Star_Rating_Num'] = unescape(matcher[4].replace('</em></span><span class="fr">', "").replace('</span></li>', "").replace('\t', "").replace('\r', "").replace('\n', "").replace(" ", ""))
+		matcher = re.findall('<li class="fl">所属分类：.*?</li>', data)
+		if len(matcher): dict['Category'] = unescape(matcher[0].replace('<li class="fl">所属分类：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('</em>号：.*?</li>', data)
+		if len(matcher): dict['Edition'] = unescape(matcher[0].replace('</em>号：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('</em>商：.*?</li>', data)
+		if len(matcher): dict['Developer'] = unescape(matcher[0].replace('</em>商：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="fl">发布时间：.*?</li>', data)
+		if len(matcher): dict['Update_Time'] = unescape(matcher[0].replace('<li class="fl">发布时间：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+		matcher = re.findall('<li class="fl">支持固件：.*?</li>', data)
+		if len(matcher): dict['System'] = unescape(matcher[0].replace('<li class="fl">支持固件：', "").replace('</li>', "").replace('\t', " ").replace('\r', "").replace('\n', " ").replace(' ', ""))
+		matcher = re.findall('class="mr10">.*?</a>', data)
+		if len(matcher):
+			tagall = ""
+			for tagstr in matcher:
+				tagall += ";"+unescape(tagstr.replace('class="mr10">', "").replace('</a>', "").replace('\t', " ").replace('\r', "").replace('\n', " "))
+			dict['Tag'] = tagall[1:]
+
 	return dict
 
 def get_app_permission(market, data):
@@ -993,6 +1028,15 @@ def get_app_description(market, data):
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
 			else: return tmp2
 
+	elif market == 'appcool':
+		matcher = re.findall('<dt>应用介绍</dt>.*?</dd>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<dt>应用介绍</dt>', "").replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
 	return ""
 	
 def get_app_release_note(market, data):
@@ -1109,6 +1153,15 @@ def get_app_release_note(market, data):
 		matcher = re.findall('更新内容</strong>.*?</div>', data, re.S)
 		if len(matcher):
 			tmp0 = re.subn('<.*?>', '', matcher[0].replace('更新内容</strong>', "").replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
+			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
+			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
+			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]
+			else: return tmp2
+
+	elif market == 'appcool':
+		matcher = re.findall('<dt>新版特性</dt>.*?</dd>', data, re.S)
+		if len(matcher):
+			tmp0 = re.subn('<.*?>', '', matcher[0].replace('<dt>新版特性</dt>', "").replace('<br/>', "\n").replace('<p>', "\n").replace("</br>", "\n").replace("<br />", "\n").replace('<br>', "\n").replace('</div>', "\n"))[0]
 			tmp1 = re.subn('( |\t)+', ' ', unescape(tmp0))[0]
 			tmp2 = re.subn('(\r?\n+ *)+', '\n', tmp1)[0]
 			if tmp2.startswith('\n') or tmp2.startswith(' '): return tmp2[1:]

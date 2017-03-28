@@ -22,4 +22,5 @@
 #zol ../Android/ 5 0.5 600000
 #nduo ../Android/ 5 0.5 600000
 #cnmo ../Android/ 4 0.6 600000
-pconline ../Android/ 4 0.6 600000
+#pconline ../Android/ 4 0.6 600000
+appcool ../Android/ 4 0.6 600000

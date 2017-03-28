@@ -191,6 +191,14 @@ def get_extend_urls(market, data, prefix):
 		matcher = re.findall('href="http://dl.pconline.com.cn/download/[0-9]+.html"', data)
 		for url in matcher:
 			urls.add(url.split('/')[-1][:-1])
+
+	elif market == 'appcool':
+		matcher = re.findall('<a href="/apps/detail-[0-9]+[\?"]?', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="/apps/', "")[:-1])
+		matcher = re.findall('<a href="/games/detail-[0-9]+[\?"]?', data)
+		for url in matcher:
+			urls.add(url.replace('<a href="/games/', "")[:-1])
 			
 	return urls
 	
@@ -546,6 +554,16 @@ def generate_url(market):
 			result.append('http://dl.pconline.com.cn/sort/1402-1-'+str(i)+'.html')
 		for i in range(1, 301):
 			result.append('http://dl.pconline.com.cn/sort/1403-1-'+str(i)+'.html')
+
+	elif market == 'appcool':
+		cate_str = ("/apps/xitonggongju", "/apps/shejiaoliaotian", "/apps/shenghuogowu", "/apps/yingyinbofang", "/apps/jiaotongdaohang", "/apps/yulesheying", "/apps/tuxiangmeihua", 
+			"/apps/anquanshadu", "/apps/bangongcidian", "/apps/jinronglicai", "/apps/tianqilvxing", "/apps/xinwenzixun", "/apps/tonghuatongxun", "/apps/jiaoyuyuedu", "/apps/jiankangyiliao", 
+			"/apps/zhuomianbizhi", "/games/xiuxianquwei", "/games/dongzuojinji", "/games/shejimaoxian", "/games/tiyujingsu", "/games/jiaosebanyan", "/games/jingyingcelue", "/games/wangluomoni", 
+			"/games/qipaiyizhi", "/games/wangyouhtml5")
+		for cate in cate_str:
+			for pagestr in ("page1", "page2"):
+				for rankstr in ("score", "new", "hot"):
+					result.append('http://www.mgyapp.com'+cate+'/'+pagestr+'/'+rankstr)
 	
 	return tuple(result)
 	
@@ -582,11 +600,12 @@ if __name__ == '__main__':
 		'zol': 'http://sj.zol.com.cn/',
 		'nduo': 'http://www.nduo.cn/Home/WebDetail/',
 		'cnmo': 'http://app.cnmo.com/android/',
-		'pconline': 'http://dl.pconline.com.cn/download/'
+		'pconline': 'http://dl.pconline.com.cn/download/',
+		'appcool': 'http://www.mgyapp.com/apps/'
 	}
 	
 	for key in url_prefix:
-		if key != 'pconline': continue
+		if key != 'appcool': continue
 		url_set = set()
 		url_tuple = generate_url(key)
 		for root_url in url_tuple:

@@ -51,12 +51,13 @@ url_prefix = {
 	'zol': 'http://sj.zol.com.cn/',
 	'nduo': 'http://www.nduo.cn/Home/WebDetail/',
 	'cnmo': 'http://app.cnmo.com/android/',
-	'pconline': 'http://dl.pconline.com.cn/download/'
+	'pconline': 'http://dl.pconline.com.cn/download/',
+	'appcool': 'http://www.mgyapp.com/apps/'
 }
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo' or market == 'cnmo':
+		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo' or market == 'cnmo' or market == 'appcool':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
 				else: req = request.Request(url)
@@ -379,8 +380,8 @@ def initialization(param):
 	print ("进程"+market+"退出")
 
 if False:
-	market = 'pconline'
-	myurl = 'http://dl.pconline.com.cn/download/172905.html'
+	market = 'appcool'
+	myurl = 'http://www.mgyapp.com/apps/detail-650999708'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -401,11 +402,11 @@ if False:
 		print (newurl)
 	print ("-----------")
 	print (response[7])
-	exit()
+	#exit()
 	if market == 'googleplay': config = read_config()
 	else: config = {}
-	download_apk('pconline', response[4], '~pconlinetmp0.apk', config)
-	download_icon('pconline', response[7], '~pconlinetmp0.png')	
+	download_apk('appcool', response[4], '~appcooltmp0.apk', config)
+	download_icon('appcool', response[7], '~appcooltmp0.png')	
 	exit()
 	
 if __name__ == '__main__':

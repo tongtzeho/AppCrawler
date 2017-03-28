@@ -103,6 +103,10 @@ def get_apk_download_link(market, data, url):
 		matcher = re.findall('<a href=".*?\.apk" rel="nofollow" class="btn dl-btn"', data)
 		if len(matcher): return matcher[0].split('"')[1]
 
+	elif market == 'appcool':
+		matcher = re.findall('<a href=".*?" class="det-butn-1"></a>', data)
+		if len(matcher): return matcher[0].split('"')[1]
+
 	return ""
 	
 def get_icon_download_link(market, data):
@@ -207,6 +211,10 @@ def get_icon_download_link(market, data):
 	elif market == 'pconline':
 		matcher = re.findall('<img width="80" height="80" alt=".*?" src=".*?">\r?\n', data)
 		if len(matcher): return matcher[0].split('"')[-2]
+
+	elif market == 'appcool':
+		matcher = re.findall('<img src=".*?" original=".*?" width="72" height="72" />', data)
+		if len(matcher): return matcher[0].split('"')[3]
 		
 	return ""
 

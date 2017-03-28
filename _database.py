@@ -30,12 +30,13 @@ market_id_dict = {
 	'zol': '22',
 	'nduo': '23',
 	'cnmo': '24',
-	'pconline': '25'
+	'pconline': '25',
+	'appcool': '26'
 }
 
 def connect_mysql():
 	try:
-		conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+		conn = pymysql.connect(host='localhost', port=3306, user='tzh', password='pkuoslab', db='Android', charset='utf8')
 		return conn
 	except:
 		print ("数据库连接失败 - "+time.asctime(time.localtime(time.time())))
@@ -57,6 +58,7 @@ def parse_number(market, line):
 		'百': 100,
 		'千': 1000,
 		'万': 10000,
+		'W': 10000,
 		'亿': 100000000
 	}
 	line = line.replace("+", "").replace(",", "").replace(" ", "").replace("%", "")
@@ -94,7 +96,8 @@ def parse_rating(market, line):
 		'lenovo': 5,
 		'zol': 10,
 		'cnmo': 5,
-		'pconline': 100
+		'pconline': 100,
+		'appcool': 5
 	}
 	numstr = re.findall("[0-9\.]+", line)
 	if len(numstr):
@@ -128,7 +131,7 @@ def parse_date(market, line):
 				if len(matcher):
 					day = matcher[0].replace("日", "")
 					updatetimestr = year+"-"+month+"-"+day+" 00:00:00"
-	elif market == '360' or market == 'huawei' or market == 'xiaomi' or market == 'hiapk' or market == 'oppo' or market == 'pp' or market == 'gfan' or market == 'meizu' or market == 'sina' or market == 'dcn' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'lenovo' or market == 'zol' or market == 'nduo' or market == 'pconline':
+	elif market == '360' or market == 'huawei' or market == 'xiaomi' or market == 'hiapk' or market == 'oppo' or market == 'pp' or market == 'gfan' or market == 'meizu' or market == 'sina' or market == 'dcn' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'lenovo' or market == 'zol' or market == 'nduo' or market == 'pconline' or market == 'appcool':
 		updatetimestr = line+" 00:00:00"
 	elif market == '91':
 		updatetimestr = line[:-1]+":00"

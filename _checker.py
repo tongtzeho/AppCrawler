@@ -53,6 +53,8 @@ def page_invalid(market, data):
 		return '<title>您查找的手机应用不存在_手机中国</title>' in data
 	elif market == 'pconline':
 		return (len(data) > 100 and not 'Android下载</a>' in data) or '<em class="ft42">页面走丢了</em>' in data
+	elif market == 'appcool':
+		return '<h4>很抱歉，您要访问的页面不存在</h4>' in data
 	return False	
 
 def check_response(market, result):
@@ -325,4 +327,20 @@ def check_response(market, result):
 		if not 'Developer' in result[0]: return False
 		if not len(result[2]): return False
 		if result[4].startswith('javascript:'): return False
+	elif market == 'appcool':
+		if not 'Name' in result[0]: return False
+		if not 'Download' in result[0]: return False
+		if not 'Size' in result[0]: return False
+		if not 'Rating' in result[0]: return False
+		if not 'Rating_Num' in result[0]: return False
+		if not 'Category' in result[0]: return False
+		if not 'Edition' in result[0]: return False
+		if not 'Developer' in result[0]: return False
+		if not 'Update_Time' in result[0]: return False
+		if not '5-Star_Rating_Num' in result[0]: return False
+		if not '4-Star_Rating_Num' in result[0]: return False
+		if not '3-Star_Rating_Num' in result[0]: return False
+		if not '2-Star_Rating_Num' in result[0]: return False
+		if not '1-Star_Rating_Num' in result[0]: return False
+		if not len(result[2]): return False
 	return True
