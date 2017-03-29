@@ -192,18 +192,18 @@ def update_apk_metadata(marketid, pkgname, md5str, info_dict, perm_all, desc_all
 	cursor = conn.cursor()
 	try:
 		if "Update_Time" in info_dict:
-			ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and UpTime =(select max(UpTime) from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and UpTime < "+info_dict["Update_Time"]+")")
+			ifexists = cursor.execute("select ID from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and UpTime =(select max(UpTime) from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and UpTime < "+info_dict["Update_Time"]+")")
 			if (ifexists == 0):
 				last_id = None
 			else:
 				last_id = str(cursor.fetchall()[0][0])
 		else:
 			last_id = None
-		ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and MD5 = '"+md5str+"'")
+		ifexists = cursor.execute("select ID from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and MD5 = '"+md5str+"'")
 		if (ifexists == 0):
 			cursor.execute("insert into Market_APK_Metadata (MarketID, Package_Name, MD5) values ("+marketid+", '"+pkgname+"', '"+md5str+"')")
 			conn.commit()
-			ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and MD5 = '"+md5str+"'")
+			ifexists = cursor.execute("select ID from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and MD5 = '"+md5str+"'")
 		update_id = str(cursor.fetchall()[0][0])
 		update_str = ""
 		if "Edition" in info_dict: update_str += ", Version='"+limitlen(info_dict['Edition'], 30)+"'"
@@ -231,11 +231,11 @@ def update_time_metadata(marketid, pkgname, timestr, info_dict):
 	if (conn == None): return False
 	cursor = conn.cursor()
 	try:
-		ifexists = cursor.execute("select ID from Market_Time_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and Time = "+timestr)
+		ifexists = cursor.execute("select ID from Market_Time_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and Time = "+timestr)
 		if (ifexists == 0):
 			cursor.execute("insert into Market_Time_Metadata (MarketID, Package_Name, Time) values ("+marketid+", '"+pkgname+"', "+timestr+")")
 			conn.commit()
-			ifexists = cursor.execute("select ID from Market_Time_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and Time = "+timestr)
+			ifexists = cursor.execute("select ID from Market_Time_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and Time = "+timestr)
 		update_id = str(cursor.fetchall()[0][0])
 		update_str = ""
 		if "Rating" in info_dict: update_str += ", Avg_rating="+info_dict['Rating']
@@ -260,14 +260,14 @@ def update_app_metadata(marketid, pkgname, urlsuffix, timestr, md5str, info_dict
 	if (conn == None): return False
 	cursor = conn.cursor()
 	try:
-		ifexists = cursor.execute("select ID from Market_APP_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"'")
+		ifexists = cursor.execute("select ID from Market_APP_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid)
 		if (ifexists == 0):
 			cursor.execute("insert into Market_APP_Metadata (MarketID, Package_Name) values ("+marketid+", '"+pkgname+"')")
 			conn.commit()
-			ifexists = cursor.execute("select ID from Market_APP_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"'")
+			ifexists = cursor.execute("select ID from Market_APP_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+)
 		update_id = str(cursor.fetchall()[0][0])
 		update_str = ""
-		ifexists = cursor.execute("select ID from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"' and UpTime =(select max(UpTime) from Market_APK_Metadata where MarketID = "+marketid+" and Package_Name = '"+pkgname+"')")
+		ifexists = cursor.execute("select ID from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and UpTime =(select max(UpTime) from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+")")
 		if (ifexists != 0): update_str += ", Market_APK_ID="+str(cursor.fetchall()[0][0])
 		update_str += ", Url_Suffix='"+urlsuffix[:319]+"'"
 		if "Name" in info_dict: update_str += ", App_Name='"+limitlen(info_dict['Name'], 100)+"'"
