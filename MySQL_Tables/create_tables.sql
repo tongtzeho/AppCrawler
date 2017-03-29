@@ -212,4 +212,16 @@ create table ThirdParty_Lib
 
 alter table ThirdParty_Lib comment '第三方库的信息表';
 
+create index pkg_mkt on Market_APK_Metadata(Package_Name, MarketID);
+
+create index mkt on Market_APK_Metadata(MarketID);
+
+create index pkg_mkt on Market_Time_Metadata(Package_Name, MarketID);
+
+create index mkt on Market_Time_Metadata(MarketID);
+
+create index pkg_mkt on Market_APP_Metadata(Package_Name, MarketID);
+
+create index mkt_url on Market_APP_Metadata(MarketID, Url_Suffix);
+
 /*漏洞我不是很懂，所以我没写~*/
