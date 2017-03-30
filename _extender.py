@@ -570,10 +570,10 @@ def generate_url(market):
 if __name__ == '__main__':
 	
 	#Windows
-	#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+	phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 	
 	#Linux
-	phantomjs_path = 'phantomjs'
+	#phantomjs_path = 'phantomjs'
 	
 	url_prefix = {
 		'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',

@@ -17,14 +17,14 @@ from _checker import *
 #phantom_js目录
 
 #Windows
-#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 
 #Linux
-phantomjs_path = 'phantomjs'
+#phantomjs_path = 'phantomjs'
 
 #Header的User Agent
-#user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+#user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -86,7 +86,6 @@ def open_url(market, url):
 				driver.quit()
 			except:
 				data = ""
-				driver.quit()
 		info_dict = get_app_basic_info(market, data)
 		permission_list = get_app_permission(market, data)
 		description = get_app_description(market, data)
@@ -145,6 +144,27 @@ def read_url(root, market):
 		result.add(line.replace('\r', "").replace('\n', ""))
 	fin.close()
 	return result
+	
+def read_log(root, market):
+	result = {}
+	if os.path.isfile(root+'__log__/'+market+'.log'):
+		fin = codecs.open(root+'__log__/'+market+'.log', "r", "utf-8")
+		for line in fin:
+			line = line.replace("\r", "").replace("\n", "")
+			splitspace = line.split(" ")
+			if len(splitspace) == 6 and splitspace[1] == 'success':
+				pkgname = splitspace[3]
+				md5str = splitspace[4]
+				sha256str = splitspace[5]
+				if pkgname in result:
+					result[pkgname].add(md5str+'-'+sha256str)
+				else:
+					result[pkgname] = set()
+					result[pkgname].add(md5str+'-'+sha256str)
+		fin.close()
+		return result
+	else:
+		return result
 
 def read_config():
 	result = {}
@@ -201,12 +221,13 @@ def write_text_information(dir, response):
 			fout.write(response[11])
 			fout.close()
 	
-def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config):
+def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
 	hold_lock_set = False
 	hold_lock_log = False
+	hold_lock_dict = False
 	while len(url_set):
 		iteration += 1
 		lock_set.acquire()
@@ -269,7 +290,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 					manifest_file = binxml2strxml(extract_dir+"/AndroidManifest.xml")
 					if len(manifest_file):
 						apk_key = get_apk_key(market, "~"+market+"tmp"+threadidstr+".apk", manifest_file)
-						if len(apk_key) == 3:					
+						if len(apk_key) == 4:					
 							lock_pool.acquire()
 							hold_lock_pool = True
 							if apk_key[1] in name_pool:
@@ -280,28 +301,41 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 								name_pool.add(apk_key[1])
 								lock_pool.release()
 								hold_lock_pool = False
-							if os.path.exists(root+market+"/"+apk_key[1]):
-								if not os.path.exists(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}"): # 之前有这个应用，但是没有这个版本
-									state = 1 
+							exist_pkg = False
+							exist_md5sha256 = False
+							lock_dict.acquire()
+							hold_lock_dict = True
+							if apk_key[1] in app_dict:
+								exist_pkg = True
+								if apk_key[2]+'-'+apk_key[3] in app_dict[apk_key[1]]:
+									exist_md5sha256 = True
+								else:
+									app_dict[apk_key[1]].add(apk_key[2]+'-'+apk_key[3])
+							else:
+								app_dict[apk_key[1]] = set()
+								app_dict[apk_key[1]].add(apk_key[2]+'-'+apk_key[3])
+							lock_dict.release()
+							hold_lock_dict = False
+							if not os.path.exists(root+market+"/"+apk_key[1]): os.makedirs(root+market+"/"+apk_key[1])
+							if exist_pkg:
+								if not exist_md5sha256: state = 1 # 之前有这个应用，但是没有这个版本
 								else: # 之前有这个应用，也有这个版本
-									state = 2 
-									if not os.path.isfile(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}/end"): # 之前这个版本的应用信息不完整，相当于没有
-										shutil.rmtree(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", ignore_errors=True)
+									state = 2
+									if os.path.exists(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+'-'+apk_key[3]+"}") and not os.path.isfile(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+'-'+apk_key[3]+"}/end"): # 之前这个版本的应用信息不完整，相当于没有
+										shutil.rmtree(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+'-'+apk_key[3]+"}", ignore_errors=True)
 										state = 4
-							else: # 之前没有这个应用
-								os.makedirs(root+market+"/"+apk_key[1])
-								state = 3
+							else: state = 3 # 之前没有这个应用
 							if state == 1 or state == 3 or state == 4:
 								download_icon(market, response[7], "~"+market+"tmp"+threadidstr+".png")
 								cur_time = str(int(time.time()))
 								fout = codecs.open(extract_dir+"/Index.txt", "w", "utf-8")
-								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
+								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nSHA256\n\t"+apk_key[3]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 								fout.close()
 								shutil.move("~"+market+"tmp"+threadidstr+".apk", extract_dir+"/"+apk_key[1]+".apk")
 								if os.path.isfile("~"+market+"tmp"+threadidstr+".png"):
 									if market != 'googleplay': shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
 									else: shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.webp")
-								shutil.copytree(extract_dir, root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}", symlinks=True)
+								shutil.copytree(extract_dir, root+market+"/"+apk_key[1]+"/{"+apk_key[2]+'-'+apk_key[3]+"}", symlinks=True)
 							else:
 								cur_time = str(int(time.time()))
 							if not os.path.exists(root+market+"/"+apk_key[1]+"/["+cur_time+"]"):
@@ -309,18 +343,18 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 							lock_log.acquire()
 							hold_lock_log = True
 							flog = open(root+'__log__/'+market+'.log', 'a')
-							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+'\n')
+							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+' '+apk_key[3]+'\n')
 							flog.close()
 							lock_log.release()
 							hold_lock_log = False
 							if not os.path.isfile(root+market+"/"+apk_key[1]+"/["+cur_time+"]/end"):
 								write_text_information(root+market+"/"+apk_key[1]+"/["+cur_time+"]/", response)
 								fout = codecs.open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/Index.txt", "w", "utf-8")
-								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
+								fout.write("Market\n\t"+apk_key[0]+"\nPackage_Name\n\t"+apk_key[1]+"\nMD5\n\t"+apk_key[2]+"\nSHA256\n\t"+apk_key[3]+"\nTime\n\t"+cur_time+"\nLink\n\t"+url+"\nDownload_Link\n\t"+response[4]+"\n")
 								fout.close()
 								open(root+market+"/"+apk_key[1]+"/["+cur_time+"]/end", "w").close()								
 							if state == 1 or state == 3 or state == 4:
-								open(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+"}/end", "w").close()
+								open(root+market+"/"+apk_key[1]+"/{"+apk_key[2]+'-'+apk_key[3]+"}/end", "w").close()
 							if state == 1: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"版本和信息")
 							elif state == 2: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"信息。无版本更新")
 							elif state == 3: print (apk_key[0]+threadidstr+"：新增"+apk_key[1])
@@ -350,12 +384,21 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 				if hold_lock_pool: lock_pool.release()
 				if hold_lock_set: lock_set.release()
 				if hold_lock_log: lock_log.release()
+				if hold_lock_dict: lock_dict.release()
+				hold_lock_pool = False
+				hold_lock_set = False
+				hold_lock_log = False
+				hold_lock_dict = False
 
 def initialization(param):
 	market = param[0]
 	root = param[1]
 	if len(root) > 0 and not os.path.exists(root): return
-	if not os.path.exists(root+"__log__"): os.makedirs(root+"__log__")
+	if not os.path.exists(root+"__log__"):
+		try:
+			os.makedirs(root+"__log__")
+		except:
+			pass
 	thread_num = param[2]
 	rate_per_iteration = param[3]
 	need_extend = param[4]
@@ -365,23 +408,25 @@ def initialization(param):
 	name_pool = set()
 	lock_set = threading.Lock()
 	url_set = read_url(root, market)
+	app_dict = read_log(root, market)
 	lock_log = threading.Lock()
+	lock_dict = threading.Lock()
 	if market == 'googleplay': config = read_config()
 	else: config = {}
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	threads = []
 	for i in range(1, thread_num):
-		threads.append(threading.Thread(target=main_loop, args=(str(i), market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)))
+		threads.append(threading.Thread(target=main_loop, args=(str(i), market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict)))
 	for t in threads:
 		t.start()
-	main_loop('0', market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config)
+	main_loop('0', market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict)
 	for t in threads:
 		t.join()
 	print ("进程"+market+"退出")
 
 if False:
 	market = 'appcool'
-	myurl = 'http://www.mgyapp.com/apps/detail-650999708'
+	myurl = 'http://www.mgyapp.com/apps/detail-599253'
 	response = open_url(market, myurl)
 	for key, val in response[0].items():
 		if len(val): print (key+": "+val)
@@ -406,7 +451,11 @@ if False:
 	if market == 'googleplay': config = read_config()
 	else: config = {}
 	download_apk('appcool', response[4], '~appcooltmp0.apk', config)
-	download_icon('appcool', response[7], '~appcooltmp0.png')	
+	download_icon('appcool', response[7], '~appcooltmp0.png')
+	extract_dir = unzip_apk("~"+market+"tmp0.apk")
+	manifest_file = binxml2strxml(extract_dir+"/AndroidManifest.xml")
+	apk_key = get_apk_key(market, "~"+market+"tmp0.apk", manifest_file)
+	print (apk_key)
 	exit()
 	
 if __name__ == '__main__':

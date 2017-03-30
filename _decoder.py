@@ -63,6 +63,20 @@ def get_apk_md5(apkfile):
 		return myhash.hexdigest()
 	except:
 		return ""
+		
+def get_apk_sha256(apkfile):
+	try:
+		myhash = hashlib.sha256()
+		f = open(apkfile, 'rb')
+		while True:
+			b = f.read(8096)
+			if not b :
+				break
+			myhash.update(b)
+		f.close()
+		return myhash.hexdigest()
+	except:
+		return ""
 	
 def get_apk_key(market, apkfile, manifest_file):
 	if not os.path.isfile(apkfile):
@@ -72,8 +86,9 @@ def get_apk_key(market, apkfile, manifest_file):
 			package_name = get_apk_package_name(manifest_file)
 			if len(package_name):
 				md5_str = get_apk_md5(apkfile)
-				if len(md5_str):
-					return (market, package_name, md5_str)
+				sha256_str = get_apk_sha256(apkfile)
+				if len(md5_str) > 0 and len(sha256_str) > 0:
+					return (market, package_name, md5_str, sha256_str)
 			return ()
 		except:
 			return ()
