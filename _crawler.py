@@ -85,6 +85,10 @@ def open_url(market, url):
 				data = driver.page_source
 				driver.quit()
 			except:
+				try:
+					driver.quit()
+				except:
+					pass
 				data = ""
 		info_dict = get_app_basic_info(market, data)
 		permission_list = get_app_permission(market, data)
