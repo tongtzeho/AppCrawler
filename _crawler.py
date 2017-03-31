@@ -119,8 +119,11 @@ def open_url(market, url):
 				data = driver.page_source
 				driver.quit()
 			except:
+				try:
+					driver.quit()
+				except:
+					pass
 				data = ""
-				driver.quit()
 			info_dict_en = get_app_basic_info(market, data)
 			permission_list_en = get_app_permission(market, data)
 			description_en = get_app_description(market, data)
@@ -281,6 +284,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 					continue
 				if not len(response[0]):
 					print (market+threadidstr+"：访问链接失败（"+url+"）")
+					time.sleep(1)
 					continue
 				print (market+threadidstr+"：准备下载APK（"+response[4]+"）")
 				if os.path.isfile('exit'):
