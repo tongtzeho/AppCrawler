@@ -86,6 +86,7 @@ create table Market_APP_Metadata
    APP_ID               bigint comment 'APP表中的ID',
    Market_APK_ID        bigint comment '最新版本在Market_APK表中的ID',
    Url_Suffix           varchar(320) comment '该APP在某市场的链接的后缀',
+   Download_Url         varchar(640) comment '该APP在某市场的下载链接',
    Package_Name         varchar(300) comment '该APP的包名',
    App_Name             varchar(100) comment '该应用的名称', 
    Developer            varchar(60) comment '应用开发者',
@@ -173,6 +174,7 @@ create table Market
 (
    ID                   int not null comment '市场ID',
    Name                 varchar(25) not null comment '市场中文名称',
+   Url_Prefix           varchar(60) comment '市场应用页面链接前缀',
    Info                 varchar(1600) comment '描述该市场的背景，历史，规模',
    AppNum               bigint comment '数据库中存储的该市场的应用数目',
    Security             float comment '对该市场的综合评分',
