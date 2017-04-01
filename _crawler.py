@@ -154,6 +154,7 @@ def read_url(root, market):
 	
 def read_log(root, market):
 	result = {}
+	visit_url = set()
 	if os.path.isfile(root+'__log__/'+market+'.log'):
 		fin = codecs.open(root+'__log__/'+market+'.log', "r", "utf-8")
 		for line in fin:
@@ -168,10 +169,12 @@ def read_log(root, market):
 				else:
 					result[pkgname] = set()
 					result[pkgname].add(md5str+'-'+sha256str)
+			if len(splitspace) >= 3:
+				visit_url.add(splitspace[2])
 		fin.close()
-		return result
+		return (result, visit_url)
 	else:
-		return result
+		return (result, visit_url)
 
 def read_config():
 	result = {}
@@ -228,7 +231,7 @@ def write_text_information(dir, response):
 			fout.write(response[11])
 			fout.close()
 	
-def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict):
+def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict, visit_url):
 	iteration = 0
 	update = 0
 	hold_lock_pool = False
@@ -239,7 +242,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 		iteration += 1
 		lock_set.acquire()
 		hold_lock_set = True
-		url_list = random.sample(url_set, (int)(len(url_set)*rate_per_iteration))
+		url_list = list(url_set)
 		lock_set.release()
 		hold_lock_set = False
 		random.shuffle(url_list)
@@ -258,6 +261,17 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 					lock_set.release()
 					hold_lock_set = False
 					print (market+threadidstr+"：更新链接列表")
+				skip = False
+				lock_dict.acquire()
+				hold_lock_dict = True
+				if short_url in visit_url:
+					if random.random() >= rate_per_iteration:
+						skip = True
+				lock_dict.release()
+				hold_lock_dict = False
+				if skip:
+					print (market+threadidstr+"：跳过（"+url_prefix[market]+short_url+"）")
+					continue
 				if os.path.exists("~"+market+"tmp"+threadidstr): shutil.rmtree("~"+market+"tmp"+threadidstr, ignore_errors=True)				
 				if os.path.isfile('exit'):
 					print (market+threadidstr+"：结束")
@@ -281,6 +295,11 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 					flog.close()
 					lock_log.release()
 					hold_lock_log = False
+					lock_dict.acquire()
+					hold_lock_dict = True
+					visit_url.add(short_url)
+					lock_dict.release()
+					hold_lock_dict = False
 					continue
 				if not len(response[0]):
 					print (market+threadidstr+"：访问链接失败（"+url+"）")
@@ -313,6 +332,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 							exist_md5sha256 = False
 							lock_dict.acquire()
 							hold_lock_dict = True
+							visit_url.add(short_url)
 							if apk_key[1] in app_dict:
 								exist_pkg = True
 								if apk_key[2]+'-'+apk_key[3] in app_dict[apk_key[1]]:
@@ -416,7 +436,7 @@ def initialization(param):
 	name_pool = set()
 	lock_set = threading.Lock()
 	url_set = read_url(root, market)
-	app_dict = read_log(root, market)
+	app_dict, visit_url = read_log(root, market)
 	lock_log = threading.Lock()
 	lock_dict = threading.Lock()
 	if market == 'googleplay': config = read_config()
@@ -424,10 +444,10 @@ def initialization(param):
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	threads = []
 	for i in range(1, thread_num):
-		threads.append(threading.Thread(target=main_loop, args=(str(i), market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict)))
+		threads.append(threading.Thread(target=main_loop, args=(str(i), market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict, visit_url)))
 	for t in threads:
 		t.start()
-	main_loop('0', market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict)
+	main_loop('0', market, root, thread_num, rate_per_iteration, lock_pool, name_pool, lock_set, url_set, lock_log, need_extend, set_maxsize, config, lock_dict, app_dict, visit_url)
 	for t in threads:
 		t.join()
 	print ("进程"+market+"退出")
