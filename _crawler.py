@@ -159,7 +159,7 @@ def read_log(root, market):
 		for line in fin:
 			line = line.replace("\r", "").replace("\n", "")
 			splitspace = line.split(" ")
-			if len(splitspace) == 6 and splitspace[1] == 'success':
+			if len(splitspace) == 7 and splitspace[1] == 'success':
 				pkgname = splitspace[3]
 				md5str = splitspace[4]
 				sha256str = splitspace[5]
@@ -351,7 +351,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 							lock_log.acquire()
 							hold_lock_log = True
 							flog = open(root+'__log__/'+market+'.log', 'a')
-							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+' '+apk_key[3]+'\n')
+							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+' '+apk_key[3]+' '+response[4]+'\n')
 							flog.close()
 							lock_log.release()
 							hold_lock_log = False
