@@ -370,7 +370,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 								os.makedirs(root+market+"/"+apk_key[1]+"/["+cur_time+"]")
 							lock_log.acquire()
 							hold_lock_log = True
-							flog = open(root+'__log__/'+market+'.log', 'a')
+							flog = codecs.open(root+'__log__/'+market+'.log', 'a', 'utf-8')
 							flog.write(cur_time+' success '+short_url+' '+apk_key[1]+' '+apk_key[2]+' '+apk_key[3]+' '+response[4]+'\n')
 							flog.close()
 							lock_log.release()
