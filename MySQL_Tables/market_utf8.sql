@@ -53,3 +53,63 @@ insert into Market (ID, AppNum, Name, Info) values (24, 0, '手机中国', '手�
 insert into Market (ID, AppNum, Name, Info) values (25, 0, '太平洋下载中心', '太平洋下载中心为用户提供优质、方便、快捷、安全的下载服务。集软件、驱动、游戏、素材下载于一体，经过十二年的积累，已经成为太平洋电脑网访问量最高的栏目之一，成为国内领先的综合性下载平台。太平洋下载中心是国内最老牌的软件下载站之一，每天提供1000多万人次的下载服务。与国内主流的软件厂商都建立友好合作关系，基本添加太平洋分流。更新及时，每天不限时不限次的滚动更新。下载分类合理，定期针对网民需求调整和开设新分类。');
 
 insert into Market (ID, AppNum, Name, Info) values (26, 0, '应用酷', '应用酷是一款集安卓软件发布、搜索、安装于一体的平台，体积轻巧，界面简洁无广告，用户可轻松获得最全面、最快捷的软件、游戏下载服务。它的开发者是深圳信一网络有限公司刷机大师团队，同属于该公司的产品有著名的刷机大师、ROOT大师。');
+
+/*alter table Market add column Url_Prefix varchar(60) after Name;*/
+
+update Market set Url_Prefix = 'https://play.google.com/store/apps/details?id=' where ID=0;
+update Market set Url_Prefix = 'https://play.google.com/store/apps/details?id=' where ID=1;
+update Market set Url_Prefix = 'http://sj.qq.com/myapp/detail.htm?apkName=' where ID=2;
+update Market set Url_Prefix = 'http://shouji.baidu.com/software/' where ID=3;
+update Market set Url_Prefix = 'http://zhushou.360.cn/detail/index/soft_id/' where ID=4;
+update Market set Url_Prefix = 'http://appstore.huawei.com/app/' where ID=5;
+update Market set Url_Prefix = 'http://app.mi.com/details?id=' where ID=6;
+update Market set Url_Prefix = 'http://www.wandoujia.com/apps/' where ID=7;
+update Market set Url_Prefix = 'http://apk.hiapk.com/appinfo/' where ID=8;
+update Market set Url_Prefix = 'http://www.anzhi.com/' where ID=9;
+update Market set Url_Prefix = 'http://apk.91.com/Soft/Android/' where ID=10;
+update Market set Url_Prefix = 'http://store.oppomobile.com/product/' where ID=11;
+update Market set Url_Prefix = 'http://www.25pp.com/android/' where ID=12;
+update Market set Url_Prefix = 'http://zhushou.sogou.com/apps/detail/' where ID=13;
+update Market set Url_Prefix = 'http://apk.gfan.com/Product/' where ID=14;
+update Market set Url_Prefix = 'http://app.meizu.com/apps/public/detail?package_name=' where ID=15;
+update Market set Url_Prefix = 'http://app.sina.com.cn/appdetail.php?appID=' where ID=16;
+update Market set Url_Prefix = 'http://android.d.cn/' where ID=17;
+update Market set Url_Prefix = 'http://os-android.liqucn.com/' where ID=18;
+update Market set Url_Prefix = 'http://www.appchina.com/app/' where ID=19;
+update Market set Url_Prefix = 'http://mm.10086.cn/android/info/' where ID=20;
+update Market set Url_Prefix = 'http://www.lenovomm.com/appdetail/' where ID=21;
+update Market set Url_Prefix = 'http://sj.zol.com.cn/' where ID=22;
+update Market set Url_Prefix = 'http://www.nduo.cn/Home/WebDetail/' where ID=23;
+update Market set Url_Prefix = 'http://app.cnmo.com/android/' where ID=24;
+update Market set Url_Prefix = 'http://dl.pconline.com.cn/download/' where ID=25;
+update Market set Url_Prefix = 'http://www.mgyapp.com/apps/' where ID=26;
+
+/*alter table Market add column Folder varchar(20) after Url_Prefix;*/
+
+update Market set Folder = 'googleplay' where ID=0;
+update Market set Folder = 'googleplay' where ID=1;
+update Market set Folder = 'yingyongbao' where ID=2;
+update Market set Folder = 'baidu' where ID=3;
+update Market set Folder = '360' where ID=4;
+update Market set Folder = 'huawei' where ID=5;
+update Market set Folder = 'xiaomi' where ID=6;
+update Market set Folder = 'wandoujia' where ID=7;
+update Market set Folder = 'hiapk' where ID=8;
+update Market set Folder = 'anzhi' where ID=9;
+update Market set Folder = '91' where ID=10;
+update Market set Folder = 'oppo' where ID=11;
+update Market set Folder = 'pp' where ID=12;
+update Market set Folder = 'sogou' where ID=13;
+update Market set Folder = 'gfan' where ID=14;
+update Market set Folder = 'meizu' where ID=15;
+update Market set Folder = 'sina' where ID=16;
+update Market set Folder = 'dcn' where ID=17;
+update Market set Folder = 'liqucn' where ID=18;
+update Market set Folder = 'appchina' where ID=19;
+update Market set Folder = '10086' where ID=20;
+update Market set Folder = 'lenovo' where ID=21;
+update Market set Folder = 'zol' where ID=22;
+update Market set Folder = 'nduo' where ID=23;
+update Market set Folder = 'cnmo' where ID=24;
+update Market set Folder = 'pconline' where ID=25;
+update Market set Folder = 'appcool' where ID=26;
