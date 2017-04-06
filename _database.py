@@ -36,7 +36,7 @@ market_id_dict = {
 
 def connect_mysql():
 	try:
-		conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='AndroidNew', charset='utf8')
+		conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
 		return conn
 	except:
 		print ("数据库连接失败 - "+time.asctime(time.localtime(time.time())))
@@ -186,7 +186,7 @@ def limitlen(content, maxlen):
 		i -= 1
 	return content[:(maxlen-(maxlen-i+1)%2)]
 
-def update_apk_metadata(marketid, pkgname, md5str, sha256str, info_dict, perm_all, desc_all, rlnt_all):
+def update_apk_metadata(marketid, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all):
 	conn = connect_mysql()
 	if (conn == None): return False
 	cursor = conn.cursor()
@@ -214,6 +214,7 @@ def update_apk_metadata(marketid, pkgname, md5str, sha256str, info_dict, perm_al
 		if perm_all != None: update_str += ", PermEx='"+limitlen(perm_all, 3000)+"'"
 		if "Update_Time" in info_dict: update_str += ", UpTime="+info_dict['Update_Time']
 		if rlnt_all != None: update_str += ", ReleaseNote='"+limitlen(rlnt_all, 1500)+"'"
+		if bytestr != None: update_str += ", Byte="+bytestr
 		if len(update_str):
 			cursor.execute("update Market_APK_Metadata set"+update_str[1:]+" where id = "+update_id)
 			conn.commit()
@@ -255,7 +256,7 @@ def update_time_metadata(marketid, pkgname, timestr, info_dict):
 		print (marketid+"：错误！"+pkgname+"/["+timestr+"] (Time_MetaData Exception)")
 		return False
 
-def update_app_metadata(marketid, pkgname, urlsuffix, timestr, md5str, sha256str, info_dict):
+def update_app_metadata(marketid, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict):
 	conn = connect_mysql()
 	if (conn == None): return False
 	cursor = conn.cursor()
@@ -269,7 +270,7 @@ def update_app_metadata(marketid, pkgname, urlsuffix, timestr, md5str, sha256str
 		update_str = ""
 		ifexists = cursor.execute("select ID from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and UpTime =(select max(UpTime) from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+")")
 		if (ifexists != 0): update_str += ", Market_APK_ID="+str(cursor.fetchall()[0][0])
-		update_str += ", Url_Suffix='"+urlsuffix[:319]+"'"
+		update_str += ", Url_Suffix='"+urlsuffix[:319]+"', Download_Url='"+downloadurl[:639]+"'"
 		if "Name" in info_dict: update_str += ", App_Name='"+limitlen(info_dict['Name'], 100)+"'"
 		if "Developer" in info_dict: update_str += ", Developer='"+limitlen(info_dict['Developer'], 60)+"'"
 		if "Category" in info_dict: update_str += ", Category='"+limitlen(info_dict['Category'], 40)+"'"
@@ -372,12 +373,13 @@ def store(param):
 			line = line.replace("\r", "").replace("\n", "")
 			splitspace = line.split(" ")
 			try:
-				if len(splitspace) == 6 and splitspace[1] == 'success':
+				if len(splitspace) == 7 and splitspace[1] == 'success':
 					timestr = splitspace[0]
 					urlsuffix = splitspace[2]
 					pkgname = splitspace[3]
 					md5str = splitspace[4]
 					sha256str = splitspace[5]
+					downloadurl = splitspace[6]
 					if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/end"):
 						if (not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng))) or not ((os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng))):
 							if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
@@ -423,11 +425,15 @@ def store(param):
 									fin_rlnt.close()
 								else:
 									rlnt_all = None
-								if not update_apk_metadata(market_id, pkgname, md5str, sha256str, info_dict, perm_all, desc_all, rlnt_all): continue
+								if os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/"+pkgname+".apk"):
+									bytestr = str(os.path.getsize(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/"+pkgname+".apk"))
+								else:
+									bytestr = None
+								if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
 								open(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng, "w").close()						
 							if not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng)):
 								if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
-								if not update_app_metadata(market_id, pkgname, urlsuffix, timestr, md5str, sha256str, info_dict): continue
+								if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
 								open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
 						timestr = splitspace[0]
@@ -486,4 +492,4 @@ if __name__ == '__main__':
 	store(param_list[0])
 	for p in processes:
 		p.join()
-	print ("正常退出")
+print ("正常退出")
