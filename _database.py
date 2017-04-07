@@ -270,6 +270,9 @@ def update_app_metadata(marketid, pkgname, urlsuffix, downloadurl, timestr, md5s
 		update_str = ""
 		ifexists = cursor.execute("select ID from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+" and UpTime =(select max(UpTime) from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid+")")
 		if (ifexists != 0): update_str += ", Market_APK_ID="+str(cursor.fetchall()[0][0])
+		else:
+			ifexists = cursor.execute("select max(ID) from Market_APK_Metadata where Package_Name = '"+pkgname+"' and MarketID = "+marketid)
+			if (ifexists != 0): update_str += ", Market_APK_ID="+str(cursor.fetchall()[0][0])
 		update_str += ", Url_Suffix='"+urlsuffix[:319]+"', Download_Url='"+downloadurl[:639]+"'"
 		if "Name" in info_dict: update_str += ", App_Name='"+limitlen(info_dict['Name'], 100)+"'"
 		if "Developer" in info_dict: update_str += ", Developer='"+limitlen(info_dict['Developer'], 60)+"'"
@@ -466,7 +469,7 @@ def clear_tag(root):
 	print ("Remove "+str(rm_num)+" Tag(s).")
 
 if __name__ == '__main__':
-	#clear_tag('D:/Android/')
+	#clear_tag('/home/tzeho/Android_10app/')
 	#exit()
 	if not os.path.isfile("database.txt"): exit()
 	if os.path.isfile('db_exit'): os.remove('db_exit')
