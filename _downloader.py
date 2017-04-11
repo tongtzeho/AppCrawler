@@ -325,8 +325,7 @@ def download_apk(market, url, apkfile, config):
 		if not len(url): return False
 		for i in range(10):
 			try:
-				os.system(phantomjs_execute_path+" _location.js "+url+" > "+apkfile)
-				urlnew = open(apkfile, 'r').read().split('\n')[-2].replace('\r', "")
+				urlnew = os.popen(phantomjs_execute_path+" _location.js "+url).read().split('\n')[-2].replace('\r', "")
 				web = requests.get(urlnew, stream=True, timeout=30)
 				with open(apkfile, 'wb') as fout:
 					for chunk in web.iter_content(chunk_size=204800):
