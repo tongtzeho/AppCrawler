@@ -495,4 +495,4 @@ if __name__ == '__main__':
 	store(param_list[0])
 	for p in processes:
 		p.join()
-print ("正常退出")
+	print ("正常退出")
