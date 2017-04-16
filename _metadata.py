@@ -76,6 +76,8 @@ def update_metadata(response, package, url, market):
 			cmd2 += ')'
 			cursor.execute("insert into Metadata "+cmd1+" values "+cmd2)
 			conn.commit()
+			cursor.close()
+			conn.close()
 			return 0
 		else:
 			old_arr = cursor.fetchall()[0]
@@ -90,10 +92,16 @@ def update_metadata(response, package, url, market):
 					cmd += ", "+key+'='+val
 				cursor.execute("update Metadata set "+cmd+" where Package_Name='"+package+"' and MarketID="+marketidstr)
 				conn.commit()
+				cursor.close()
+				conn.close()
 				return 1
 			else:
+				cursor.close()
+				conn.close()
 				return 2
 	except:
+		cursor.close()
+		conn.close()
 		return -1
 
 def read_url_pair(url_pair_file):
@@ -107,7 +115,22 @@ def read_url_pair(url_pair_file):
 	fin.close()
 	return tuple(result)
 
+def exist_pkg_market(package, market):
+	conn = connect_mysql()
+	if (conn == None): return False
+	cursor = conn.cursor()
+	try:
+		ifexists = cursor.execute("select * from Metadata where Package_Name='"+package+"' and MarketID="+market_id_dict[market])
+		cursor.close()
+		conn.close()
+		return ifexists == 1
+	except:
+		cursor.close()
+		conn.close()
+		return False
+	
 def main_loop(threadidstr, market, thread_num, url_pkg_tuple):
+	firstloop = True
 	while True:
 		url_pkg_index = int(threadidstr)
 		while url_pkg_index < len(url_pkg_tuple):
@@ -123,7 +146,10 @@ def main_loop(threadidstr, market, thread_num, url_pkg_tuple):
 				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：链接格式错误（"+url_pkg+"）")
 				continue
 			print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：开始连接（"+url+"）")
-			response = open_url(market, url)
+			if firstloop and exist_pkg_market(package, market):
+				continue
+			else:
+				response = open_url(market, url)
 			if not len(response):
 				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：无效的链接（"+url+"）")
 				continue
@@ -143,6 +169,7 @@ def main_loop(threadidstr, market, thread_num, url_pkg_tuple):
 			elif state == 2:
 				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：更新失败"+package)
 		print (market+threadidstr+"：完成！")
+		firstloop = False
 
 def initialization(param):
 	market = param[0]
