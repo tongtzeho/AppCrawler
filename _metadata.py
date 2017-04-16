@@ -4,11 +4,10 @@ import codecs, time, os, pymysql, multiprocessing, threading
 from _crawler import open_url
 from _crawler import url_prefix
 from _database import market_id_dict
+from _database import limitlen
 from _database import parse_number
 from _database import parse_rating
 from _database import parse_date
-
-root = 'home/tzeho/AppCrawler/Url_Pair/'
 
 store_item = (
 	'Name', 
@@ -39,11 +38,11 @@ def connect_mysql():
 
 def parse_response(response, market):
 	cmd_dict = {}
-	if response[2] != None and len(response[2]): cmd_dict['Description'] = "'"+response[2][:4999]+"'"
-	if response[3] != None and len(response[3]): cmd_dict['Release_Note'] = "'"+response[3][:1499]+"'"
+	if response[2] != None and len(response[2]): cmd_dict['Description'] = "'"+limitlen(response[2].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 5000)+"'"
+	if response[3] != None and len(response[3]): cmd_dict['Release_Note'] = "'"+limitlen(response[3].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 1500)+"'"
 	for key, val in response[0].items():
 		if key in store_item:
-			if key == 'Name': cmd_dict[key] = "'"+response[0][key][:99]+"'"
+			if key == 'Name': cmd_dict[key] = "'"+limitlen(response[0][key].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 100)+"'"
 			elif key == 'Download': cmd_dict[key] = str(parse_number(market, response[0][key]))
 			elif key == 'Rating': cmd_dict[key] = str(parse_rating(market, response[0][key]))
 			elif key == 'Rating_Num': cmd_dict[key] = str(parse_number(market, response[0][key]))
@@ -52,11 +51,11 @@ def parse_response(response, market):
 			elif key == '3-Star_Rating_Num': cmd_dict['Three_Star'] = str(parse_number(market, response[0][key]))
 			elif key == '2-Star_Rating_Num': cmd_dict['Two_Star'] = str(parse_number(market, response[0][key]))
 			elif key == '1-Star_Rating_Num': cmd_dict['One_Star'] = str(parse_number(market, response[0][key]))
-			elif key == 'Category': cmd_dict[key] = "'"+response[0][key][:39]+"'"
-			elif key == 'Tag': cmd_dict[key] = "'"+response[0][key][:119]+"'"
-			elif key == 'Edition': cmd_dict[key] = "'"+response[0][key][:29]+"'"
+			elif key == 'Category': cmd_dict[key] = "'"+limitlen(response[0][key].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 40)+"'"
+			elif key == 'Tag': cmd_dict[key] = "'"+limitlen(response[0][key].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 120)+"'"
+			elif key == 'Edition': cmd_dict[key] = "'"+limitlen(response[0][key].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 30)+"'"
 			elif key == 'Update_Time': cmd_dict[key] = parse_date(market, response[0][key])
-			elif key == 'Developer': cmd_dict[key] = "'"+response[0][key][:59]+"'"
+			elif key == 'Developer': cmd_dict[key] = "'"+limitlen(response[0][key].replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\""), 60)+"'"
 	return cmd_dict
 
 def update_metadata(response, package, url, market):
@@ -115,34 +114,34 @@ def main_loop(threadidstr, market, thread_num, url_pkg_tuple):
 			url_pkg = url_pkg_tuple[url_pkg_index]
 			url_pkg_index += thread_num
 			if os.path.isfile('md_exit'):
-				print (market+threadidstr+"：结束")
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：结束")
 				return
 			try:
 				url = url_prefix[market]+url_pkg.split(' ')[0]
 				package = url_pkg.split(' ')[1].replace('\r', '').replace('\n', '')
 			except:
-				print (market+threadidstr+"：链接格式错误（"+url_pkg+"）")
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：链接格式错误（"+url_pkg+"）")
 				continue
-			print (market+threadidstr+"：开始连接（"+url+"）")
+			print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：开始连接（"+url+"）")
 			response = open_url(market, url)
 			if not len(response):
-				print (market+threadidstr+"：无效的链接（"+url+"）")
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：无效的链接（"+url+"）")
 				continue
 			if not len(response[0]):
-				print (market+threadidstr+"：访问链接失败（"+url+"）")
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：访问链接失败（"+url+"）")
 				time.sleep(1)
 				continue
 			state = update_metadata(response, package, url, market)
 			if state == -2:
-				print (market+threadidstr+"：数据库连接失败")
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：数据库连接失败")
 			elif state == -1:
-				print (market+threadidstr+"：数据错误！（"+package+"）")
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：数据错误！（"+package+"）")
 			elif state == 0:
-				print (market+threadidstr+"：新增"+package)
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：新增"+package)
 			elif state == 1:
-				print (market+threadidstr+"：更新"+package)
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：更新"+package)
 			elif state == 2:
-				print (market+threadidstr+"：更新失败"+package)
+				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：更新失败"+package)
 		print (market+threadidstr+"：完成！")
 
 def initialization(param):
@@ -160,7 +159,7 @@ def initialization(param):
 	for t in threads:
 		t.join()
 	print ("进程"+market+"退出")
-
+	
 if __name__ == '__main__':
 	if not os.path.isfile("metadata.txt"): exit()
 	if os.path.isfile('md_exit'): os.remove('md_exit')

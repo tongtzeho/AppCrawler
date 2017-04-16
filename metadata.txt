@@ -1,2 +1,6 @@
-yingyongbao url_pair/ 2
-baidu url_pair/ 2
+googleplay D:/url_pair/ 6
+yingyongbao D:/url_pair/ 6
+xiaomi D:/url_pair/ 6
+hiapk D:/url_pair/ 6
+meizu D:/url_pair/ 6
+lenovo D:/url_pair/ 6
