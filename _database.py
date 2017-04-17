@@ -67,11 +67,11 @@ def parse_number(market, line):
 	if len(numstr):
 		for cnword in cnword_multi_2.keys():
 			if line.endswith(cnword):
-				return str(round(float(numstr[-1])*cnword_multi_2[cnword]))
+				return str(int(round(float(numstr[-1])*cnword_multi_2[cnword])))
 		for cnword in cnword_multi_1.keys():
 			if line.endswith(cnword):
-				return str(round(float(numstr[-1])*cnword_multi_1[cnword]))
-		return str(round(float(numstr[-1])))
+				return str(int(round(float(numstr[-1])*cnword_multi_1[cnword])))
+		return str(int(round(float(numstr[-1]))))
 	return ""
 
 def parse_rating(market, line):
