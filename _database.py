@@ -353,6 +353,7 @@ def update_market(marketid, prevcount):
 def store(param):
 	market = param[0]
 	root = param[1]
+	cuttimestr = param[2]
 	if (not os.path.exists(root) and len(root) > 0) or not os.path.exists(root+"__log__"): return
 	market_id = market_id_dict[market]
 	iseng = ""
@@ -368,6 +369,7 @@ def store(param):
 			time.sleep(1)
 			continue
 		fin = open(root+'__log__/'+market+'.log', "r")
+		pkg_md5sha256_timestr = {}
 		for line in fin:
 			if os.path.isfile('db_exit'):
 				fin.close()
@@ -383,8 +385,14 @@ def store(param):
 					md5str = splitspace[4]
 					sha256str = splitspace[5]
 					downloadurl = splitspace[6]
-					if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/end"):
-						if (not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng))) or not ((os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng))):
+					if cuttimestr != None and int(timestr) <= int(cuttimestr):
+						if pkgname in pkg_md5sha256_timestr:
+							if not md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname]:
+								pkg_md5sha256_timestr[pkgname][md5str+'-'+sha256str] = timestr
+						else:
+							pkg_md5sha256_timestr[pkgname] = {md5str+'-'+sha256str: timestr}
+					if (cuttimestr == None or int(timestr) > int(cuttimestr)) and os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and ((pkgname in pkg_md5sha256_timestr and md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname]) or os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/end")):
+						if (not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng))) or ( (not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng))) and (not (pkgname in pkg_md5sha256_timestr and md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname])) ):
 							if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
 								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Information File Not Found)")
 								continue
@@ -409,7 +417,7 @@ def store(param):
 							if "Star_Rating_Num" in info_dict and len(re.findall('[0-9]+', info_dict["Star_Rating_Num"])) != 5:
 								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Star_Rating_Num)")
 								continue
-							if not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng)):
+							if (not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng))) and (not (pkgname in pkg_md5sha256_timestr and md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname])):
 								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
 									fin_perm = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r", "utf-8")
 									perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
@@ -481,10 +489,14 @@ if __name__ == '__main__':
 		if line.startswith('#') or len(line.split(' ')) < 2: continue
 		market = line.split(' ')[0]
 		root = line.split(' ')[1][:]
+		if len(line.split(' ')) >= 3:
+			cuttimestr = line.split(' ')[2]
+		else:
+			cuttimestr = None
 		if market in market_set: exit()
 		if market in market_id_dict:
 			market_set.add(market)
-			param_list.append((market, root))
+			param_list.append((market, root, cuttimestr))
 	fin_settings.close()
 	processes = []
 	for param in param_list:
