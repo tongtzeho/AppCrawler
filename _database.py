@@ -429,8 +429,8 @@ def store(param):
 								fin_rlnt.close()
 							else:
 								rlnt_all = None
-							if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
 							if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
+							if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
 							if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
 							open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
