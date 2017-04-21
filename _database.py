@@ -369,7 +369,6 @@ def store(param):
 			time.sleep(1)
 			continue
 		fin = open(root+'__log__/'+market+'.log', "r")
-		pkg_md5sha256_timestr = {}
 		for line in fin:
 			if os.path.isfile('db_exit'):
 				fin.close()
@@ -378,21 +377,16 @@ def store(param):
 			line = line.replace("\r", "").replace("\n", "")
 			splitspace = line.split(" ")
 			try:
-				if len(splitspace) == 7 and splitspace[1] == 'success':
+				if len(splitspace) == 8 and splitspace[1] == 'success':
 					timestr = splitspace[0]
 					urlsuffix = splitspace[2]
 					pkgname = splitspace[3]
 					md5str = splitspace[4]
 					sha256str = splitspace[5]
-					downloadurl = splitspace[6]
-					if cuttimestr != None and int(timestr) <= int(cuttimestr):
-						if pkgname in pkg_md5sha256_timestr:
-							if not md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname]:
-								pkg_md5sha256_timestr[pkgname][md5str+'-'+sha256str] = timestr
-						else:
-							pkg_md5sha256_timestr[pkgname] = {md5str+'-'+sha256str: timestr}
-					if (cuttimestr == None or int(timestr) > int(cuttimestr)) and os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and ((pkgname in pkg_md5sha256_timestr and md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname]) or os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/end")):
-						if (not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng))) or ( (not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng))) and (not (pkgname in pkg_md5sha256_timestr and md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname])) ):
+					bytestr = splitspace[6]
+					downloadurl = splitspace[7]
+					if (cuttimestr == None or int(timestr) > int(cuttimestr)) and os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end"):
+						if not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng)):
 							if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
 								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Information File Not Found)")
 								continue
@@ -417,35 +411,28 @@ def store(param):
 							if "Star_Rating_Num" in info_dict and len(re.findall('[0-9]+', info_dict["Star_Rating_Num"])) != 5:
 								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Star_Rating_Num)")
 								continue
-							if (not (os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng))) and (not (pkgname in pkg_md5sha256_timestr and md5str+'-'+sha256str in pkg_md5sha256_timestr[pkgname])):
-								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
-									fin_perm = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r", "utf-8")
-									perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
-									fin_perm.close()
-								else:
-									perm_all = None
-								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt"):
-									fin_desc = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r", "utf-8")
-									desc_all = fin_desc.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
-									fin_desc.close()
-								else:
-									desc_all = None
-								if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt"):
-									fin_rlnt = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r", "utf-8")
-									rlnt_all = fin_rlnt.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
-									fin_rlnt.close()
-								else:
-									rlnt_all = None
-								if os.path.isfile(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/"+pkgname+".apk"):
-									bytestr = str(os.path.getsize(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/"+pkgname+".apk"))
-								else:
-									bytestr = None
-								if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
-								open(root+market+"/"+pkgname+"/{"+md5str+"-"+sha256str+"}/db"+iseng, "w").close()						
-							if not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng)):
-								if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
-								if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
-								open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
+							if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
+								fin_perm = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r", "utf-8")
+								perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
+								fin_perm.close()
+							else:
+								perm_all = None
+							if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt"):
+								fin_desc = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r", "utf-8")
+								desc_all = fin_desc.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
+								fin_desc.close()
+							else:
+								desc_all = None
+							if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt"):
+								fin_rlnt = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r", "utf-8")
+								rlnt_all = fin_rlnt.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
+								fin_rlnt.close()
+							else:
+								rlnt_all = None
+							if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
+							if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
+							if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
+							open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
 						timestr = splitspace[0]
 						urlsuffix = splitspace[2]
