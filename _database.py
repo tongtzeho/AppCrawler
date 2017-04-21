@@ -434,9 +434,10 @@ def store(param):
 							if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
 							open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
-						timestr = splitspace[0]
-						urlsuffix = splitspace[2]
-						if not set_invalid_app_metadata(market_id, urlsuffix, timestr): continue
+					timestr = splitspace[0]
+					urlsuffix = splitspace[2]
+					if (cuttimestr == None or int(timestr) > int(cuttimestr)):
+						set_invalid_app_metadata(market_id, urlsuffix, timestr)
 			except:
 				print (market+iseng+"：Unknown Error - "+line)
 		fin.close()
