@@ -353,7 +353,6 @@ def update_market(marketid, prevcount):
 def store(param):
 	market = param[0]
 	root = param[1]
-	cuttimestr = param[2]
 	if (not os.path.exists(root) and len(root) > 0) or not os.path.exists(root+"__log__"): return
 	market_id = market_id_dict[market]
 	iseng = ""
@@ -385,59 +384,57 @@ def store(param):
 					sha256str = splitspace[5]
 					bytestr = splitspace[6]
 					downloadurl = splitspace[7]
-					if (cuttimestr == None or int(timestr) > int(cuttimestr)) and os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end"):
-						if not (os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng)):
-							if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
-								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Information File Not Found)")
-								continue
-							fin_info = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt", "r", "utf-8")
-							info_all = fin_info.read()
-							fin_info.close()
-							try:
-								if len(iseng): info_dict = parse_info("googleplayeng", info_all) 
-								else: info_dict = parse_info(market, info_all)
-							except:
-								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Read Info Exception)")
-								continue
-							check_key_tuple = ("Download", "Rating", "Rating_Num", "Update_Time")
-							fail = False
-							for check_key in check_key_tuple:
-								if check_key in info_dict and not len(info_dict[check_key]):
-									print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] ("+check_key+")")
-									fail = True
-									break
-							if fail:
-								continue
-							if "Star_Rating_Num" in info_dict and len(re.findall('[0-9]+', info_dict["Star_Rating_Num"])) != 5:
-								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Star_Rating_Num)")
-								continue
-							if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
-								fin_perm = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r", "utf-8")
-								perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
-								fin_perm.close()
-							else:
-								perm_all = None
-							if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt"):
-								fin_desc = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r", "utf-8")
-								desc_all = fin_desc.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
-								fin_desc.close()
-							else:
-								desc_all = None
-							if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt"):
-								fin_rlnt = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r", "utf-8")
-								rlnt_all = fin_rlnt.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
-								fin_rlnt.close()
-							else:
-								rlnt_all = None
-							if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
-							if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
-							if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
-							open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
+					if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng):
+						if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
+							print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Information File Not Found)")
+							continue
+						fin_info = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt", "r", "utf-8")
+						info_all = fin_info.read()
+						fin_info.close()
+						try:
+							if len(iseng): info_dict = parse_info("googleplayeng", info_all) 
+							else: info_dict = parse_info(market, info_all)
+						except:
+							print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Read Info Exception)")
+							continue
+						check_key_tuple = ("Download", "Rating", "Rating_Num", "Update_Time")
+						fail = False
+						for check_key in check_key_tuple:
+							if check_key in info_dict and not len(info_dict[check_key]):
+								print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] ("+check_key+")")
+								fail = True
+								break
+						if fail:
+							continue
+						if "Star_Rating_Num" in info_dict and len(re.findall('[0-9]+', info_dict["Star_Rating_Num"])) != 5:
+							print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Star_Rating_Num)")
+							continue
+						if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt"):
+							fin_perm = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Permission"+iseng+".txt", "r", "utf-8")
+							perm_all = fin_perm.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
+							fin_perm.close()
+						else:
+							perm_all = None
+						if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt"):
+							fin_desc = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Description"+iseng+".txt", "r", "utf-8")
+							desc_all = fin_desc.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
+							fin_desc.close()
+						else:
+							desc_all = None
+						if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt"):
+							fin_rlnt = codecs.open(root+market+"/"+pkgname+"/["+timestr+"]/Release_Note"+iseng+".txt", "r", "utf-8")
+							rlnt_all = fin_rlnt.read().replace("\\", "\\\\").replace("\r", "").replace("\n", "\\n").replace("\t", "\\t").replace("'", "\\'").replace("\"", "\\\"")
+							fin_rlnt.close()
+						else:
+							rlnt_all = None
+						if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
+						if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
+						if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
+						open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
 					timestr = splitspace[0]
 					urlsuffix = splitspace[2]
-					if (cuttimestr == None or int(timestr) > int(cuttimestr)):
-						set_invalid_app_metadata(market_id, urlsuffix, timestr)
+					set_invalid_app_metadata(market_id, urlsuffix, timestr)
 			except:
 				print (market+iseng+"：Unknown Error - "+line)
 		fin.close()
@@ -477,14 +474,10 @@ if __name__ == '__main__':
 		if line.startswith('#') or len(line.split(' ')) < 2: continue
 		market = line.split(' ')[0]
 		root = line.split(' ')[1][:]
-		if len(line.split(' ')) >= 3:
-			cuttimestr = line.split(' ')[2]
-		else:
-			cuttimestr = None
 		if market in market_set: exit()
 		if market in market_id_dict:
 			market_set.add(market)
-			param_list.append((market, root, cuttimestr))
+			param_list.append((market, root))
 	fin_settings.close()
 	processes = []
 	for param in param_list:
