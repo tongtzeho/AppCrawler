@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
 # export QT_QPA_PLATFORM=offscreen
 # sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
-# 安装python3，安装pip3，用pip3安装chardet, selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
+# 安装python3，安装pip3，用pip3安装json，chardet, selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
 # 如果在阿里云安装不了Java和phantomjs，输入apt-get update
 
 from urllib import request
 from selenium import webdriver
-import multiprocessing, threading, random, requests, urllib, time, os, codecs, shutil, sys
+import multiprocessing, threading, random, requests, urllib, time, os, codecs, shutil, sys, json
 
 from _downloader import *
 from _decoder import *
@@ -179,15 +179,22 @@ def read_log(root, market):
 
 def read_config():
 	result = {}
-	if os.path.isfile("config.txt"):
-		fin = open("config.txt", "r")
-		data = fin.read().replace("\r", "").split("\n")
-		result['ANDROID_ID'] = data[0]
-		result['GOOGLE_LOGIN'] = data[1]
-		result['GOOGLE_PASSWORD'] = data[2]
-		if len(data) > 3:
-			result['LOCAL_ROOT'] = data[3]
-	return result
+	result['ANDROID_ID'] = ""
+	result['GOOGLE_LOGIN'] = ""
+	result['GOOGLE_PASSWORD'] = ""
+	result['LOCAL_ROOT'] = None
+	try:
+		if os.path.isfile("config.json"):
+			with open("config.json") as jsonfile:
+				config_dict = json.load(jsonfile)
+			for key in result.keys():
+				if key in config_dict:
+					result[key] = config_dict[key]
+			return result
+		else:
+			return None
+	except:
+		return None
 	
 def write_text_information(dir, response):
 	fout = codecs.open(dir+"Information.txt", "w", "utf-8")
@@ -447,6 +454,9 @@ def initialization(param):
 	lock_log = threading.Lock()
 	lock_dict = threading.Lock()
 	config = read_config()
+	if config == None:
+		print ("进程"+market+"退出：Config错误")
+		return
 	if not os.path.exists(root+market): os.makedirs(root+market)
 	threads = []
 	for i in range(1, thread_num):
@@ -484,6 +494,7 @@ if False:
 	#exit()
 	if market == 'googleplay': config = read_config()
 	else: config = {}
+	print (config)
 	download_apk('googleplay', response[4], '~googleplaytmp0.apk', config)
 	download_icon('googleplay', response[7], '~googleplaytmp0.png')
 	exit()

@@ -2,7 +2,7 @@
 # sudo nohup bash _database.sh >_database.log 2>&1 &
 # 需要安装pymysql
 
-import pymysql, multiprocessing, re, time, datetime, os, codecs
+import pymysql, multiprocessing, re, time, datetime, os, codecs, json
 
 market_id_dict = {
 	'googleplay': '0',
@@ -34,9 +34,9 @@ market_id_dict = {
 	'appcool': '26'
 }
 
-def connect_mysql():
+def connect_mysql(config):
 	try:
-		conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+		conn = pymysql.connect(host=config['MYSQL_HOST'], port=int(config['MYSQL_PORT']), user=config['MYSQL_USER'], password=config['MYSQL_PASSWORD'], db=config['MYSQL_DB'], charset=config['MYSQL_CHARSET'])
 		return conn
 	except:
 		print ("数据库连接失败 - "+time.asctime(time.localtime(time.time())))
@@ -186,8 +186,8 @@ def limitlen(content, maxlen):
 		i -= 1
 	return content[:(maxlen-(maxlen-i+1)%2)]
 
-def update_apk_metadata(marketid, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all):
-	conn = connect_mysql()
+def update_apk_metadata(config, marketid, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all):
+	conn = connect_mysql(config)
 	if (conn == None): return False
 	cursor = conn.cursor()
 	try:
@@ -227,8 +227,8 @@ def update_apk_metadata(marketid, pkgname, md5str, sha256str, bytestr, info_dict
 		print (marketid+"：错误！"+pkgname+"/{"+md5str+"-"+sha256str+"} (APK_MetaData Exception)")
 		return False
 
-def update_time_metadata(marketid, pkgname, timestr, info_dict):
-	conn = connect_mysql()
+def update_time_metadata(config, marketid, pkgname, timestr, info_dict):
+	conn = connect_mysql(config)
 	if (conn == None): return False
 	cursor = conn.cursor()
 	try:
@@ -256,8 +256,8 @@ def update_time_metadata(marketid, pkgname, timestr, info_dict):
 		print (marketid+"：错误！"+pkgname+"/["+timestr+"] (Time_MetaData Exception)")
 		return False
 
-def update_app_metadata(marketid, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict):
-	conn = connect_mysql()
+def update_app_metadata(config, marketid, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict):
+	conn = connect_mysql(config)
 	if (conn == None): return False
 	cursor = conn.cursor()
 	try:
@@ -299,8 +299,8 @@ def update_app_metadata(marketid, pkgname, urlsuffix, downloadurl, timestr, md5s
 		print (marketid+"：错误！"+pkgname+"/["+timestr+"] (APP_MetaData Exception)")
 		return False
 
-def set_invalid_app_metadata(marketid, urlsuffix, timestr):
-	conn = connect_mysql()
+def set_invalid_app_metadata(config, marketid, urlsuffix, timestr):
+	conn = connect_mysql(config)
 	if (conn == None): return False
 	cursor = conn.cursor()
 	try:
@@ -332,8 +332,8 @@ def set_invalid_app_metadata(marketid, urlsuffix, timestr):
 		print (marketid+"：错误！"+urlsuffix+":["+timestr+"] (APP_MetaData_Invalid Exception)")
 		return False
 
-def update_market(marketid, prevcount):
-	conn = connect_mysql()
+def update_market(config, marketid, prevcount):
+	conn = connect_mysql(config)
 	if (conn == None): return None
 	cursor = conn.cursor()
 	try:
@@ -353,6 +353,7 @@ def update_market(marketid, prevcount):
 def store(param):
 	market = param[0]
 	root = param[1]
+	config = param[2]
 	if (not os.path.exists(root) and len(root) > 0) or not os.path.exists(root+"__log__"): return
 	market_id = market_id_dict[market]
 	iseng = ""
@@ -427,23 +428,44 @@ def store(param):
 							fin_rlnt.close()
 						else:
 							rlnt_all = None
-						if not update_time_metadata(market_id, pkgname, timestr, info_dict): continue
-						if not update_apk_metadata(market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
-						if not update_app_metadata(market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
+						if not update_time_metadata(config, market_id, pkgname, timestr, info_dict): continue
+						if not update_apk_metadata(config, market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
+						if not update_app_metadata(config, market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
 						open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
 					timestr = splitspace[0]
 					urlsuffix = splitspace[2]
-					set_invalid_app_metadata(market_id, urlsuffix, timestr)
+					set_invalid_app_metadata(config, market_id, urlsuffix, timestr)
 			except:
 				print (market+iseng+"：Unknown Error - "+line)
 		fin.close()
-		count = update_market(market_id, prevcount)
+		count = update_market(config, market_id, prevcount)
 		if count != None:
 			if count != prevcount: print (market+iseng+"：完成！ - "+str(count)+" App(s)")
 			else: time.sleep(1)
 			prevcount = count
 
+def read_config():
+	result = {}
+	result['MYSQL_HOST'] = ""
+	result['MYSQL_PORT'] = "3306"
+	result['MYSQL_USER'] = ""
+	result['MYSQL_PASSWORD'] = ""
+	result['MYSQL_DB'] = ""
+	result['MYSQL_CHARSET'] = "utf8"
+	try:
+		if os.path.isfile("config.json"):
+			with open("config.json") as jsonfile:
+				config_dict = json.load(jsonfile)
+			for key in result.keys():
+				if key in config_dict:
+					result[key] = config_dict[key]
+			return result
+		else:
+			return None
+	except:
+		return None
+			
 def clear_tag(root):
 	tagcn = "db"
 	tagen = "db(eng)"
@@ -464,6 +486,8 @@ def clear_tag(root):
 if __name__ == '__main__':
 	#clear_tag('/home/tzeho/Android_10app/')
 	#exit()
+	config = read_config()
+	if config == None: exit()
 	if not os.path.isfile("database.txt"): exit()
 	if os.path.isfile('db_exit'): os.remove('db_exit')
 	fin_settings = open("database.txt", "r")
@@ -477,7 +501,7 @@ if __name__ == '__main__':
 		if market in market_set: exit()
 		if market in market_id_dict:
 			market_set.add(market)
-			param_list.append((market, root))
+			param_list.append((market, root, config))
 	fin_settings.close()
 	processes = []
 	for param in param_list:

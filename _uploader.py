@@ -17,6 +17,7 @@ def zip_dir(dirname, zipfilename):
 def upload_local(src_dir, apk_key, apkfile, config):
 	try:
 		root = config['LOCAL_ROOT']
+		if root == None: return False
 		market = apk_key[0]
 		pkg = apk_key[1]
 		md5 = apk_key[2]
@@ -31,9 +32,7 @@ def upload_local(src_dir, apk_key, apkfile, config):
 				os.makedirs(root+'apk/'+market+'/'+pkg)
 			except:
 				pass
-		if not os.path.isdir(root+'apk/'+market+'/'+pkg+'/{'+md5+'-'+sha256+'}'):
-			os.makedirs(root+'apk/'+market+'/'+pkg+'/{'+md5+'-'+sha256+'}')
-		shutil.move(apkfile, root+'apk/'+market+'/'+pkg+'/{'+md5+'-'+sha256+'}/'+pkg+".apk")
+		shutil.move(apkfile, root+'apk/'+market+'/'+pkg+'/'+md5+'-'+sha256+".apk")
 		zip_dir(src_dir, src_dir+'.zip')
 		if not os.path.isdir(root+'zip/'+market):
 			try:
@@ -45,9 +44,7 @@ def upload_local(src_dir, apk_key, apkfile, config):
 				os.makedirs(root+'zip/'+market+'/'+pkg)
 			except:
 				pass
-		if not os.path.isdir(root+'zip/'+market+'/'+pkg+'/{'+md5+'-'+sha256+'}'):
-			os.makedirs(root+'zip/'+market+'/'+pkg+'/{'+md5+'-'+sha256+'}')
-		shutil.move(src_dir+'.zip', root+'zip/'+market+'/'+pkg+'/{'+md5+'-'+sha256+'}/'+pkg+".zip")
+		shutil.move(src_dir+'.zip', root+'zip/'+market+'/'+pkg+'/'+md5+'-'+sha256+".zip")
 		return True
 	except:
 		return False
