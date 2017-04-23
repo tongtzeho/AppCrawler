@@ -368,7 +368,7 @@ def store(param):
 		if not os.path.isfile(root+'__log__/'+market+'.log'):
 			time.sleep(1)
 			continue
-		fin = open(root+'__log__/'+market+'.log', "r")
+		fin = codecs.open(root+'__log__/'+market+'.log', "r", "utf-8")
 		for line in fin:
 			if os.path.isfile('db_exit'):
 				fin.close()
