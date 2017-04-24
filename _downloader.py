@@ -221,10 +221,10 @@ def get_icon_download_link(market, data):
 def download_apk(market, url, apkfile, config):
 
 	#Windows
-	phantomjs_execute_path = 'phantomjs\\bin\\phantomjs.exe'
+	#phantomjs_execute_path = 'phantomjs\\bin\\phantomjs.exe'
 
 	#Linux
-	#phantomjs_execute_path = '/usr/lib/phantomjs/phantomjs'
+	phantomjs_execute_path = '/usr/lib/phantomjs/phantomjs'
 
 	if market == 'googleplay':
 		if not len(url): return False

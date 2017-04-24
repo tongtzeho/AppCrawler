@@ -40,7 +40,7 @@ def connect_mysql(config):
 		return conn
 	except:
 		print ("数据库连接失败 - "+time.asctime(time.localtime(time.time())))
-		time.sleep(1)
+		time.sleep(10)
 		return None
 
 def parse_number(market, line):
@@ -377,14 +377,18 @@ def store(param):
 			line = line.replace("\r", "").replace("\n", "")
 			splitspace = line.split(" ")
 			try:
-				if len(splitspace) == 8 and splitspace[1] == 'success':
+				if (len(splitspace) == 7 or len(splitspace) == 8) and splitspace[1] == 'success':
 					timestr = splitspace[0]
 					urlsuffix = splitspace[2]
 					pkgname = splitspace[3]
 					md5str = splitspace[4]
 					sha256str = splitspace[5]
-					bytestr = splitspace[6]
-					downloadurl = splitspace[7]
+					if len(splitspace) == 7:
+						bytestr = None
+						downloadurl = splitspace[6]
+					else:
+						bytestr = splitspace[6]
+						downloadurl = splitspace[7]
 					if os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/end") and not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng):
 						if not os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/Information"+iseng+".txt"):
 							print (market+iseng+"：错误！"+pkgname+"/["+timestr+"] (Information File Not Found)")

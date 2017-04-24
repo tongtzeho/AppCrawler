@@ -18,14 +18,14 @@ from _uploader import *
 #phantom_js目录
 
 #Windows
-phantomjs_path = 'phantomjs/bin/phantomjs.exe'
+#phantomjs_path = 'phantomjs/bin/phantomjs.exe'
 
 #Linux
-#phantomjs_path = 'phantomjs'
+phantomjs_path = 'phantomjs'
 
 #Header的User Agent
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
-#user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
+#user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
+user_agent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0'
 
 url_prefix = {
 	'yingyongbao': 'http://sj.qq.com/myapp/detail.htm?apkName=',
@@ -467,37 +467,6 @@ def initialization(param):
 	for t in threads:
 		t.join()
 	print ("进程"+market+"退出")
-
-if False:
-	market = 'googleplay'
-	myurl = 'https://play.google.com/store/apps/details?id=com.google.android.youtube'
-	response = open_url(market, myurl)
-	for key, val in response[0].items():
-		if len(val): print (key+": "+val)
-	print ("-----------")
-	for permission in response[1]:
-		print (permission)
-	print ("-----------")
-	print (response[2])
-	print ("-----------")
-	print (response[3])
-	print ("-----------")
-	print (response[4])
-	print ("-----------")
-	for newurl in response[5]:
-		print (newurl)
-	print ("-----------")
-	for newurl in response[6]:
-		print (newurl)
-	print ("-----------")
-	print (response[7])
-	#exit()
-	if market == 'googleplay': config = read_config()
-	else: config = {}
-	print (config)
-	download_apk('googleplay', response[4], '~googleplaytmp0.apk', config)
-	download_icon('googleplay', response[7], '~googleplaytmp0.png')
-	exit()
 	
 if __name__ == '__main__':
 	if not os.path.isfile(phantomjs_path) or not os.path.isfile("settings.txt"): exit()
