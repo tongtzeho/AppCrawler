@@ -376,7 +376,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 								if os.path.isfile("~"+market+"tmp"+threadidstr+".png"):
 									if market != 'googleplay': shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.png")
 									else: shutil.move("~"+market+"tmp"+threadidstr+".png", extract_dir+"/icon.webp")
-								if not upload_local(extract_dir, apk_key, "~"+market+"tmp"+threadidstr+".apk", config): # upload_oss(extract_dir, apk_key, "~"+market+"tmp"+threadidstr+".apk", config)
+								if not upload_oss(extract_dir, apk_key, "~"+market+"tmp"+threadidstr+".apk", config):
 									state = -1
 							else:
 								cur_time = str(int(time.time()))
