@@ -3,11 +3,11 @@
 # sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
 # 安装python3，安装pip3，用pip3安装selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
 # 如果在阿里云安装不了Java和phantomjs，输入apt-get update
-# 如果使用阿里云，安装oss2
+# 如果使用阿里云，安装oss2, redis
 
 from urllib import request
 from selenium import webdriver
-import multiprocessing, threading, random, requests, urllib, time, os, codecs, shutil, sys, json
+import multiprocessing, threading, random, requests, urllib, time, os, codecs, shutil, sys, json, redis
 
 from _downloader import *
 from _decoder import *
@@ -187,6 +187,8 @@ def read_config():
 	result['ACCESS_KEY_ID'] = None
 	result['ACCESS_KEY_SECRET'] = None
 	result['ENDPOINT'] = None
+	result['REDIS_HOST'] = ""
+	result['REDIS_PASSWORD'] = ""
 	try:
 		if os.path.isfile("config.json"):
 			with open("config.json") as jsonfile:
@@ -402,7 +404,12 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 								if state == 1: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"版本和信息")
 								elif state == 2: print (apk_key[0]+threadidstr+"：更新"+apk_key[1]+"信息。无版本更新")
 								elif state == 3: print (apk_key[0]+threadidstr+"：新增"+apk_key[1])
-								# queue msg
+								try:
+									conn = redis.StrictRedis(host=config['REDIS_HOST'], password=config['REDIS_PASSWORD'])
+									state_str = {1: "UpdateVersion", 2: "UpdateMetadata", 3: "New"}
+									conn.lpush("apk_queue", state_str[state]+" "+market+" "+apk_key[1]+" "+apk_key[2]+" "+apk_key[3])
+								except:
+									print (apk_key[0]+threadidstr+"：消息队列错误"+apk_key[1])
 							else:
 								print (apk_key[0]+threadidstr+"：上传失败"+apk_key[1])
 							lock_pool.acquire()
