@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # export QT_QPA_PLATFORM=offscreen
 # sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
-# 安装python3，安装pip3，用pip3安装json，chardet, selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
+# 安装python3，安装pip3，用pip3安装selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
 # 如果在阿里云安装不了Java和phantomjs，输入apt-get update
 # 如果使用阿里云，安装oss2
 
@@ -184,6 +184,9 @@ def read_config():
 	result['GOOGLE_LOGIN'] = ""
 	result['GOOGLE_PASSWORD'] = ""
 	result['LOCAL_ROOT'] = None
+	result['ACCESS_KEY_ID'] = None
+	result['ACCESS_KEY_SECRET'] = None
+	result['ENDPOINT'] = None
 	try:
 		if os.path.isfile("config.json"):
 			with open("config.json") as jsonfile:
