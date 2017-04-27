@@ -1,4 +1,5 @@
 import os, shutil, zipfile, requests, base64, hashlib
+import oss2 # Aliyun
 
 def zip_dir(dirname, zipfilename):
 	filelist = []
@@ -65,52 +66,32 @@ def content_md5(file):
 		
 def upload_oss(src_dir, apk_key, apkfile, config):
 	try:
-		autho = config['AUTHORIZATION']
-		if autho == None: return False
+		key_id = config['ACCESS_KEY_ID']
+		key_secret = config['ACCESS_KEY_SECRET']
+		endpoint = config['ENDPOINT']
 		market = apk_key[0]
 		pkg = apk_key[1]
 		md5 = apk_key[2]
 		sha256 = apk_key[3]
-		url = "[aliyun]"+"/"+market+'/'+pkg+'/'+md5+'-'+sha256+".apk"
-		files = {'file': open(apkfile, 'rb')}
-		headers = {
-			'Host': '[apk-bucket]',
-			'Cache-control': 'no-cache',
-			'Content-Disposition': 'attachment;filename='+pkg+".apk",
-			'Content-MD5': content_md5(apkfile),
-			'Content-Type': 'application/vnd.android.package-archive',
-			'Content-Length': str(os.path.getsize(apkfile)),
-			'Authorization': autho
-		}
 		success = False
+		auth = oss2.Auth(key_id, key_secret)
+		bucket = oss2.Bucket(auth, endpoint, 'lxapk')
 		for i in range(10):
 			try:
-				r = requests.put(url, files=files, timeout=30, headers=headers)
-				if r.status_code == 200:
+				r = bucket.put_object_from_file(market+'/'+pkg+'/'+md5+'-'+sha256+".apk", apkfile)
+				if r.status == 200:
 					success = True
 					break
-				continue
 			except:
 				continue
 		if not success: return False
-		url = "[aliyun]"+"/"+market+'/'+pkg+'/'+md5+'-'+sha256+".zip"
 		zip_dir(src_dir, src_dir+'.zip')
-		files = {'file': open(src_dir+'.zip', 'rb')}
-		headers = {
-			'Host': '[zip-bucket]',
-			'Cache-control': 'no-cache',
-			'Content-Disposition': 'attachment;filename='+pkg+".zip",
-			'Content-MD5': content_md5(src_dir+'.zip'),
-			'Content-Type': 'application/zip',
-			'Content-Length': str(os.path.getsize(src_dir+'.zip')),
-			'Authorization': autho
-		}
+		bucket = oss2.Bucket(auth, endpoint, 'lxzip')
 		for i in range(10):
 			try:
-				r = requests.put(url, files=files, timeout=30, headers=headers)
-				if r.status_code == 200:
+				r = bucket.put_object_from_file(market+'/'+pkg+'/'+md5+'-'+sha256+".zip", src_dir+'.zip')
+				if r.status == 200:
 					return True
-				continue
 			except:
 				continue
 		return False

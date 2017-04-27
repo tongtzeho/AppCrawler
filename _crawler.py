@@ -3,6 +3,7 @@
 # sudo nohup bash _crawler.sh >_crawler.log 2>&1 &
 # 安装python3，安装pip3，用pip3安装json，chardet, selenium, google, protobuf，安装phantomjs并设置路径，安装Java，下载AXMLPrinter2.jar放在当前目录中
 # 如果在阿里云安装不了Java和phantomjs，输入apt-get update
+# 如果使用阿里云，安装oss2
 
 from urllib import request
 from selenium import webdriver
