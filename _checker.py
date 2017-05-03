@@ -114,7 +114,7 @@ def check_response(market, result):
 		if not '1-Star_Rating_Num' in result[0]: return False
 		if not 'Age' in result[0]: return False
 		if not 'Price' in result[0]: return False
-		if not len(result[1]): return False
+		#if not len(result[1]): return False
 		if not len(result[2]): return False
 	elif market == 'huawei':
 		if not 'Name' in result[0]: return False
