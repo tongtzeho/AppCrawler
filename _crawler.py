@@ -76,11 +76,12 @@ def open_url(market, url):
 				driver.set_page_load_timeout(45)
 				if market == 'googleplay':
 					driver.get(url+"&hl=zh")
-					try:
-						driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
-						time.sleep(3)
-					except:
-						pass
+					time.sleep(0.5)
+				#	try:
+				#		driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
+				#		time.sleep(3)
+				#	except:
+				#		pass
 				else:
 					driver.get(url)
 					time.sleep(0.5)
@@ -113,11 +114,12 @@ def open_url(market, url):
 				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
 				driver.set_page_load_timeout(45)
 				driver.get(url+"&hl=en")
-				try:
-					driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
-					time.sleep(3)
-				except:
-					pass
+				time.sleep(0.5)
+			#	try:
+			#		driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
+			#		time.sleep(3)
+			#	except:
+			#		pass
 				data = driver.page_source
 				driver.quit()
 			except:
