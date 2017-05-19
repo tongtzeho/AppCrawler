@@ -3,7 +3,7 @@
 from urllib import request
 from selenium import webdriver
 from _googleplayapi import GooglePlayAPI
-import urllib, time, requests, re, os
+import urllib, time, requests, re, os, json
 
 def get_apk_download_link(market, data, url):
 	if market == 'yingyongbao':
@@ -371,3 +371,44 @@ def download_icon(market, url, pngfile):
 			except:
 				continue
 	return False
+
+if __name__ == '__main__':
+	config = {
+		'ANDROID_ID': "",
+		'GOOGLE_LOGIN': "",
+		'GOOGLE_PASSWORD': ""
+	}
+	try:
+		if os.path.isfile("config.json"):
+			with open("config.json") as jsonfile:
+				config_dict = json.load(jsonfile)
+			for key in config.keys():
+				if key in config_dict:
+					config[key] = config_dict[key]
+			print("读取Config成功")
+		else:
+			print("Config不存在")
+			exit()
+	except:
+		print("读取Config失败")
+		exit()
+	if os.path.isfile("Google_Play_Download_List.txt"):
+		apk_list = open('Google_Play_Download_List.txt', 'r').read().replace('\r', "").split("\n")
+		print("读取下载列表成功")
+		fout = open('Google_Play_Download.log', 'w')
+		for apk in apk_list:
+			if len(apk):
+				url = 'https://play.google.com/store/apps/details?id='+apk
+				if not os.path.exists('Google_Play_Download'):
+					os.makedirs('Google_Play_Download')
+				success = download_apk('googleplay', url, 'Google_Play_Download/'+apk+'.apk', config)
+				if success:
+					print('下载成功 '+apk)
+					fout.write('Success '+apk)
+				else:
+					print('下载失败 '+apk)
+					fout.write('Failed '+apk)
+		fout.close()
+	else:
+		print("下载列表不存在")
+		exit()
