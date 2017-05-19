@@ -404,10 +404,11 @@ if __name__ == '__main__':
 				success = download_apk('googleplay', url, 'Google_Play_Download/'+apk+'.apk', config)
 				if success:
 					print('下载成功 '+apk)
-					fout.write('Success '+apk)
+					fout.write('Success '+apk+'\n')
 				else:
 					print('下载失败 '+apk)
-					fout.write('Failed '+apk)
+					fout.write('Failed '+apk+'\n')
+				fout.flush()
 		fout.close()
 	else:
 		print("下载列表不存在")
