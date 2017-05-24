@@ -277,34 +277,34 @@ class GooglePlayAPI(object):
 
         versionCode can be grabbed by using the details() method on the given
         app."""
-        #try:
-        path = "purchase"
-        data = "ot=%d&doc=%s&vc=%d" % (offerType, packageName, versionCode)
-        message = self.executeRequestApi2(path, data)
-        url = message.payload.buyResponse.purchaseStatusResponse.appDeliveryData.downloadUrl
-        #print(message)
-        #print(message.payload)
-        cookie = message.payload.buyResponse.purchaseStatusResponse.appDeliveryData.downloadAuthCookie[0]
+        try:
+            path = "purchase"
+            data = "ot=%d&doc=%s&vc=%d" % (offerType, packageName, versionCode)
+            message = self.executeRequestApi2(path, data)
+            url = message.payload.buyResponse.purchaseStatusResponse.appDeliveryData.downloadUrl
+            #print(message)
+            #print(message.payload)
+            cookie = message.payload.buyResponse.purchaseStatusResponse.appDeliveryData.downloadAuthCookie[0]
 
-        cookies = {
-            str(cookie.name): str(cookie.value) # python-requests #459 fixes this
-        }
+            cookies = {
+                str(cookie.name): str(cookie.value) # python-requests #459 fixes this
+            }
 
-        headers = {
-                   "User-Agent" : "AndroidDownloadManager/4.1.1 (Linux; U; Android 4.1.1; Nexus S Build/JRO03E)",
-                   "Accept-Encoding": "",
-                  }
+            headers = {
+                       "User-Agent" : "AndroidDownloadManager/4.1.1 (Linux; U; Android 4.1.1; Nexus S Build/JRO03E)",
+                       "Accept-Encoding": "",
+                      }
 
-        #response = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True)
-        #return response.content
-        web = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True, stream=True, timeout=45)
-        with open(apkfile, 'wb') as fout:
-            for chunk in web.iter_content(chunk_size=204800):
-                if chunk:
-                    fout.write(chunk)
-                    fout.flush()
-        fout.close()
-        return True
-        #except:
-        #    return False
+            #response = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True)
+            #return response.content
+            web = requests.get(url, headers=headers, cookies=cookies, proxies=self.proxy_dict, verify=True, stream=True, timeout=45)
+            with open(apkfile, 'wb') as fout:
+                for chunk in web.iter_content(chunk_size=204800):
+                    if chunk:
+                        fout.write(chunk)
+                        fout.flush()
+            fout.close()
+            return True
+        except:
+            return False
 
