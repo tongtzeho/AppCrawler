@@ -232,7 +232,7 @@ def download_apk(market, url, apkfile, config):
 		for i in range(10):
 			try:
 				api = GooglePlayAPI(config['ANDROID_ID'])
-				api.login(config['GOOGLE_LOGIN'], config['GOOGLE_PASSWORD'])
+				api.login(config['GOOGLE_LOGIN'], config['GOOGLE_PASSWORD'], packagename)
 				m = api.details(packagename)
 				doc = m.docV2
 				vc = doc.details.appDetails.versionCode
