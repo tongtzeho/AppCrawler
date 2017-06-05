@@ -59,9 +59,10 @@ url_prefix = {
 	
 def open_url(market, url):
 	for i in range(10):
-		if market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo' or market == 'cnmo' or market == 'appcool':
+		if market == 'googleplay' or market == 'baidu' or market == 'huawei' or market == 'xiaomi' or market == 'wandoujia' or market == '91' or market == 'oppo' or market == 'pp' or market == 'sogou' or market == 'gfan' or market == 'sina' or market == 'liqucn' or market == 'appchina' or market == '10086' or market == 'nduo' or market == 'cnmo' or market == 'appcool':
 			try:
 				if market == 'xiaomi' and i % 3 == 2: req = request.Request(url+"&type=pad")
+				elif market == 'googleplay': req = request.Request(url+"&hl=zh")
 				else: req = request.Request(url)
 				req.add_header('User-Agent', user_agent)
 				web = request.urlopen(req, timeout=30)
@@ -74,17 +75,8 @@ def open_url(market, url):
 			try:
 				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
 				driver.set_page_load_timeout(45)
-				if market == 'googleplay':
-					driver.get(url+"&hl=zh")
-					time.sleep(0.5)
-				#	try:
-				#		driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
-				#		time.sleep(3)
-				#	except:
-				#		pass
-				else:
-					driver.get(url)
-					time.sleep(0.5)
+				driver.get(url)
+				time.sleep(0.5)
 				data = driver.page_source
 				driver.quit()
 			except:
@@ -111,22 +103,13 @@ def open_url(market, url):
 	if market == 'googleplay':
 		for i in range(10):
 			try:
-				driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-				driver.set_page_load_timeout(45)
-				driver.get(url+"&hl=en")
-				time.sleep(0.5)
-			#	try:
-			#		driver.find_element_by_xpath("//button[@class='content id-view-permissions-details fake-link']").click()
-			#		time.sleep(3)
-			#	except:
-			#		pass
-				data = driver.page_source
-				driver.quit()
+				req = request.Request(url+"&hl=en")
+				req.add_header('User-Agent', user_agent)
+				web = request.urlopen(req, timeout=30)
+				charset = str(web.headers.get_content_charset())
+				if charset == "None": charset = "utf-8"
+				data = web.read().decode(charset)
 			except:
-				try:
-					driver.quit()
-				except:
-					pass
 				data = ""
 			info_dict_en = get_app_basic_info(market, data)
 			permission_list_en = get_app_permission(market, data)
