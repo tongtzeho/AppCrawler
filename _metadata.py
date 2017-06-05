@@ -137,37 +137,37 @@ def main_loop(threadidstr, market, thread_num, url_pkg_tuple):
 			url_pkg = url_pkg_tuple[url_pkg_index]
 			url_pkg_index += thread_num
 			if os.path.isfile('md_exit'):
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：结束")
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：结束")
 				return
 			try:
 				url = url_prefix[market]+url_pkg.split(' ')[0]
 				package = url_pkg.split(' ')[1].replace('\r', '').replace('\n', '')
 			except:
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：链接格式错误（"+url_pkg+"）")
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：链接格式错误（"+url_pkg+"）")
 				continue
-			print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：开始连接（"+url+"）")
+			print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：开始连接（"+url+"）")
 			if firstloop and exist_pkg_market(package, market):
 				continue
 			else:
 				response = open_url(market, url)
 			if not len(response):
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：无效的链接（"+url+"）")
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：无效的链接（"+url+"）")
 				continue
 			if not len(response[0]):
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：访问链接失败（"+url+"）")
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：访问链接失败（"+url+"）")
 				time.sleep(1)
 				continue
 			state = update_metadata(response, package, url, market)
 			if state == -2:
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：数据库连接失败")
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：数据库连接失败")
 			elif state == -1:
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：数据错误！（"+package+"）")
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：数据错误！（"+package+"）")
 			elif state == 0:
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：新增"+package)
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：新增"+package)
 			elif state == 1:
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：更新"+package)
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：更新"+package)
 			elif state == 2:
-				print (market+threadidstr+'('+str(url_pkg_index)+'/'+str(len(url_pkg_tuple))+')'+"：更新失败"+package)
+				print (market+threadidstr+'('+str(url_pkg_index-thread_num)+'/'+str(len(url_pkg_tuple))+')'+"：更新失败"+package)
 		print (market+threadidstr+"：完成！")
 		firstloop = False
 
