@@ -2,7 +2,7 @@
 # sudo nohup bash _database.sh >_database.log 2>&1 &
 # 需要安装pymysql
 
-import pymysql, multiprocessing, re, time, datetime, os, codecs, json
+import pymysql, multiprocessing, re, time, datetime, os, codecs, json, shutil
 
 market_id_dict = {
 	'googleplay': '0',
@@ -436,6 +436,8 @@ def store(param):
 						if not update_apk_metadata(config, market_id, pkgname, md5str, sha256str, bytestr, info_dict, perm_all, desc_all, rlnt_all): continue
 						if not update_app_metadata(config, market_id, pkgname, urlsuffix, downloadurl, timestr, md5str, sha256str, info_dict): continue
 						open(root+market+"/"+pkgname+"/["+timestr+"]/db"+iseng, "w").close()
+						if market != 'googleplay': shutil.rmtree(root+market+"/"+pkgname+"/["+timestr+"]", ignore_errors=True)
+						elif os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db") and os.path.isfile(root+market+"/"+pkgname+"/["+timestr+"]/db(eng)"): shutil.rmtree(root+market+"/"+pkgname+"/["+timestr+"]", ignore_errors=True)
 				elif len(splitspace) == 3 and splitspace[1] == 'invalid':
 					timestr = splitspace[0]
 					urlsuffix = splitspace[2]
