@@ -120,7 +120,7 @@ def parse_date(market, line):
 		'Dec': '12'
 	}
 	updatetimestr = ""
-	if market == 'googleplay' or market == 'yingyongbao' or market == 'anzhi':
+	if market == 'googleplay' or market == 'yingyongbao' or market == 'anzhi' or market == 'wandoujia':
 		matcher = re.findall("[0-9]+年", line)
 		if len(matcher):
 			year = matcher[0].replace("年", "")
@@ -137,7 +137,7 @@ def parse_date(market, line):
 		updatetimestr = line[:-1]+":00"
 	elif market == 'sogou' or market == 'cnmo':
 		updatetimestr = line
-	elif market == 'googleplayeng' or market == 'wandoujia':
+	elif market == 'googleplayeng':
 		if line[0:3] in engmonth_num:
 			month = engmonth_num[line[0:3]]
 			matcher = re.findall("[0-9]+,", line)
