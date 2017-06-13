@@ -249,7 +249,7 @@ def main_loop(threadidstr, market, root, thread_num, rate_per_iteration, lock_po
 		random.shuffle(url_list)
 		for short_url in url_list:
 			try:
-				if update >= thread_num*100: #10:
+				if update >= thread_num*500: #10:
 					update = 0
 					lock_set.acquire()
 					hold_lock_set = True
