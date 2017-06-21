@@ -49,7 +49,7 @@ def get_apk_download_link(market, data, url):
 		if len(matcher): return 'http://store.oppomobile.com/product/download.html?id='+matcher[0].replace('<a class="detail_down" onclick="detailInfoDownload(', "").replace(')">下载到电脑</a>', "")+'&from=0_0'
 
 	elif market == 'pp':
-		matcher = re.findall('appdownurl=".*?" onclick="return ppOneKeySetup.*?" data.*?">立即下载</a>', data)
+		matcher = re.findall('appdownurl=".*?".*?data.*?">立即下载</a>', data)
 		if len(matcher): return matcher[0].split('"')[1]
 
 	elif market == 'sogou':
