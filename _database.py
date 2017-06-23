@@ -337,7 +337,7 @@ def update_market(config, marketid, prevcount):
 	if (conn == None): return None
 	cursor = conn.cursor()
 	try:
-		count = cursor.execute("select ID from Market_APP_Metadata where MarketID="+marketid+" and Deltime is null")
+		count = cursor.execute("select ID from Market_APP_Metadata where MarketID="+marketid) #+" and Deltime is null")
 		if count != prevcount:
 			cursor.execute("update Market set AppNum="+str(count)+" where ID="+marketid)
 			conn.commit()
